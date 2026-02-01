@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DisplayMakeTool</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho&display=swap" rel="stylesheet">
+
+  <!-- 外部CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <br>
+  <h3>DisplayMakeTool</h3>
+
+  <div class="container">
+    <div class="main-content">
+      <div class="aspect-ratio-controls">
+        <label><input type="radio" name="aspectRatio" value="landscape" id="aspectLandscape"> 横長 (1920×1080)</label>
+        <label><input type="radio" name="aspectRatio" value="square" id="aspectSquare" checked> 正方形 (2000×2000)</label>
+        <label><input type="radio" name="aspectRatio" value="portrait" id="aspectPortrait"> 縦長 (1748×2480)</label>
+      </div>
+      <div class="previewWrap">
+        <div class="squareViewport">
+          <canvas id="mainCanvas" width="2000" height="2000"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <aside class="sidebar" aria-label="操作パネル">
+
+      <div class="panel">
+        <strong>画像読み込み(クリックorドロップ)</strong><br>
+        <label>プレビュー内で掴んで移動、スクロールで拡縮できます。</label>
+
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
+        <div id="slotMainPic" class="fileSlot">
+          <div class="title">立ち絵</div>
+          <input id="fileMainPic" type="file" accept="image/*" style="display:none;">
+          <div id="infoMainPic" class="slotInfo" style="display:none;">
+            <img id="thumbMainPic" class="thumb">
+            <div id="metaMainPic" class="fileMeta"></div>
+            <button id="removeMainPic" class="removeBtn">削除</button>
+          </div>
+        </div>
+        <div class="slotControls"><button id="resetMainPicPos" class="btn">デフォルト位置に戻す</button></div>
+
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
+        <div style="height:10px;"></div>
+
+
+        <div id="slotSubPic" class="fileSlot">
+          <div class="title">立ち絵のアップ</div>
+          <input id="fileSubPic" type="file" accept="image/*" style="display:none;">
+          <div id="infoSubPic" class="slotInfo" style="display:none;">
+            <img id="thumbSubPic" class="thumb">
+            <div id="metaSubPic" class="fileMeta"></div>
+            <button id="removeSubPic" class="removeBtn">削除</button>
+          </div>
+        </div>
+        <br>
+
+        <div class="panel">
+          <strong>立ち絵アップ設定</strong><br>
+          <div style="margin-top:8px;">
+          <label style="display:block; margin-bottom:6px;">切り抜き形状</label>
+          <label style="margin-right:12px;">
+          <input id="subPicShapeCircle" name="subPicShape" type="radio" value="circle" checked>丸</label>
+          <label>
+          <input id="subPicShapeDiamond" name="subPicShape" type="radio" value="diamond">ひし形</label>
+          </div>
+
+          <label style="margin-top:8px;">ズーム</label>
+          <div class="row">
+            <input id="subPicZoom" type="range" min="50" max="400" value="100">
+            <div id="subPicZoomVal" class="val">100%</div>
+          </div>
+
+          <label>縦の位置</label>
+          <input id="subPicCropY" type="range" min="0" max="100" value="33">
+
+          <label for="subPicCropX" style="display:block; margin-top:8px;">横の位置</label>
+          <input id="subPicCropX" type="range" min="0" max="100" value="50" step="1" style="width:100%;">
+
+          <label style="margin-top:8px;">縁の太さ</label>
+          <input id="subPicBorder" type="number" min="0" max="20" value="2">
+
+          <div class="controlRow">
+          <label style="margin-top:8px;">縁の色</label>
+          <input id="subPicBorderColor" type="color" value="#000000">
+          </div>
+
+          <label>背景色</label>
+          <input id="bgSubPic" type="color" value="#FFFF00">
+        </div>
+
+        <div class="slotControls"><button id="resetSubPicPos" class="btn">デフォルト位置に戻す</button></div>
+
+        
+        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
+        <div style="height:10px;"></div>
+
+
+        <strong style="display:block;margin-bottom:8px;">背景</strong>
+        <div id="slotBgPic" class="fileSlot">
+          <div class="title">背景</div>
+          <input id="fileBgPic" type="file" accept="image/*" style="display:none;">
+          <div id="infoBgPic" class="slotInfo" style="display:none;">
+            <img id="thumbBgPic" class="thumb">
+            <div id="metaBgPic" class="fileMeta"></div>
+            <button id="removeBgPic" class="removeBtn">削除</button>
+          </div>
+        </div>
+        <div class="slotControls"><button id="resetBgPicPos" class="btn">背景をフィット</button></div>
+
+
+        <div style="height:10px;"></div>
+
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
+        <strong style="display:block;margin-bottom:8px;">ウォーターマーク</strong>
+
+        <div id="slotWmPic" class="fileSlot">
+          <div class="title">ウォーターマーク</div>
+          <input id="fileWmPic" type="file" accept="image/*" style="display:none;">
+          <div id="infoWmPic" class="slotInfo" style="display:none;">
+            <img id="thumbWmPic" class="thumb">
+            <div id="metaWmPic" class="fileMeta"></div>
+            <button id="removeWmPic" class="removeBtn">削除</button>
+          </div>
+        </div>
+
+        <label style="margin-top:8px;display:block;">不透明度</label>
+        <div class="row watermark-opacity-row">
+        <input id="wmPicOpacity" type="range" min="0" max="100" value="50">
+        <div id="wmPicOpacityVal" class="val">50%</div>
+        </div>
+
+        <div class="slotControls" style="margin-top:8px;">
+          <button id="resetWmPicPos" class="btn">デフォルト位置に戻す</button>
+        </div>
+
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
+
+
+        <strong style="display:block;margin-bottom:8px;">システムロゴ</strong>
+        <div id="slotSysPic" class="fileSlot">
+          <div class="title">システム</div>
+          <input id="fileSysPic" type="file" accept="image/*" style="display:none;">
+          <div id="infoSysPic" class="slotInfo" style="display:none;">
+            <img id="thumbSysPic" class="thumb">
+            <div id="metaSysPic" class="fileMeta"></div>
+            <button id="removeSysPic" class="removeBtn">削除</button>
+          </div>
+        </div>
+        <div class="slotControls">
+          <button id="resetSysPicPos" class="btn">デフォルト位置に戻す</button>
+        </div>
+
+      </div>
+
+
+      <div class="panel">
+        <strong>テキスト</strong><br>
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
+        <label style="margin-top:8px;">背景色</label>
+
+        <div class="bandRow">
+          <input id="bandColor" type="color" value="#ffffff">
+          <label style="margin-top:8px;">幅</label>
+          <input id="bandHeight" type="number" value="1000" min="20" max="2000">
+        </div>
+
+    <div style="margin-top:8px;">
+      <label style="display:block; margin-bottom:6px;">帯の向き</label>
+      <label style="margin-right:12px;">
+        <input id="bandOrientHorizontal" name="bandOrient" type="radio" value="horizontal" checked>横</label>
+      <label>
+        <input id="bandOrientVertical" name="bandOrient" type="radio" value="vertical">縦</label>
+    </div>
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
+        <label style="margin-top:8px;">フォント</label><select id="fontSelect"></select>
+        <label style="margin-top:8px;">サイズ</label><input id="fontSize" type="number" value="60">
+        <label style="margin-top:8px;">色</label><input id="fontColor" type="color" value="#000000">
+
+        <label>text1</label><textarea id="text1">シナリオ</textarea>
+        <label>text2</label><textarea id="text2">ハンドアウト</textarea>
+        <label>text3</label><textarea id="text3">お名前</textarea>
+
+        <div class="slotControls" style="margin-top:8px;">
+          <button id="resetTextPosBtn" class="btn">デフォルト位置に戻す</button>
+        </div>
+
+      </div>
+
+      <div class="panel">
+        <strong>出力形式</strong>
+        <select id="format">
+          <option value="image/png">PNG</option>
+          <option value="image/jpeg">JPG</option>
+          <option value="gif">GIF</option>
+        </select>
+        <button id="exportBtn" class="btn btnPrimary">エクスポート</button>
+      </div>
+
+    </aside>
+  </div>
+
+
+  <!-- 外部JS -->
+    <script src="/display-make-tool/libs/gif.js" defer></script>
+
+    <script src="app-state.js" defer></script>
+    <script src="app-utils.js" defer></script>
+    <script src="app-ui.js" defer></script>
+    <script src="app-interactions.js" defer></script>
+    <script src="app-interactions-hover.js" defer></script>
+    <script src="app-draw.js" defer></script>
+
+</body>
+</html>

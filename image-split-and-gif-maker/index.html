@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>画像ツール GIF合成プロトタイプ</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- gif.js と gifuct-js を利用（CDN） -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
+  <script src="https://unpkg.com/gifuct-js/dist/gifuct.min.js"></script>
+</head>
+<body>
+  <header class="header">
+    <h1>画像ツール GIF合成プロトタイプ</h1>
+  </header>
+
+  <main class="container">
+    <section class="left">
+      <div id="dropArea" class="drop">ここをクリックまたは画像をドラッグ＆ドロップ</div>
+      <canvas id="previewCanvas" class="preview" width="800" height="450" style="display:none"></canvas>
+      <div id="noImage" class="no-image">画像が読み込まれていません</div>
+
+      <div class="preview-controls">
+        <label class="small">プレビューズーム</label>
+        <input id="zoomRange" type="range" min="50" max="150" value="100" />
+      </div>
+    </section>
+
+    <aside class="right">
+      <div class="panel">
+        <label class="label">処理モード</label>
+        <div class="row">
+          <input type="radio" id="modeSplit" name="mode" value="split" checked />
+          <label for="modeSplit">4分割（16:9）</label>
+        </div>
+        <div class="row">
+          <input type="radio" id="modeGif" name="mode" value="gif" />
+          <label for="modeGif">GIF出力（合成）</label>
+        </div>
+      </div>
+
+      <div class="panel" id="splitOptions">
+        <label class="label">4分割オプション</label>
+        <div class="row">
+          <input type="radio" id="bgWhite" name="bg" value="#ffffff" checked />
+          <label for="bgWhite">白</label>
+          <input type="radio" id="bgBlack" name="bg" value="#000000" />
+          <label for="bgBlack">黒</label>
+        </div>
+        <div class="row">
+          <input type="radio" id="fmtPng" name="format" value="png" checked />
+          <label for="fmtPng">PNG</label>
+          <input type="radio" id="fmtJpg" name="format" value="jpg" />
+          <label for="fmtJpg">JPG</label>
+        </div>
+      </div>
+
+      <div class="panel" id="gifOptions" style="display:none">
+        <label class="label">GIFオプション</label>
+
+        <div class="row">
+          <label class="small">モード</label>
+          <select id="gifMode">
+            <option value="fromImage">静止画から自動生成</option>
+            <option value="overlayGif">アップロードGIFを重ねる</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label class="small">フレーム数</label>
+          <input id="gifFrames" type="number" min="2" max="60" value="12" />
+        </div>
+
+        <div class="row">
+          <label class="small">フレーム遅延(ms)</label>
+          <input id="gifDelay" type="number" min="20" max="2000" value="80" />
+        </div>
+
+        <div class="row">
+          <label class="small">ループ</label>
+          <input id="gifLoop" type="number" min="0" max="0" value="0" />
+          <span class="small">0 = 無限ループ</span>
+        </div>
+
+        <div class="row">
+          <label class="small">重ねるGIFをアップロード</label>
+          <input id="overlayGifInput" type="file" accept="image/gif" />
+        </div>
+
+        <div class="small info">注意: アップロードGIFのフレーム抽出には gifuct-js を使用します。大きなGIFは処理に時間がかかります。</div>
+      </div>
+
+      <div class="panel">
+        <label class="label">操作</label>
+        <div class="row">
+          <button id="exportBtn" disabled>エクスポート</button>
+          <button id="clearBtn" disabled class="btn-secondary">削除</button>
+        </div>
+        <div id="progress" class="small info">状態: 待機中</div>
+      </div>
+
+      <div class="panel">
+        <label class="label">ファイル情報</label>
+        <div id="fileInfo" class="small info">読み込み待ち</div>
+      </div>
+
+      <div class="panel footer-note">
+        <div class="small">画像はブラウザ内でのみ処理され、外部送信は行いません。</div>
+      </div>
+    </aside>
+  </main>
+
+  <script src="/image-split-and-gif-maker/libs/gif.js" defer></script>
+  <script src="app.js"></script>
+</body>
+</html>
+

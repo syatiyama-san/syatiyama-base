@@ -1,0 +1,116 @@
+// app-interactions-hover.js
+
+(function(){
+    const canvas = window.APP && window.APP.canvas;
+    const state = window.APP && window.APP.state;
+
+    if(!canvas || !state){
+        console.error('app-interactions-hover: required globals missing (canvas/state).');
+        return;
+    }
+
+    function canvasPointFromEvent(e){
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+    }
+
+    function checkHover(p){
+        const ui = window.APP.ui || {};
+        const uiRefs = ui.refs || {};
+        const utils = window.APP.utils || {};
+
+        const size = (uiRefs && uiRefs.fontSizeEl) ? (parseInt(uiRefs.fontSizeEl.value,10) || 60) : 60;
+        const font = (uiRefs && uiRefs.fontSelect) ? uiRefs.fontSelect.value || 'Arial' : 'Arial';
+        const fontSpec = `${size}px "${font}"`;
+        const lineHeight = Math.round(size * 1.15);
+        const maxWidth = Math.max(200, state.width - 220 - 220);
+        
+        for(let i = state.texts.length - 1; i >= 0; i--){
+            const t = state.texts[i];
+            const block = utils.measureTextBlock ? utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight) : { lines: [t.text] };
+            const w = block.width || maxWidth;
+            const h = block.height || lineHeight;
+            if(p.x >= t.x && p.x <= t.x + w && p.y >= t.y && p.y <= t.y + h){
+                return { type: 'text', index: i };
+            }
+        }
+
+        const imgs = ['mainPic','subPic','bgPic','wmPic','sysPic'].sort((a,b)=> (state.images[b] && state.images[b].z||0)-(state.images[a] && state.images[a].z||0));
+        for(const k of imgs){
+            const obj = state.images[k];
+            if(!obj || !obj.img) continue;
+            
+            if(k === 'subPic'){
+                const sizePx = obj.sizePx || (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) || 200;
+                if(p.x >= obj.x && p.x <= obj.x + sizePx && p.y >= obj.y && p.y <= obj.y + sizePx){
+                    return { type: 'image', key: k };
+                }
+                continue;
+            }
+            
+            const w = (obj.img.width || 0) * (obj.scale || 1);
+            const h = (obj.img.height || 0) * (obj.scale || 1);
+            if(p.x >= obj.x && p.x <= obj.x + w && p.y >= obj.y && p.y <= obj.y + h){
+                return { type: 'image', key: k };
+            }
+        }
+
+        return null;
+    }
+
+    canvas.addEventListener('mousemove', e => {
+        try {
+            const p = canvasPointFromEvent(e);
+            const hoverTarget = checkHover(p);
+            
+            if(hoverTarget){
+                state.hovering = hoverTarget;
+            } else {
+                state.hovering = null;
+            }
+            
+            if(window.APP && typeof window.APP.draw === 'function') {
+                window.APP.draw();
+            }
+        } catch(err){
+            console.error('hover mousemove handler error', err);
+        }
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+        try {
+            state.hovering = null;
+            if(window.APP && typeof window.APP.draw === 'function') {
+                window.APP.draw();
+            }
+        } catch(err){
+            console.error('hover mouseleave handler error', err);
+        }
+    });
+
+    const originalMouseDown = canvas.onmousedown;
+    canvas.onmousedown = function(e){
+        state.hovering = null;
+        if(originalMouseDown) originalMouseDown.call(this, e);
+    };
+
+    const originalMouseUp = canvas.onmouseup;
+    canvas.onmouseup = function(e){
+        if(originalMouseUp) originalMouseUp.call(this, e);
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        if(mouseX >= 0 && mouseX <= rect.width && mouseY >= 0 && mouseY <= rect.height){
+            const p = canvasPointFromEvent(e);
+            const hoverTarget = checkHover(p);
+            if(hoverTarget){
+                state.hovering = hoverTarget;
+                if(window.APP && typeof window.APP.draw === 'function') {
+                    window.APP.draw();
+                }
+            }
+        }
+    };
+})();
