@@ -3,169 +3,38 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ツールポータル</title>
-  <style>
-    /* 基本リセット */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    /* 固定ヘッダー */
-    header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 16px;
-      background: #fff;
-      border-bottom: 1px solid #e0e0e0;
-      z-index: 1000;
-    }
-    #site-logo { font-size: 1.1rem; font-weight: 600; }
-
-    /* お問い合わせ（丸いメールボタン） */
-    .contact-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: #ffffff;
-      border: 1px solid #ddd;
-      text-decoration: none;
-      color: inherit;
-      position: relative;
-    }
-    .contact-btn svg { width: 20px; height: 20px; display: block; }
-
-    /* カスタムツールチップ（ホバーで表示） */
-    .contact-btn[data-tooltip] {
-      cursor: pointer;
-    }
-    .contact-btn[data-tooltip]::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%);
-      white-space: nowrap;
-      background: rgba(0,0,0,0.8);
-      color: #fff;
-      font-size: 12px;
-      padding: 6px 8px;
-      border-radius: 4px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.12s ease;
-      z-index: 1001;
-    }
-    .contact-btn[data-tooltip]:hover::after,
-    .contact-btn[data-tooltip]:focus::after {
-      opacity: 1;
-    }
-
-    /* メイン領域はヘッダー分だけ下げる */
-    main {
-      padding: 80px 16px 24px; /* header高さ + 余白 */
-      min-height: calc(100vh - 80px);
-      display: grid;
-      grid-template-columns: 1fr 1fr; /* 左右をちょうど半分に */
-      gap: 24px;
-      align-items: start;
-    }
-
-    /* カラム見出し（大きめ表示） */
-    .column-title {
-      font-size: 1.6rem; /* デスクトップで大きめ */
-      font-weight: 700;
-      margin-bottom: 12px;
-      color: #222;
-      line-height: 1.1;
-    }
-    /* Tools 見出しを少し強調したい場合の追加スタイル */
-    .tools-title { letter-spacing: 0.4px; }
-
-    /* 左カラム（SNS） */
-    #left-column .grid-sns {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-    .sns-btn {
-      display: block;
-      width: 100%;
-      padding-top: 100%; /* 正方形を維持するためのトリック */
-      position: relative;
-      background: #f7f7f7;
-      text-decoration: none;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    .sns-btn img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    /* 右カラム（Tools 見出し → ReadMe → 本文 → ツール一覧） */
-    #readme { margin: 8px 0 16px; }
-    #readme h3 { margin-bottom: 8px; font-size: 1rem; }
-    #readme p { line-height: 1.6; color: #333; }
-
-    #tools-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .tool-card {
-      display: block;
-      padding: 16px;
-      text-decoration: none;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      background: #fff;
-      color: inherit;
-    }
-    .tool-card h3 { margin-bottom: 6px; font-size: 1.05rem; }
-    .tool-card p { margin: 0; color: #555; line-height: 1.4; }
-
-    /* レスポンシブ：スマホでは縦積み、SNSカラムが上 */
-    @media (max-width: 768px) {
-      main {
-        grid-template-columns: 1fr;
-        padding: 72px 12px 16px;
-      }
-      .column-title {
-        font-size: 1.25rem; /* モバイルでは少し小さく */
-      }
-      /* SNSボタンを少し大きく見せる（任意） */
-      #left-column .grid-sns {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-      }
-    }
-
-    /* アクセシビリティ用の視覚的に隠すクラス（必要なら使用） */
-    .visually-hidden {
-      position: absolute !important;
-      height: 1px; width: 1px;
-      overflow: hidden;
-      clip: rect(1px, 1px, 1px, 1px);
-      white-space: nowrap;
-    }
-  </style>
+  <title>しゃちやまベース</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <!-- 固定ヘッダー -->
-  <header id="site-header" role="banner">
-    <h1 id="site-logo">サイトタイトルロゴ</h1>
+<!-- header 部分（置き換え） -->
+<header id="site-header" role="banner">
+  <h1 id="site-logo">
+    <a href="https://syatiyama-san.github.io/syatiyama-base/" aria-label="しゃちやまベース トップページへ移動">
+      しゃちやまベース(Bata.)
+    </a>
+  </h1>
+
+  <!-- 丸いメールボタン：ホバーでツールチップ、クリックで新しいタブで開く -->
+  <nav id="header-actions" aria-label="ヘッダーアクション">
+    <a
+      class="contact-btn"
+      href="https://docs.google.com/forms/d/e/1FAIpQLSfXnaGuHdZZ41ivZM3Siq7hVGDadyYfCVFn0K5QdLxgTwAzSA/viewform?usp=publish-editor"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="お問い合わせ（Googleフォームが開きます）"
+      data-tooltip="GoogleFormが開きます"
+      title="GoogleFormが開きます"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+      </svg>
+    </a>
+  </nav>
+</header>
+
+
 
     <!-- 丸いメールボタン：ホバーでツールチップ、クリックで新しいタブで開く -->
     <nav id="header-actions" aria-label="ヘッダーアクション">
@@ -178,7 +47,6 @@
         data-tooltip="GoogleFormが開きます"
         title="GoogleFormが開きます"
       >
-        <!-- シンプルなメールアイコン（SVG） -->
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path fill="currentColor" d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
         </svg>
@@ -192,22 +60,22 @@
     <section id="left-column" aria-label="SNSリンク">
       <h2 class="column-title">SNSリンク</h2>
       <div class="grid-sns" role="list">
-        <a role="listitem" class="sns-btn" href="https://twitter.com/" aria-label="Twitter">
+        <a role="listitem" class="sns-btn" href="https://x.com/syatiyama_TRPG" aria-label="Twitter">
           <img src="path/to/twitter.png" alt="Twitter">
         </a>
-        <a role="listitem" class="sns-btn" href="https://github.com/" aria-label="GitHub">
-          <img src="path/to/github.png" alt="GitHub">
+        <a role="listitem" class="sns-btn" href="https://xfolio.jp/portfolio/syatiyama_san" aria-label="xfolio">
+          <img src="path/to/xfolio.png" alt="xfolio">
         </a>
-        <a role="listitem" class="sns-btn" href="https://facebook.com/" aria-label="Facebook">
-          <img src="path/to/facebook.png" alt="Facebook">
+        <a role="listitem" class="sns-btn" href="https://commons.nicovideo.jp/users/34289370" aria-label="ニコニ・コモンズ">
+          <img src="path/to/commons.png" alt="commons">
         </a>
-        <a role="listitem" class="sns-btn" href="#" aria-label="SNS4">
+        <a role="listitem" class="sns-btn" href="#" aria-label="空リンク">
           <img src="path/to/sns4.png" alt="SNS4">
         </a>
-        <a role="listitem" class="sns-btn" href="#" aria-label="SNS5">
+        <a role="listitem" class="sns-btn" href="#" aria-label="空リンク">
           <img src="path/to/sns5.png" alt="SNS5">
         </a>
-        <a role="listitem" class="sns-btn" href="#" aria-label="SNS6">
+        <a role="listitem" class="sns-btn" href="#" aria-label="空リンク">
           <img src="path/to/sns6.png" alt="SNS6">
         </a>
       </div>
@@ -219,13 +87,14 @@
 
       <article id="readme">
         <h3>ReadMe</h3>
-        <p>ここにツールの説明や使い方の概要を入れます。短く要点をまとめると親切です。</p>
+        <p>ブラウザ上で動作するフリーツールです。アップロードした画像はエクスポートのみに使用され、外部サーバーへの送信は行われません。
+これらのツールはAIコーディングで作成されています。</p>
       </article>
 
       <nav id="tools-list" aria-label="ツール一覧">
-        <a class="tool-card" href="display-make-tool/" aria-labelledby="tool1-title">
-          <h3 id="tool1-title">display-make-tool</h3>
-          <p>表示関連のツール。簡単な説明文が入ります。</p>
+        <a class="tool-card" href="https://syatiyama-san.github.io/syatiyama-base/display-make-tool/" aria-labelledby="tool1-title">
+          <h3 id="tool1-title">立ち絵ディスプレイ製作ツール</h3>
+          <p>立ち絵と背景画像があれば良い感じのディスプレイが作れます。</p>
         </a>
 
 <!--
@@ -234,10 +103,9 @@
           <p>画像分割とGIF出力ができるツール。</p>
         </a>
 -->
-
-        <!-- 必要に応じてツールを追加 -->
       </nav>
     </section>
   </main>
 </body>
 </html>
+
