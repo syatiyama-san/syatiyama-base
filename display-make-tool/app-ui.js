@@ -645,7 +645,7 @@
                     const c = document.createElement('canvas');
                     c.width = src.width;
                     c.height = src.height;
-                    const ctx = c.getContext('2d');
+                    const ctx = c.getContext('2d', { willReadFrequently: true });
                     ctx.drawImage(src, 0, 0);
                     return c;
                 }
@@ -685,9 +685,10 @@
                         canvas.height = origH;
                         if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
                     }
+                    gif.running = false; // Reset running flag on error
                 });
                 if (gif.running) {
-                    console.warn('GIF is already running, skipping export');
+                    console.warn('GIF is already running, waiting for completion...');
                     return;
                 }
                 gif.render();
