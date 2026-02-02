@@ -621,7 +621,7 @@
     function exportCanvasImage(){
         var gif = window.APP && window.APP.gif;
         if(!gif){
-            var workerPath = '/syatiyama-base/libs/gif.worker.js';
+            var workerPath = '/libs/gif.worker.js';
             gif = new GIF({ workers: 2, quality: 10, workerScript: workerPath });
             if(!window.APP) window.APP = {};
             window.APP.gif = gif;
