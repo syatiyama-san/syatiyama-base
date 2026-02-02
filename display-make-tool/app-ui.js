@@ -621,7 +621,7 @@
     function exportCanvasImage(){
         var gif = window.APP && window.APP.gif;
         if(!gif){
-            var workerPath = '/libs/gif.worker.js';
+            var workerPath = '../libs/gif.worker.js';
             gif = new GIF({ workers: 2, quality: 10, workerScript: workerPath });
             if(!window.APP) window.APP = {};
             window.APP.gif = gif;
@@ -676,7 +676,7 @@
                         canvas.height = origH;
                         if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
                     }
-                    gif.running = false; // Reset running flag
+                    gif.running = false;
                 });
                 gif.on('error', function(err){
                     console.error('GIF generation error', err);
@@ -685,7 +685,7 @@
                         canvas.height = origH;
                         if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
                     }
-                    gif.running = false; // Reset running flag on error
+                    gif.running = false;
                 });
                 if (gif.running) {
                     console.warn('GIF is already running, waiting for completion...');
