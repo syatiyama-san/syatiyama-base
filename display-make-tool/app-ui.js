@@ -621,7 +621,7 @@
     function exportCanvasImage(){
         var gif = window.APP && window.APP.gif;
         if(!gif){
-            var workerPath = '../libs/gif.worker.js';
+            var workerPath = 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js';
             gif = new GIF({ workers: 2, quality: 10, workerScript: workerPath });
             if(!window.APP) window.APP = {};
             window.APP.gif = gif;
