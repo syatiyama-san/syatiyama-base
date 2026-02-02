@@ -166,6 +166,25 @@
                     ctx.fill();
                     ctx.globalAlpha = 1.0;
                     ctx.clip();
+                } else if (shape === 'heart') {
+                    ctx.beginPath();
+                    const s = radius / 100;
+                    const cx = clipCx;
+                    const cy = clipCy;
+                    const hcx = 100, hcy = 107.5;
+                    ctx.moveTo(cx + (100 - hcx) * s, cy + (65 - hcy) * s);
+                    ctx.bezierCurveTo(cx + (90 - hcx) * s, cy + (40 - hcy) * s, cx + (70 - hcx) * s, cy + (25 - hcy) * s, cx + (50 - hcx) * s, cy + (25 - hcy) * s);
+                    ctx.bezierCurveTo(cx + (40 - hcx) * s, cy + (25 - hcy) * s, cx + (0 - hcx) * s, cy + (25 - hcy) * s, cx + (0 - hcx) * s, cy + (75 - hcy) * s);
+                    ctx.bezierCurveTo(cx + (0 - hcx) * s, cy + (145 - hcy) * s, cx + (90 - hcx) * s, cy + (170 - hcy) * s, cx + (100 - hcx) * s, cy + (190 - hcy) * s);
+                    ctx.bezierCurveTo(cx + (110 - hcx) * s, cy + (170 - hcy) * s, cx + (200 - hcx) * s, cy + (145 - hcy) * s, cx + (200 - hcx) * s, cy + (75 - hcy) * s);
+                    ctx.bezierCurveTo(cx + (200 - hcx) * s, cy + (25 - hcy) * s, cx + (160 - hcx) * s, cy + (25 - hcy) * s, cx + (150 - hcx) * s, cy + (25 - hcy) * s);
+                    ctx.bezierCurveTo(cx + (130 - hcx) * s, cy + (25 - hcy) * s, cx + (110 - hcx) * s, cy + (40 - hcy) * s, cx + (100 - hcx) * s, cy + (65 - hcy) * s);
+                    ctx.closePath();
+                    ctx.fillStyle = bgColor || '#ffffff';
+                    ctx.globalAlpha = bgColorOpacity;
+                    ctx.fill();
+                    ctx.globalAlpha = 1.0;
+                    ctx.clip();
                 } else {
                     ctx.beginPath(); ctx.arc(clipCx, clipCy, radius, 0, Math.PI * 2); ctx.closePath();
                     ctx.fillStyle = bgColor || '#ffffff';
@@ -189,6 +208,19 @@
                         ctx.lineTo(clipCx + radius, clipCy);
                         ctx.lineTo(clipCx, clipCy + radius);
                         ctx.lineTo(clipCx - radius, clipCy);
+                        ctx.closePath();
+                    } else if (shape === 'heart') {
+                        const s = radius / 100;
+                        const cx = clipCx;
+                        const cy = clipCy;
+                        const hcx = 100, hcy = 107.5;
+                        ctx.moveTo(cx + (100 - hcx) * s, cy + (65 - hcy) * s);
+                        ctx.bezierCurveTo(cx + (90 - hcx) * s, cy + (40 - hcy) * s, cx + (70 - hcx) * s, cy + (25 - hcy) * s, cx + (50 - hcx) * s, cy + (25 - hcy) * s);
+                        ctx.bezierCurveTo(cx + (40 - hcx) * s, cy + (25 - hcy) * s, cx + (0 - hcx) * s, cy + (25 - hcy) * s, cx + (0 - hcx) * s, cy + (75 - hcy) * s);
+                        ctx.bezierCurveTo(cx + (0 - hcx) * s, cy + (145 - hcy) * s, cx + (90 - hcx) * s, cy + (170 - hcy) * s, cx + (100 - hcx) * s, cy + (190 - hcy) * s);
+                        ctx.bezierCurveTo(cx + (110 - hcx) * s, cy + (170 - hcy) * s, cx + (200 - hcx) * s, cy + (145 - hcy) * s, cx + (200 - hcx) * s, cy + (75 - hcy) * s);
+                        ctx.bezierCurveTo(cx + (200 - hcx) * s, cy + (25 - hcy) * s, cx + (160 - hcx) * s, cy + (25 - hcy) * s, cx + (150 - hcx) * s, cy + (25 - hcy) * s);
+                        ctx.bezierCurveTo(cx + (130 - hcx) * s, cy + (25 - hcy) * s, cx + (110 - hcx) * s, cy + (40 - hcy) * s, cx + (100 - hcx) * s, cy + (65 - hcy) * s);
                         ctx.closePath();
                     } else {
                         ctx.arc(clipCx, clipCy, radius, 0, Math.PI * 2);
@@ -318,6 +350,22 @@
                             ctx.lineTo(clipCx + radius + 2, clipCy);
                             ctx.lineTo(clipCx, clipCy + radius + 2);
                             ctx.lineTo(clipCx - radius - 2, clipCy);
+                            ctx.closePath();
+                            ctx.fill();
+                            ctx.stroke();
+                        } else if (shape === 'heart') {
+                            ctx.beginPath();
+                            const s = (radius + 2) / 100;
+                            const cx = clipCx;
+                            const cy = clipCy;
+                            const hcx = 100, hcy = 107.5;
+                            ctx.moveTo(cx + (100 - hcx) * s, cy + (65 - hcy) * s);
+                            ctx.bezierCurveTo(cx + (90 - hcx) * s, cy + (40 - hcy) * s, cx + (70 - hcx) * s, cy + (25 - hcy) * s, cx + (50 - hcx) * s, cy + (25 - hcy) * s);
+                            ctx.bezierCurveTo(cx + (40 - hcx) * s, cy + (25 - hcy) * s, cx + (0 - hcx) * s, cy + (25 - hcy) * s, cx + (0 - hcx) * s, cy + (75 - hcy) * s);
+                            ctx.bezierCurveTo(cx + (0 - hcx) * s, cy + (145 - hcy) * s, cx + (90 - hcx) * s, cy + (170 - hcy) * s, cx + (100 - hcx) * s, cy + (190 - hcy) * s);
+                            ctx.bezierCurveTo(cx + (110 - hcx) * s, cy + (170 - hcy) * s, cx + (200 - hcx) * s, cy + (145 - hcy) * s, cx + (200 - hcx) * s, cy + (75 - hcy) * s);
+                            ctx.bezierCurveTo(cx + (200 - hcx) * s, cy + (25 - hcy) * s, cx + (160 - hcx) * s, cy + (25 - hcy) * s, cx + (150 - hcx) * s, cy + (25 - hcy) * s);
+                            ctx.bezierCurveTo(cx + (130 - hcx) * s, cy + (25 - hcy) * s, cx + (110 - hcx) * s, cy + (40 - hcy) * s, cx + (100 - hcx) * s, cy + (65 - hcy) * s);
                             ctx.closePath();
                             ctx.fill();
                             ctx.stroke();

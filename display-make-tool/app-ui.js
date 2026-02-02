@@ -37,6 +37,7 @@
 
     const subPicShapeCircle = document.getElementById('subPicShapeCircle');
     const subPicShapeDiamond = document.getElementById('subPicShapeDiamond');
+    const subPicShapeHeart = document.getElementById('subPicShapeHeart');
 
     const bandColor = document.getElementById('bandColor');
     const bandHeight = document.getElementById('bandHeight');
@@ -298,13 +299,19 @@
         state.images = state.images || {};
         state.images.subPic = state.images.subPic || {};
         state.images.subPic.crop = state.images.subPic.crop || {};
-        state.images.subPic.crop.shape = (shape === 'diamond') ? 'diamond' : 'circle';
+        state.images.subPic.crop.shape = (shape === 'diamond' || shape === 'heart') ? shape : 'circle';
         if (state.images.subPic.crop.shape === 'diamond') {
             if (subPicShapeDiamond) subPicShapeDiamond.checked = true;
             if (subPicShapeCircle) subPicShapeCircle.checked = false;
+            if (subPicShapeHeart) subPicShapeHeart.checked = false;
+        } else if (state.images.subPic.crop.shape === 'heart') {
+            if (subPicShapeHeart) subPicShapeHeart.checked = true;
+            if (subPicShapeCircle) subPicShapeCircle.checked = false;
+            if (subPicShapeDiamond) subPicShapeDiamond.checked = false;
         } else {
             if (subPicShapeCircle) subPicShapeCircle.checked = true;
             if (subPicShapeDiamond) subPicShapeDiamond.checked = false;
+            if (subPicShapeHeart) subPicShapeHeart.checked = false;
         }
         if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
     }
@@ -320,6 +327,12 @@
             if(this.checked) setSubPicShape('diamond');
         });
         subPicShapeDiamond._bound = true;
+    }
+    if(subPicShapeHeart && !subPicShapeHeart._bound){
+        subPicShapeHeart.addEventListener('change', function(){
+            if(this.checked) setSubPicShape('heart');
+        });
+        subPicShapeHeart._bound = true;
     }
 
     if(subPicBorder && !subPicBorder._bound){
