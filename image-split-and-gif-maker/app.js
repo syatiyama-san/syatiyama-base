@@ -1,6 +1,4 @@
 // app.js
-// GIF合成プロトタイプのクライアントサイド実装
-// 依存: gif.js, gifuct-js を index.html で読み込むこと
 
 (() => {
   const dropArea = document.getElementById('dropArea');
@@ -27,9 +25,8 @@
   let currentFile = null;
   let currentImage = null;
   let overlayGifArrayBuffer = null;
-  let overlayFrames = null; // extracted frames from uploaded GIF
+  let overlayFrames = null;
 
-  // Drag & drop handlers
   ['dragenter','dragover'].forEach(ev => {
     dropArea.addEventListener(ev, e => { e.preventDefault(); dropArea.style.borderColor = '#0b69ff'; }, false);
   });
@@ -41,7 +38,6 @@
     if (f) loadFile(f);
   });
 
-  // Click to open file picker
   dropArea.addEventListener('click', () => {
     const inp = document.createElement('input');
     inp.type = 'file';
@@ -52,7 +48,6 @@
     inp.click();
   });
 
-  // Overlay GIF upload
   overlayGifInput.addEventListener('change', async (e) => {
     const f = e.target.files && e.target.files[0];
     if (!f) { overlayGifArrayBuffer = null; overlayFrames = null; return; }
@@ -66,7 +61,7 @@
     try {
       const gif = gifuct.parseGIF(overlayGifArrayBuffer);
       const frames = gifuct.decompressFrames(gif, true);
-      overlayFrames = frames; // frames: [{dims, patch, delay, disposalType, ...}, ...]
+      overlayFrames = frames;
       progress(`アップロードGIFのフレーム数: ${frames.length}`);
     } catch (err) {
       console.error(err);
@@ -76,7 +71,6 @@
     }
   });
 
-  // Load file
   function loadFile(file) {
     if (!file.type.startsWith('image/')) {
       alert('画像ファイルを選択してください');
@@ -103,7 +97,6 @@
     img.src = url;
   }
 
-  // Clear
   clearBtn.addEventListener('click', () => {
     currentFile = null;
     currentImage = null;
@@ -118,7 +111,6 @@
     progress('待機中');
   });
 
-  // Mode toggle
   [modeSplitRadio, modeGifRadio].forEach(r => r.addEventListener('change', () => {
     if (modeGifRadio.checked) {
       splitOptions.style.display = 'none';
@@ -129,7 +121,6 @@
     }
   }));
 
-  // Preview render with 16:9 background and zoom
   function renderPreview() {
     if (!currentImage) return;
     const targetRatio = 16/9;
@@ -306,7 +297,7 @@
     const gif = new GIF({
       workers: 2,
       quality: 10,
-      workerScript: 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js'
+      workerScript: '../libs/gif.worker.js'
     });
 
     gif.on('progress', p => {
@@ -394,7 +385,6 @@
       return;
     }
 
-    // Set loop count (gif.js uses repeat: 0 = infinite)
     gif.on('finished', blob => {
       const url = URL.createObjectURL(blob);
       triggerDownload(url, `${baseName}.gif`);
@@ -402,14 +392,12 @@
       progress('GIF生成完了');
     });
 
-    // gif.js does not expose repeat directly in constructor; set via gif.options.repeat
     gif.options.repeat = (isNaN(loop) ? 0 : loop);
 
     progress('エンコード開始...');
     gif.render();
   }
 
-  // Utility: convert canvas to blob and trigger download
   function canvasToFileAndDownload(canvas, format, baseName) {
     return new Promise((resolve, reject) => {
       const mime = format === 'jpg' ? 'image/jpeg' : 'image/png';
