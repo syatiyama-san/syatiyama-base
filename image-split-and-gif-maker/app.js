@@ -297,7 +297,7 @@
     const gif = new GIF({
       workers: 2,
       quality: 10,
-      workerScript: '/syatiyama-base/libs/gif.worker.js'
+      workerScript: '/libs/gif.worker.js'
     });
 
     gif.on('progress', p => {
