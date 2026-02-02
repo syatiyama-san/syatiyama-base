@@ -184,29 +184,15 @@
             }
             if(subPicCropY){
                 const minY = 0;
-                let maxY = minY;
-                if (subPic && subPic.img) {
-                    const baseSrcSize = Math.min(subPic.img.width, subPic.img.height);
-                    const zoom = subPic.zoom && subPic.zoom > 0 ? subPic.zoom : 1.0;
-                    const srcSize = Math.round(baseSrcSize / zoom);
-                    maxY = Math.max(minY, Math.round(subPic.img.height - srcSize));
-                }
+                const maxY = 100;
                 subPicCropY.min = minY;
                 subPicCropY.max = maxY;
                 subPicCropY.step = 1;
                 let curY;
                 if (subPic.crop && typeof subPic.crop.cy === 'number') {
-                    if (subPic.crop.cy <= 1) {
-                        if (subPic.img && typeof subPic.img.height === 'number') {
-                            curY = Math.round(subPic.crop.cy * subPic.img.height);
-                        } else {
-                            curY = Math.round(subPic.crop.cy * sizePx);
-                        }
-                    } else {
-                        curY = Math.round(subPic.crop.cy);
-                    }
+                    curY = Math.round(subPic.crop.cy * 100);
                 } else {
-                    curY = (typeof subPic.y === 'number') ? subPic.y : 0;
+                    curY = 33;
                 }
                 curY = Math.max(minY, Math.min(maxY, curY));
                 subPicCropY.value = curY;
@@ -214,12 +200,7 @@
                 
                 if (subPic && subPic.crop && subPic.img) {
                     if (typeof subPic.crop.cy === 'number') {
-                        if (subPic.crop.cy <= 1) {
-                            const clampedY = Math.max(minY, Math.min(maxY, curY));
-                            subPic.crop.cy = clampedY / (subPic.img.height || 1);
-                        } else {
-                            subPic.crop.cy = Math.max(minY, Math.min(maxY, curY));
-                        }
+                        subPic.crop.cy = curY / 100;
                     }
                 }
             }
@@ -259,6 +240,7 @@
             console.warn('updateSubPicCropSliders error', e);
         }
     }
+
     if(subPicCropX && !subPicCropX._bound){
         subPicCropX.addEventListener('input', function(){
             try {
@@ -281,12 +263,9 @@
             try {
                 state.images = state.images || {};
                 state.images.subPic = state.images.subPic || {};
-                const sizePx = computeSubPicSizePx();
-                const maxY = Math.max(0, Math.round(state.height - sizePx));
-                let y = parseInt(subPicCropY.value, 10) || 0;
-                y = Math.max(0, Math.min(maxY, y));
+                const y = parseInt(subPicCropY.value, 10) || 0;
                 state.images.subPic.crop = state.images.subPic.crop || {};
-                state.images.subPic.crop.cy = y;
+                state.images.subPic.crop.cy = y / 100;
                 if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
             } catch(e){
                 console.warn('subPicCropY input error', e);
