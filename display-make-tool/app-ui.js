@@ -621,7 +621,7 @@
     function exportCanvasImage(){
         var gif = window.APP && window.APP.gif;
         if(!gif){
-            var workerPath = '/display-make-tool/libs/gif.worker.js';
+            var workerPath = '../libs/gif.worker.js';
             gif = new GIF({ workers: 2, quality: 10, workerScript: workerPath });
             if(!window.APP) window.APP = {};
             window.APP.gif = gif;
@@ -657,18 +657,6 @@
                     canvas.height = targetH;
                     if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
                 }
-                (function(){
-                    var workerPath = '/display-make-tool/libs/gif.worker.js';
-                    console.log('exportCanvasImage: using gif.worker path ->', workerPath);
-                    if(typeof GIF === 'undefined'){
-                        console.warn('exportCanvasImage: GIF global not found. gif.js may not be loaded yet.');
-                    }
-                    var gif = new GIF({
-                        workers: 2,
-                        quality: 10,
-                        workerScript: workerPath
-                    });
-                })();
                 const frameA = cloneCanvas(canvas);
                 const frameB = cloneCanvas(canvas);
                 const delayMs = 400;
@@ -688,6 +676,7 @@
                         canvas.height = origH;
                         if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
                     }
+                    gif.running = false; // Reset running flag
                 });
                 gif.on('error', function(err){
                     console.error('GIF generation error', err);
@@ -697,6 +686,10 @@
                         if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
                     }
                 });
+                if (gif.running) {
+                    console.warn('GIF is already running, skipping export');
+                    return;
+                }
                 gif.render();
                 return;
             }
