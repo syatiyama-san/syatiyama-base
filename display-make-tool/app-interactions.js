@@ -21,6 +21,8 @@
         subPicZoomVal: document.getElementById('subPicZoomVal'),
         subPicBorder: document.getElementById('subPicBorder'),
         bgSubPic: document.getElementById('bgSubPic'),
+        bgSubPicAlpha: document.getElementById('bgSubPicAlpha'),
+        bgSubPicAlphaVal: document.getElementById('bgSubPicAlphaVal'),
         bandColor: document.getElementById('bandColor'),
         bandHeight: document.getElementById('bandHeight'),
         text1El: document.getElementById('text1'),
@@ -434,13 +436,14 @@
     if(refs.subPicCropY) refs.subPicCropY.addEventListener('input', ()=>{ state.images.subPic.crop.cy = parseInt(refs.subPicCropY.value,10)/100; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
     if(refs.subPicZoom) refs.subPicZoom.addEventListener('input', ()=>{ const pct = parseInt(refs.subPicZoom.value,10); if(refs.subPicZoomVal) refs.subPicZoomVal.textContent = pct + '%'; state.images.subPic.zoom = pct/100; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
     if(refs.subPicBorder) refs.subPicBorder.addEventListener('input', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
-    if(refs.resetSubPicPos) refs.resetSubPicPos.addEventListener('click', ()=>{ state.images.subPic.x = window.APP.subPicDefault.x; state.images.subPic.y = window.APP.subPicDefault.y; state.images.subPic.sizePx = window.APP.subPicDefault.sizePx; state.images.subPic.crop = {cx:0.5,cy:0.33}; state.images.subPic.zoom = 1.0; if(refs.subPicCropY) refs.subPicCropY.value = 33; if(refs.subPicZoom) refs.subPicZoom.value = 100; if(refs.subPicZoomVal) refs.subPicZoomVal.textContent='100%'; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+    if(refs.resetSubPicPos) refs.resetSubPicPos.addEventListener('click', ()=>{ state.images.subPic.x = window.APP.subPicDefault.x; state.images.subPic.y = window.APP.subPicDefault.y; state.images.subPic.sizePx = window.APP.subPicDefault.sizePx; state.images.subPic.crop = {cx:0.5,cy:0.33}; state.images.subPic.zoom = 1.0; state.images.subPic.bgOpacity = 1.0; if(refs.subPicCropY) refs.subPicCropY.value = 33; if(refs.subPicZoom) refs.subPicZoom.value = 100; if(refs.subPicZoomVal) refs.subPicZoomVal.textContent='100%'; if(refs.bgSubPic) refs.bgSubPic.value = '#FFFF00'; if(refs.bgSubPicAlpha) refs.bgSubPicAlpha.value = 100; if(refs.bgSubPicAlphaVal) refs.bgSubPicAlphaVal.textContent = '100%'; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
 
     if(refs.text1El) refs.text1El.addEventListener('input', ()=>{ state.texts[0].text = refs.text1El.value; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
     if(refs.text2El) refs.text2El.addEventListener('input', ()=>{ state.texts[1].text = refs.text2El.value; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
     if(refs.text3El) refs.text3El.addEventListener('input', ()=>{ state.texts[2].text = refs.text3El.value; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
 
     if(refs.bgSubPic) refs.bgSubPic.addEventListener('input', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+    if(refs.bgSubPicAlpha) refs.bgSubPicAlpha.addEventListener('input', ()=>{ state.images.subPic.bgOpacity = parseInt(refs.bgSubPicAlpha.value,10)/100; if(refs.bgSubPicAlphaVal) refs.bgSubPicAlphaVal.textContent = refs.bgSubPicAlpha.value + '%'; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
     if(refs.bandColor) refs.bandColor.addEventListener('input', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
     if(refs.bandHeight) refs.bandHeight.addEventListener('input', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
     if(refs.fontSelect) refs.fontSelect.addEventListener('change', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });

@@ -104,8 +104,14 @@
           <input id="subPicBorderColor" type="color" value="#000000">
           </div>
 
-          <label>背景色</label>
+          <label style="margin-top:8px;display:block;">背景色</label>
           <input id="bgSubPic" type="color" value="#FFFF00">
+
+          <label style="margin-top:8px;display:block;">不透明度</label>
+          <div class="row watermark-opacity-row">
+          <input id="bgSubPicAlpha" type="range" min="0" max="100" value="100">
+          <div id="bgSubPicAlphaVal" class="val">100%</div>
+          </div>
         </div>
 
         <div class="slotControls"><button id="resetSubPicPos" class="btn">デフォルト位置に戻す</button></div>

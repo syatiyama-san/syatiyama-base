@@ -47,6 +47,7 @@
         const ui = window.APP.ui || {};
         const uiRefs = ui.refs || {};
         const bgColor = (uiRefs && uiRefs.bgSubPic) ? uiRefs.bgSubPic.value : '#ffffff';
+        const bgColorOpacity = (state.images && state.images.subPic && typeof state.images.subPic.bgOpacity === 'number') ? state.images.subPic.bgOpacity : 1.0;
         const bandCol = (uiRefs && uiRefs.bandColor) ? uiRefs.bandColor.value : '#ffffff';
         const bandHVal = (uiRefs && uiRefs.bandHeight) ? (parseInt(uiRefs.bandHeight.value,10) || 100) : 100;
         const orient = (state.ui && state.ui.bandOrientation) ? state.ui.bandOrientation : 'horizontal';
@@ -148,7 +149,9 @@
                 if (shape === 'circle') {
                     ctx.beginPath(); ctx.arc(clipCx, clipCy, radius, 0, Math.PI * 2); ctx.closePath();
                     ctx.fillStyle = bgColor || '#ffffff';
+                    ctx.globalAlpha = bgColorOpacity;
                     ctx.fill();
+                    ctx.globalAlpha = 1.0;
                     ctx.beginPath(); ctx.arc(clipCx, clipCy, radius, 0, Math.PI * 2); ctx.closePath();
                     ctx.clip();
                 } else if (shape === 'diamond') {
@@ -159,12 +162,16 @@
                     ctx.lineTo(clipCx - radius, clipCy);
                     ctx.closePath();
                     ctx.fillStyle = bgColor || '#ffffff';
+                    ctx.globalAlpha = bgColorOpacity;
                     ctx.fill();
+                    ctx.globalAlpha = 1.0;
                     ctx.clip();
                 } else {
                     ctx.beginPath(); ctx.arc(clipCx, clipCy, radius, 0, Math.PI * 2); ctx.closePath();
                     ctx.fillStyle = bgColor || '#ffffff';
+                    ctx.globalAlpha = bgColorOpacity;
                     ctx.fill();
+                    ctx.globalAlpha = 1.0;
                     ctx.beginPath(); ctx.arc(clipCx, clipCy, radius, 0, Math.PI * 2); ctx.closePath();
                     ctx.clip();
                 }

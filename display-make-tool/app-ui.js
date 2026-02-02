@@ -44,6 +44,8 @@
     const bandOrientVertical = document.getElementById('bandOrientVertical');
 
     const bgSubPic = document.getElementById('bgSubPic');
+    const bgSubPicAlpha = document.getElementById('bgSubPicAlpha');
+    const bgSubPicAlphaVal = document.getElementById('bgSubPicAlphaVal');
 
     const aspectLandscape = document.getElementById('aspectLandscape');
     const aspectSquare = document.getElementById('aspectSquare');
@@ -881,7 +883,7 @@
         subPicCropX,
         subPicShapeCircle, subPicShapeDiamond,
         bandColor, bandHeight, bandOrientHorizontal, bandOrientVertical,
-        bgSubPic,
+        bgSubPic, bgSubPicAlpha, bgSubPicAlphaVal,
         text1El,text2El,text3El,fontSelect,fontSizeEl,fontColorEl,
         exportBtn,formatSel,
         wmPicOpacity
