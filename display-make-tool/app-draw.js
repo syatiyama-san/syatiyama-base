@@ -31,6 +31,18 @@
         }
     }
 
+    function isDrawableImage(img){
+        if(!img) return false;
+        if(typeof HTMLImageElement !== 'undefined' && img instanceof HTMLImageElement) return true;
+        if(typeof HTMLCanvasElement !== 'undefined' && img instanceof HTMLCanvasElement) return true;
+        if(typeof ImageBitmap !== 'undefined' && img instanceof ImageBitmap) return true;
+        if(typeof OffscreenCanvas !== 'undefined' && img instanceof OffscreenCanvas) return true;
+        if(typeof HTMLVideoElement !== 'undefined' && img instanceof HTMLVideoElement) return true;
+        if(typeof SVGImageElement !== 'undefined' && img instanceof SVGImageElement) return true;
+        if(typeof VideoFrame !== 'undefined' && img instanceof VideoFrame) return true;
+        return false;
+    }
+
     async function draw(){
         const ctx = ensureCanvasAndContext();
         if(!ctx){
@@ -53,7 +65,7 @@
         const orient = (state.ui && state.ui.bandOrientation) ? state.ui.bandOrientation : 'horizontal';
         try {
             const bgPic = state.images && state.images.bgPic;
-            if(bgPic && bgPic.img){
+            if(bgPic && isDrawableImage(bgPic.img)){
                 const w4 = bgPic.img.width * (bgPic.scale || 1);
                 const h4 = bgPic.img.height * (bgPic.scale || 1);
                 ctx.drawImage(bgPic.img, bgPic.x || 0, bgPic.y || 0, w4, h4);
@@ -77,7 +89,7 @@
         }
         try {
             const overlay = state.images && state.images.overlayAsset;
-            if (overlay && overlay.img) {
+            if(overlay && isDrawableImage(overlay.img)){
                 const desiredW = overlay.widthPx || 700;
                 const maxAllowedW = Math.max(0, state.width - (overlay.marginLeft || 20) - 20);
                 const drawW = Math.min(desiredW, maxAllowedW);
@@ -100,7 +112,7 @@
         }
         try {
             const sysPic = state.images && state.images.sysPic;
-            if(sysPic && sysPic.img){
+            if(sysPic && isDrawableImage(sysPic.img)){
                 const img = sysPic.img;
                 const scale = (typeof sysPic.scale === 'number') ? sysPic.scale : 1;
                 const drawW = Math.round(img.width * scale);
@@ -120,7 +132,7 @@
         }
         try {
             const subPic = state.images && state.images.subPic;
-            if(subPic && subPic.img){
+            if(subPic && isDrawableImage(subPic.img)){
                 const sizePx = subPic.sizePx || (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) || 200;
                 const drawX = (typeof subPic.x === 'number') ? subPic.x : 0;
                 const drawY = (typeof subPic.y === 'number') ? subPic.y : 0;
@@ -235,7 +247,7 @@
         }
         try {
             const mainPic = state.images && state.images.mainPic;
-            if(mainPic && mainPic.img){
+            if(mainPic && isDrawableImage(mainPic.img)){
                 const w1 = mainPic.img.width * (mainPic.scale || 1);
                 const h1 = mainPic.img.height * (mainPic.scale || 1);
                 ctx.drawImage(mainPic.img, mainPic.x || 0, mainPic.y || 0, w1, h1);
@@ -245,7 +257,7 @@
         }
         try {
             const sysPic = state.images && state.images.sysPic;
-            if(sysPic && sysPic.img){
+            if(sysPic && isDrawableImage(sysPic.img)){
                 const img = sysPic.img;
                 const scale = (typeof sysPic.scale === 'number') ? sysPic.scale : 1;
                 const drawW = Math.round(img.width * scale);
@@ -290,7 +302,7 @@
         }
         try {
             const wmPic = state.images && state.images.wmPic;
-            if (wmPic && wmPic.img) {
+            if(wmPic && isDrawableImage(wmPic.img)){
                 ctx.save();
                 ctx.globalAlpha = (wmPic.opacity != null) ? wmPic.opacity : 0.5;
                 const w5 = wmPic.img.width * (wmPic.scale || 1);
