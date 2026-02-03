@@ -16,11 +16,14 @@
         fontSizeEl: document.getElementById('fontSize'),
         fontSelect: document.getElementById('fontSelect'),
         fontColorEl: document.getElementById('fontColor'),
+        subPicCropX: document.getElementById('subPicCropX'),
         subPicCropY: document.getElementById('subPicCropY'),
         subPicZoom: document.getElementById('subPicZoom'),
         subPicZoomVal: document.getElementById('subPicZoomVal'),
         subPicBorder: document.getElementById('subPicBorder'),
         bgSubPic: document.getElementById('bgSubPic'),
+        bgSubPicAlpha: document.getElementById('bgSubPicAlpha'),
+        bgSubPicAlphaVal: document.getElementById('bgSubPicAlphaVal'),
         bandColor: document.getElementById('bandColor'),
         bandHeight: document.getElementById('bandHeight'),
         text1El: document.getElementById('text1'),
@@ -91,6 +94,9 @@
                 const w = block.width || maxWidth;
                 const h = block.height;
                 if(p.x >= t.x && p.x <= t.x + w && p.y >= t.y && p.y <= t.y + h){
+                    if(window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
+                        state._dragSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
+                    }
                     state.dragging = { type:'text', index:i };
                     state.dragOffset.x = p.x - t.x; state.dragOffset.y = p.y - t.y;
                     return;
@@ -103,6 +109,9 @@
                 if(k === 'subPic'){
                     const sizePx = obj.sizePx || (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) || 300;
                     if(p.x >= obj.x && p.x <= obj.x + sizePx && p.y >= obj.y && p.y <= obj.y + sizePx){
+                        if(window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
+                            state._dragSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
+                        }
                         state.dragging = { type:'image', key:k };
                         state.dragOffset.x = p.x - obj.x; state.dragOffset.y = p.y - obj.y;
                         return;
@@ -119,6 +128,9 @@
                     h = (obj.img.height || 0) * (obj.scale || 1);
                 }
                 if(p.x >= obj.x && p.x <= obj.x + w && p.y >= obj.y && p.y <= obj.y + h){
+                    if(window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
+                        state._dragSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
+                    }
                     state.dragging = { type:'image', key:k };
                     state.dragOffset.x = p.x - obj.x; state.dragOffset.y = p.y - obj.y;
                     return;
@@ -145,12 +157,37 @@
             console.error('mousemove handler error', err);
         }
     });
-    canvas.addEventListener('mouseup', ()=> state.dragging = null);
-    canvas.addEventListener('mouseleave', ()=> state.dragging = null);
+    canvas.addEventListener('mouseup', ()=> {
+        if(state.dragging && state._dragSnapshot && window.APP && window.APP.history && typeof window.APP.history.saveSnapshot === 'function'){
+            window.APP.history.saveSnapshot(state._dragSnapshot);
+        }
+        state._dragSnapshot = null;
+        state.dragging = null;
+    });
+    canvas.addEventListener('mouseleave', ()=> {
+        if(state.dragging && state._dragSnapshot && window.APP && window.APP.history && typeof window.APP.history.saveSnapshot === 'function'){
+            window.APP.history.saveSnapshot(state._dragSnapshot);
+        }
+        state._dragSnapshot = null;
+        state.dragging = null;
+    });
 
     canvas.addEventListener('wheel', e=>{
         try {
             e.preventDefault();
+            if(!state._wheelSnapshot && window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
+                state._wheelSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
+            }
+            if(state._wheelCommitTimer){
+                clearTimeout(state._wheelCommitTimer);
+            }
+            state._wheelCommitTimer = setTimeout(()=>{
+                if(state._wheelSnapshot && window.APP && window.APP.history && typeof window.APP.history.saveSnapshot === 'function'){
+                    window.APP.history.saveSnapshot(state._wheelSnapshot);
+                }
+                state._wheelSnapshot = null;
+                state._wheelCommitTimer = null;
+            }, 200);
             const p = canvasPointFromEvent(e);
             const imgs = ['mainPic','subPic','bgPic','wmPic','sysPic'].sort((a,b)=> (state.images[b] && state.images[b].z||0)-(state.images[a] && state.images[a].z||0));
             for(const k of imgs){
@@ -431,28 +468,89 @@
 
     function downloadDataURL(dataURL, filename){ const a = document.createElement('a'); a.href = dataURL; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); }
 
-    if(refs.subPicCropY) refs.subPicCropY.addEventListener('input', ()=>{ state.images.subPic.crop.cy = parseInt(refs.subPicCropY.value,10)/100; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
-    if(refs.subPicZoom) refs.subPicZoom.addEventListener('input', ()=>{ const pct = parseInt(refs.subPicZoom.value,10); if(refs.subPicZoomVal) refs.subPicZoomVal.textContent = pct + '%'; state.images.subPic.zoom = pct/100; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
-    if(refs.subPicBorder) refs.subPicBorder.addEventListener('input', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
-    if(refs.resetSubPicPos) refs.resetSubPicPos.addEventListener('click', ()=>{ state.images.subPic.x = window.APP.subPicDefault.x; state.images.subPic.y = window.APP.subPicDefault.y; state.images.subPic.sizePx = window.APP.subPicDefault.sizePx; state.images.subPic.crop = {cx:0.5,cy:0.33}; state.images.subPic.zoom = 1.0; if(refs.subPicCropY) refs.subPicCropY.value = 33; if(refs.subPicZoom) refs.subPicZoom.value = 100; if(refs.subPicZoomVal) refs.subPicZoomVal.textContent='100%'; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+    function startHistorySnapshot(el){
+        if(!el || el._historySnapshot) return;
+        if(window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
+            el._historySnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
+        }
+    }
+    function commitHistorySnapshot(el){
+        if(!el || !el._historySnapshot) return;
+        if(window.APP && window.APP.history && typeof window.APP.history.saveSnapshot === 'function'){
+            window.APP.history.saveSnapshot(el._historySnapshot);
+        }
+        el._historySnapshot = null;
+    }
+    function bindHistoryStart(el){
+        if(!el || el._historyStartBound) return;
+        const start = ()=> startHistorySnapshot(el);
+        el.addEventListener('pointerdown', start);
+        el.addEventListener('mousedown', start);
+        el.addEventListener('touchstart', start);
+        el.addEventListener('keydown', start);
+        el.addEventListener('focus', start);
+        el._historyStartBound = true;
+    }
 
-    if(refs.text1El) refs.text1El.addEventListener('input', ()=>{ state.texts[0].text = refs.text1El.value; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
-    if(refs.text2El) refs.text2El.addEventListener('input', ()=>{ state.texts[1].text = refs.text2El.value; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
-    if(refs.text3El) refs.text3El.addEventListener('input', ()=>{ state.texts[2].text = refs.text3El.value; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+    if(refs.subPicCropX) {
+        bindHistoryStart(refs.subPicCropX);
+        refs.subPicCropX.addEventListener('input', ()=>{ state.images.subPic.crop.cx = parseInt(refs.subPicCropX.value,10)/100; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+        refs.subPicCropX.addEventListener('change', ()=>{ commitHistorySnapshot(refs.subPicCropX); });
+    }
+    if(refs.subPicCropY) {
+        bindHistoryStart(refs.subPicCropY);
+        refs.subPicCropY.addEventListener('input', ()=>{ state.images.subPic.crop.cy = parseInt(refs.subPicCropY.value,10)/100; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+        refs.subPicCropY.addEventListener('change', ()=>{ commitHistorySnapshot(refs.subPicCropY); });
+    }
+    if(refs.subPicZoom) {
+        bindHistoryStart(refs.subPicZoom);
+        refs.subPicZoom.addEventListener('input', ()=>{ const pct = parseInt(refs.subPicZoom.value,10); if(refs.subPicZoomVal) refs.subPicZoomVal.textContent = pct + '%'; state.images.subPic.zoom = pct/100; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+        refs.subPicZoom.addEventListener('change', ()=>{ commitHistorySnapshot(refs.subPicZoom); });
+    }
+    if(refs.subPicBorder) {
+        bindHistoryStart(refs.subPicBorder);
+        refs.subPicBorder.addEventListener('input', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+        refs.subPicBorder.addEventListener('change', ()=>{ commitHistorySnapshot(refs.subPicBorder); });
+    }
+    if(refs.resetSubPicPos) refs.resetSubPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); state.images.subPic.x = window.APP.subPicDefault.x; state.images.subPic.y = window.APP.subPicDefault.y; state.images.subPic.sizePx = window.APP.subPicDefault.sizePx; state.images.subPic.crop = {cx:0.5,cy:0.33}; state.images.subPic.zoom = 1.0; state.images.subPic.bgOpacity = 1.0; if(refs.subPicCropX) refs.subPicCropX.value = 50; if(refs.subPicCropY) refs.subPicCropY.value = 33; if(refs.subPicZoom) refs.subPicZoom.value = 100; if(refs.subPicZoomVal) refs.subPicZoomVal.textContent='100%'; if(refs.bgSubPic) refs.bgSubPic.value = '#FFFF00'; if(refs.bgSubPicAlpha) refs.bgSubPicAlpha.value = 100; if(refs.bgSubPicAlphaVal) refs.bgSubPicAlphaVal.textContent = '100%'; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
 
-    if(refs.bgSubPic) refs.bgSubPic.addEventListener('input', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
-    if(refs.bandColor) refs.bandColor.addEventListener('input', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
-    if(refs.bandHeight) refs.bandHeight.addEventListener('input', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
-    if(refs.fontSelect) refs.fontSelect.addEventListener('change', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
-    if(refs.fontSizeEl) refs.fontSizeEl.addEventListener('input', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
-    if(refs.fontColorEl) refs.fontColorEl.addEventListener('input', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+    if(refs.text1El) {
+        refs.text1El.addEventListener('input', ()=>{ if(!refs.text1El._historySnapshot) startHistorySnapshot(refs.text1El); state.texts[0].text = refs.text1El.value; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+        refs.text1El.addEventListener('blur', ()=>{ commitHistorySnapshot(refs.text1El); });
+    }
+    if(refs.text2El) {
+        refs.text2El.addEventListener('input', ()=>{ if(!refs.text2El._historySnapshot) startHistorySnapshot(refs.text2El); state.texts[1].text = refs.text2El.value; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+        refs.text2El.addEventListener('blur', ()=>{ commitHistorySnapshot(refs.text2El); });
+    }
+    if(refs.text3El) {
+        refs.text3El.addEventListener('input', ()=>{ if(!refs.text3El._historySnapshot) startHistorySnapshot(refs.text3El); state.texts[2].text = refs.text3El.value; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+        refs.text3El.addEventListener('blur', ()=>{ commitHistorySnapshot(refs.text3El); });
+    }
 
-    if(refs.wmPicOpacity) refs.wmPicOpacity.addEventListener('input', ()=>{ state.images.wmPic.opacity = parseInt(refs.wmPicOpacity.value,10)/100; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+    if(refs.bgSubPicAlpha) {
+        bindHistoryStart(refs.bgSubPicAlpha);
+        refs.bgSubPicAlpha.addEventListener('input', ()=>{ state.images.subPic.bgOpacity = parseInt(refs.bgSubPicAlpha.value,10)/100; if(refs.bgSubPicAlphaVal) refs.bgSubPicAlphaVal.textContent = refs.bgSubPicAlpha.value + '%'; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+        refs.bgSubPicAlpha.addEventListener('change', ()=>{ commitHistorySnapshot(refs.bgSubPicAlpha); });
+    }
+    if(refs.fontSelect) {
+        refs.fontSelect.addEventListener('change', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+    }
+    if(refs.fontSizeEl) {
+        bindHistoryStart(refs.fontSizeEl);
+        refs.fontSizeEl.addEventListener('input', ()=>{ state.ui = state.ui || {}; state.ui.fontSize = parseInt(refs.fontSizeEl.value,10) || 0; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+        refs.fontSizeEl.addEventListener('change', ()=>{ commitHistorySnapshot(refs.fontSizeEl); });
+    }
+    if(refs.wmPicOpacity) {
+        bindHistoryStart(refs.wmPicOpacity);
+        refs.wmPicOpacity.addEventListener('input', ()=>{ state.images.wmPic.opacity = parseInt(refs.wmPicOpacity.value,10)/100; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+        refs.wmPicOpacity.addEventListener('change', ()=>{ commitHistorySnapshot(refs.wmPicOpacity); });
+    }
 
-    if(refs.resetMainPicPos) refs.resetMainPicPos.addEventListener('click', ()=>{ state.images.mainPic.x = window.APP.refPos.mainPic.x; state.images.mainPic.y = window.APP.refPos.mainPic.y; if(typeof state.images.mainPic.initialScale==='number') state.images.mainPic.scale = state.images.mainPic.initialScale; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
-    if(refs.resetBgPicPos) refs.resetBgPicPos.addEventListener('click', ()=>{ if(state.images.bgPic.img && window.APP && window.APP.ui && typeof window.APP.ui.fitBgPicToCanvas === 'function') window.APP.ui.fitBgPicToCanvas(state.images.bgPic.img); if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+    if(refs.resetMainPicPos) refs.resetMainPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); state.images.mainPic.x = window.APP.refPos.mainPic.x; state.images.mainPic.y = window.APP.refPos.mainPic.y; if(typeof state.images.mainPic.initialScale==='number') state.images.mainPic.scale = state.images.mainPic.initialScale; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+    if(refs.resetBgPicPos) refs.resetBgPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); if(state.images.bgPic.img && window.APP && window.APP.ui && typeof window.APP.ui.fitBgPicToCanvas === 'function') window.APP.ui.fitBgPicToCanvas(state.images.bgPic.img); if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
 
     if(refs.resetWmPicPos) refs.resetWmPicPos.addEventListener('click', ()=>{
+        if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
         const wmPic = state.images.wmPic;
         const verticalOffset = 80;
         if(wmPic.img){
@@ -499,7 +597,7 @@
                 removeBtn._bound = true;
             }
             if(resetBtn && !resetBtn._bound){
-                resetBtn.addEventListener('click', ()=> resetSysPicToDefault());
+                resetBtn.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); resetSysPicToDefault(); });
                 resetBtn._bound = true;
             }
             const sampleBtn = document.querySelector('button[id^="resetPic"]') || document.querySelector('button');

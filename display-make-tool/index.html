@@ -22,6 +22,20 @@
         <span class="home-icon">🏠</span>
       </a>
       <h3>DisplayMakeTool</h3>
+      <div class="header-undo-redo">
+        <button id="undoBtn" class="undo-redo-btn undo-btn" title="元に戻す" aria-label="元に戻す">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M7 7v10c0 1.1.9 2 2 2h10v-2H9V7z"></path>
+            <path d="M15 2v2h4.59L8.41 20 10 18.41 18.59 9.82V14h2V2z" opacity="0.3"></path>
+          </svg>
+        </button>
+        <button id="redoBtn" class="undo-redo-btn redo-btn" title="やり直す" aria-label="やり直す">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M17 7v10c0 1.1-.9 2-2 2H5v-2h10V7z"></path>
+            <path d="M9 2v2H4.41L15.59 20 14 18.41 5.41 9.82V14h-2V2z" opacity="0.3"></path>
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -80,8 +94,10 @@
           <label style="display:block; margin-bottom:6px;">切り抜き形状</label>
           <label style="margin-right:12px;">
           <input id="subPicShapeCircle" name="subPicShape" type="radio" value="circle" checked>丸</label>
-          <label>
+          <label style="margin-right:12px;">
           <input id="subPicShapeDiamond" name="subPicShape" type="radio" value="diamond">ひし形</label>
+          <label>
+          <input id="subPicShapeHeart" name="subPicShape" type="radio" value="heart">ハート</label>
           </div>
 
           <label style="margin-top:8px;">ズーム</label>
@@ -104,8 +120,14 @@
           <input id="subPicBorderColor" type="color" value="#000000">
           </div>
 
-          <label>背景色</label>
+          <label style="margin-top:8px;display:block;">背景色</label>
           <input id="bgSubPic" type="color" value="#FFFF00">
+
+          <label style="margin-top:8px;display:block;">不透明度</label>
+          <div class="row watermark-opacity-row">
+          <input id="bgSubPicAlpha" type="range" min="0" max="100" value="100">
+          <div id="bgSubPicAlphaVal" class="val">100%</div>
+          </div>
         </div>
 
         <div class="slotControls"><button id="resetSubPicPos" class="btn">デフォルト位置に戻す</button></div>

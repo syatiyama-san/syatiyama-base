@@ -37,6 +37,7 @@
 
     const subPicShapeCircle = document.getElementById('subPicShapeCircle');
     const subPicShapeDiamond = document.getElementById('subPicShapeDiamond');
+    const subPicShapeHeart = document.getElementById('subPicShapeHeart');
 
     const bandColor = document.getElementById('bandColor');
     const bandHeight = document.getElementById('bandHeight');
@@ -44,6 +45,8 @@
     const bandOrientVertical = document.getElementById('bandOrientVertical');
 
     const bgSubPic = document.getElementById('bgSubPic');
+    const bgSubPicAlpha = document.getElementById('bgSubPicAlpha');
+    const bgSubPicAlphaVal = document.getElementById('bgSubPicAlphaVal');
 
     const aspectLandscape = document.getElementById('aspectLandscape');
     const aspectSquare = document.getElementById('aspectSquare');
@@ -181,29 +184,15 @@
             }
             if(subPicCropY){
                 const minY = 0;
-                let maxY = minY;
-                if (subPic && subPic.img) {
-                    const baseSrcSize = Math.min(subPic.img.width, subPic.img.height);
-                    const zoom = subPic.zoom && subPic.zoom > 0 ? subPic.zoom : 1.0;
-                    const srcSize = Math.round(baseSrcSize / zoom);
-                    maxY = Math.max(minY, Math.round(subPic.img.height - srcSize));
-                }
+                const maxY = 100;
                 subPicCropY.min = minY;
                 subPicCropY.max = maxY;
                 subPicCropY.step = 1;
                 let curY;
                 if (subPic.crop && typeof subPic.crop.cy === 'number') {
-                    if (subPic.crop.cy <= 1) {
-                        if (subPic.img && typeof subPic.img.height === 'number') {
-                            curY = Math.round(subPic.crop.cy * subPic.img.height);
-                        } else {
-                            curY = Math.round(subPic.crop.cy * sizePx);
-                        }
-                    } else {
-                        curY = Math.round(subPic.crop.cy);
-                    }
+                    curY = Math.round(subPic.crop.cy * 100);
                 } else {
-                    curY = (typeof subPic.y === 'number') ? subPic.y : 0;
+                    curY = 33;
                 }
                 curY = Math.max(minY, Math.min(maxY, curY));
                 subPicCropY.value = curY;
@@ -211,23 +200,9 @@
                 
                 if (subPic && subPic.crop && subPic.img) {
                     if (typeof subPic.crop.cy === 'number') {
-                        if (subPic.crop.cy <= 1) {
-                            const clampedY = Math.max(minY, Math.min(maxY, curY));
-                            subPic.crop.cy = clampedY / (subPic.img.height || 1);
-                        } else {
-                            subPic.crop.cy = Math.max(minY, Math.min(maxY, curY));
-                        }
+                        subPic.crop.cy = curY / 100;
                     }
                 }
-            }
-            if(subPic && subPic.crop && typeof subPic.crop.shape === 'string'){
-                if(subPic.crop.shape === 'diamond'){
-                    if(subPicShapeDiamond) subPicShapeDiamond.checked = true;
-                } else {
-                    if(subPicShapeCircle) subPicShapeCircle.checked = true;
-                }
-            } else {
-                if(subPicShapeCircle) subPicShapeCircle.checked = true;
             }
             if (subPic && typeof subPic.borderWidth === 'number' && subPicBorder) {
                 subPicBorder.value = subPic.borderWidth;
@@ -256,6 +231,60 @@
             console.warn('updateSubPicCropSliders error', e);
         }
     }
+
+    function updateSlidersFromState(){
+        try { updateSubPicCropSliders(); } catch(e){ /* ignore */ }
+        try {
+            const subPic = (state.images && state.images.subPic) ? state.images.subPic : {};
+            if(subPicZoom){
+                const pct = Math.round((subPic.zoom || 1.0) * 100);
+                subPicZoom.value = pct;
+            }
+            if(subPicZoomVal){
+                subPicZoomVal.textContent = Math.round((subPic.zoom || 1.0) * 100) + '%';
+            }
+            if(subPicBorder && typeof subPic.borderWidth === 'number'){
+                subPicBorder.value = subPic.borderWidth;
+            }
+            if(bgSubPic && typeof subPic.bgColor === 'string'){
+                bgSubPic.value = subPic.bgColor;
+            }
+            if(bgSubPicAlpha){
+                const pct = Math.round(((typeof subPic.bgOpacity === 'number') ? subPic.bgOpacity : 1.0) * 100);
+                bgSubPicAlpha.value = pct;
+                if(bgSubPicAlphaVal) bgSubPicAlphaVal.textContent = pct + '%';
+            }
+            const wmPic = (state.images && state.images.wmPic) ? state.images.wmPic : {};
+            if(wmPicOpacity && typeof wmPic.opacity === 'number'){
+                wmPicOpacity.value = Math.round(wmPic.opacity * 100);
+            }
+            if(bandHeight && state.ui && typeof state.ui.bandHeight === 'number'){
+                bandHeight.value = state.ui.bandHeight;
+            }
+            if(bandColor && state.ui && typeof state.ui.bandColor === 'string'){
+                bandColor.value = state.ui.bandColor;
+            }
+            if(fontSizeEl && state.ui && typeof state.ui.fontSize === 'number'){
+                fontSizeEl.value = state.ui.fontSize;
+            }
+            if(fontColorEl && state.ui && typeof state.ui.fontColor === 'string'){
+                fontColorEl.value = state.ui.fontColor;
+            }
+            // テキスト要素の値を復元
+            if(text1El && state.texts && state.texts[0]){
+                text1El.value = state.texts[0].text || '';
+            }
+            if(text2El && state.texts && state.texts[1]){
+                text2El.value = state.texts[1].text || '';
+            }
+            if(text3El && state.texts && state.texts[2]){
+                text3El.value = state.texts[2].text || '';
+            }
+        } catch(e){
+            console.warn('updateSlidersFromState error', e);
+        }
+    }
+
     if(subPicCropX && !subPicCropX._bound){
         subPicCropX.addEventListener('input', function(){
             try {
@@ -278,12 +307,9 @@
             try {
                 state.images = state.images || {};
                 state.images.subPic = state.images.subPic || {};
-                const sizePx = computeSubPicSizePx();
-                const maxY = Math.max(0, Math.round(state.height - sizePx));
-                let y = parseInt(subPicCropY.value, 10) || 0;
-                y = Math.max(0, Math.min(maxY, y));
+                const y = parseInt(subPicCropY.value, 10) || 0;
                 state.images.subPic.crop = state.images.subPic.crop || {};
-                state.images.subPic.crop.cy = y;
+                state.images.subPic.crop.cy = y / 100;
                 if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
             } catch(e){
                 console.warn('subPicCropY input error', e);
@@ -296,13 +322,19 @@
         state.images = state.images || {};
         state.images.subPic = state.images.subPic || {};
         state.images.subPic.crop = state.images.subPic.crop || {};
-        state.images.subPic.crop.shape = (shape === 'diamond') ? 'diamond' : 'circle';
+        state.images.subPic.crop.shape = (shape === 'diamond' || shape === 'heart') ? shape : 'circle';
         if (state.images.subPic.crop.shape === 'diamond') {
             if (subPicShapeDiamond) subPicShapeDiamond.checked = true;
             if (subPicShapeCircle) subPicShapeCircle.checked = false;
+            if (subPicShapeHeart) subPicShapeHeart.checked = false;
+        } else if (state.images.subPic.crop.shape === 'heart') {
+            if (subPicShapeHeart) subPicShapeHeart.checked = true;
+            if (subPicShapeCircle) subPicShapeCircle.checked = false;
+            if (subPicShapeDiamond) subPicShapeDiamond.checked = false;
         } else {
             if (subPicShapeCircle) subPicShapeCircle.checked = true;
             if (subPicShapeDiamond) subPicShapeDiamond.checked = false;
+            if (subPicShapeHeart) subPicShapeHeart.checked = false;
         }
         if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
     }
@@ -318,6 +350,12 @@
             if(this.checked) setSubPicShape('diamond');
         });
         subPicShapeDiamond._bound = true;
+    }
+    if(subPicShapeHeart && !subPicShapeHeart._bound){
+        subPicShapeHeart.addEventListener('change', function(){
+            if(this.checked) setSubPicShape('heart');
+        });
+        subPicShapeHeart._bound = true;
     }
 
     if(subPicBorder && !subPicBorder._bound){
@@ -350,6 +388,73 @@
         subPicBorderColor._bound = true;
     }
 
+    if(bandHeight && !bandHeight._bound){
+        bandHeight.addEventListener('input', function(){
+            try {
+                state.ui = state.ui || {};
+                const h = Math.max(0, Math.min(300, parseInt(bandHeight.value,10) || 0));
+                state.ui.bandHeight = h;
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            } catch(e){
+                console.warn('bandHeight input error', e);
+            }
+        });
+        bandHeight.addEventListener('change', function(){
+            if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
+        });
+        bandHeight._bound = true;
+    }
+
+    if(bgSubPic && !bgSubPic._bound){
+        bgSubPic.addEventListener('input', function(){
+            try {
+                state.images = state.images || {};
+                state.images.subPic = state.images.subPic || {};
+                const c = (bgSubPic.value || '#FFFF00').toString();
+                state.images.subPic.bgColor = c;
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            } catch(e){
+                console.warn('bgSubPic input error', e);
+            }
+        });
+        bgSubPic.addEventListener('change', function(){
+            if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
+        });
+        bgSubPic._bound = true;
+    }
+
+    if(bandColor && !bandColor._bound){
+        bandColor.addEventListener('input', function(){
+            try {
+                state.ui = state.ui || {};
+                state.ui.bandColor = bandColor.value;
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            } catch(e){
+                console.warn('bandColor input error', e);
+            }
+        });
+        bandColor.addEventListener('change', function(){
+            if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
+        });
+        bandColor._bound = true;
+    }
+
+    if(fontColorEl && !fontColorEl._bound){
+        fontColorEl.addEventListener('input', function(){
+            try {
+                state.ui = state.ui || {};
+                state.ui.fontColor = fontColorEl.value;
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            } catch(e){
+                console.warn('fontColorEl input error', e);
+            }
+        });
+        fontColorEl.addEventListener('change', function(){
+            if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
+        });
+        fontColorEl._bound = true;
+    }
+
     function setBandOrientation(orient){
         state.ui = state.ui || {};
         state.ui.bandOrientation = (orient === 'vertical') ? 'vertical' : 'horizontal';
@@ -374,6 +479,27 @@
             if(this.checked) setBandOrientation('vertical');
         });
         bandOrientVertical._bound = true;
+    }
+
+    function syncHistoryForImageKeys(keys){
+        if(!window.APP || !window.APP.history || !window.APP.state) return;
+        const history = window.APP.history;
+        const currentImages = window.APP.state.images || {};
+        const syncOne = (stack)=>{
+            if(!Array.isArray(stack)) return;
+            stack.forEach(entry=>{
+                if(!entry || !entry.images) return;
+                keys.forEach(k=>{
+                    const cur = currentImages[k] || {};
+                    const cloned = JSON.parse(JSON.stringify(cur));
+                    if(cloned && Object.prototype.hasOwnProperty.call(cloned, 'img')) cloned.img = null;
+                    entry.images[k] = cloned;
+                });
+            });
+        };
+        syncOne(history.undoStack);
+        syncOne(history.redoStack);
+        history.updateHistoryUI();
     }
 
     function setupSlot(slotEl, inputEl, key, infoEl, thumbEl, metaEl, removeBtn){
@@ -454,6 +580,7 @@
                          };
                     }
                     updateSlotUI(key);
+                    syncHistoryForImageKeys([key]);
                     if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
                     try { if(inputEl && typeof inputEl.value !== 'undefined') inputEl.value = ''; } catch(e){ /* ignore */ }
                 });
@@ -523,6 +650,7 @@
                         };
                   }
                     updateSlotUI(key);
+                    syncHistoryForImageKeys([key]);
                     if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
                     try { if(inputEl && typeof inputEl.value !== 'undefined') inputEl.value = ''; } catch(e){ /* ignore */ }
                 });
@@ -540,6 +668,7 @@
                     try { window.APP.removeWmPic(); } catch(e){ /* ignore */ }
                     clearWmPicState(inputEl);
                     updateSlotUI(key);
+                    syncHistoryForImageKeys([key]);
                     if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
                     return;
                 }
@@ -548,15 +677,17 @@
                     state.images.sysPic = {};
                     state.images.sysPic._preventDefault = true;
                     updateSlotUI('sysPic');
+                    syncHistoryForImageKeys(['sysPic']);
                     if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
                     return;
                 }
                 state.images[key] = {};
                 try { inputEl.value = ''; } catch(e){}
                 if(key === 'subPic'){
-                    try { updateSubPicCropSliders(); } catch(e){ /* ignore */ }
+                    try { updateSlidersFromState(); } catch(e){ /* ignore */ }
                 }
                 updateSlotUI(key);
+                syncHistoryForImageKeys([key]);
                 if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
             });
             removeBtn._bound = true;
@@ -881,7 +1012,7 @@
         subPicCropX,
         subPicShapeCircle, subPicShapeDiamond,
         bandColor, bandHeight, bandOrientHorizontal, bandOrientVertical,
-        bgSubPic,
+        bgSubPic, bgSubPicAlpha, bgSubPicAlphaVal,
         text1El,text2El,text3El,fontSelect,fontSizeEl,fontColorEl,
         exportBtn,formatSel,
         wmPicOpacity
@@ -1109,8 +1240,75 @@
         aspectPortrait._bound = true;
     }
 
+    // アンドゥ・リドゥボタンのイベント設定
+    const undoBtn = document.getElementById('undoBtn');
+    const redoBtn = document.getElementById('redoBtn');
+    if (undoBtn) {
+        undoBtn.addEventListener('click', function() {
+            if (window.APP && window.APP.history && window.APP.history.canUndo()) {
+                const previousState = window.APP.history.undo();
+                if (previousState) {
+                    // img オブジェクトを保持しながら状態を復元
+                    const savedImages = {};
+                    ['mainPic', 'subPic', 'bgPic', 'wmPic', 'sysPic', 'overlayAsset'].forEach(key => {
+                        if (window.APP.state.images[key] && window.APP.state.images[key].img) {
+                            savedImages[key] = window.APP.state.images[key].img;
+                        }
+                    });
+                    Object.assign(window.APP.state, previousState);
+                    // bandOrientationは履歴外であるため削除
+                    if (window.APP.state.ui) {
+                        delete window.APP.state.ui.bandOrientation;
+                    }
+                    Object.keys(savedImages).forEach(key => {
+                        if (window.APP.state.images[key]) {
+                            window.APP.state.images[key].img = savedImages[key];
+                        }
+                    });
+                    try { updateSlidersFromState(); } catch(e){ /* ignore */ }
+                    if (typeof window.APP.draw === 'function') window.APP.draw();
+                }
+            }
+        });
+    }
+    if (redoBtn) {
+        redoBtn.addEventListener('click', function() {
+            if (window.APP && window.APP.history && window.APP.history.canRedo()) {
+                const nextState = window.APP.history.redo();
+                if (nextState) {
+                    // img オブジェクトを保持しながら状態を復元
+                    const savedImages = {};
+                    ['mainPic', 'subPic', 'bgPic', 'wmPic', 'sysPic', 'overlayAsset'].forEach(key => {
+                        if (window.APP.state.images[key] && window.APP.state.images[key].img) {
+                            savedImages[key] = window.APP.state.images[key].img;
+                        }
+                    });
+                    Object.assign(window.APP.state, nextState);
+                    // bandOrientationは履歴外であるため削除
+                    if (window.APP.state.ui) {
+                        delete window.APP.state.ui.bandOrientation;
+                    }
+                    Object.keys(savedImages).forEach(key => {
+                        if (window.APP.state.images[key]) {
+                            window.APP.state.images[key].img = savedImages[key];
+                        }
+                    });
+                    try { updateSlidersFromState(); } catch(e){ /* ignore */ }
+                    if (typeof window.APP.draw === 'function') window.APP.draw();
+                }
+            }
+        });
+    }
+
     window.APP.ui.setAspectRatio = setAspectRatio;
     window.APP.ui.scaleImagesToNewRatio = scaleImagesToNewRatio;
+
+    // 初期化完了時に履歴スタックをクリア（初期化中の draw 呼び出しによる履歴を除外）
+    if (window.APP && window.APP.history) {
+        window.APP.history.undoStack = [];
+        window.APP.history.redoStack = [];
+        window.APP.history.updateHistoryUI();
+    }
 
     window.addEventListener('resize', function(){
         try { updateSubPicCropSliders(); } catch(e){ /* ignore */ }
