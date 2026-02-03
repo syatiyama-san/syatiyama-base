@@ -35,7 +35,11 @@ body{
     display: flex;
     align-items: center;
     gap: 12px;
-    align-self: flex-start;
+    width: 100%;
+}
+
+.header-top > :nth-child(3) {
+    margin-left: auto;
 }
 
 .home-btn {
@@ -312,4 +316,65 @@ input[type="range"]:disabled {
     display: block;
     margin: 0 auto;
     text-align: center;
+}
+
+.header-undo-redo {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.undo-redo-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    color: #222;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    padding: 0;
+}
+
+.undo-redo-btn:hover:not(:disabled) {
+    background: #e8e8e8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.undo-redo-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    color: #999;
+}
+
+.undo-redo-btn::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 1001;
+}
+
+.undo-redo-btn:hover::after {
+    opacity: 1;
+}
+
+.undo-redo-btn svg {
+    width: 20px;
+    height: 20px;
 }

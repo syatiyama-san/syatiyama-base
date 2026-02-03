@@ -90,6 +90,99 @@
         'Inter','Noto Serif JP'
     ];
 
+    // 履歴管理システム
+    const history = {
+        undoStack: [],
+        redoStack: [],
+        maxSteps: 50,
+        // state から画像オブジェクトを除外してディープコピーを作成
+        cloneStateForHistory: function(currentState) {
+            const cloned = JSON.parse(JSON.stringify(currentState));
+            // 画像オブジェクト（img）は履歴に保存しない
+            if (cloned && cloned.images) {
+                Object.keys(cloned.images).forEach(key => {
+                    if (cloned.images[key] && Object.prototype.hasOwnProperty.call(cloned.images[key], 'img')) {
+                        cloned.images[key].img = null;
+                    }
+                });
+            }
+            // ホバー/ドラッグ状態は履歴に保存しない
+            if (cloned) {
+                delete cloned.hovering;
+                delete cloned.dragging;
+                delete cloned.dragOffset;
+            }
+            // ラジオボタン要素（画像比率、切り抜き形、帯の縦横）は履歴に保存しない
+            if (cloned && cloned.images && cloned.images.subPic && cloned.images.subPic.crop) {
+                delete cloned.images.subPic.crop.shape;
+            }
+            if (cloned) {
+                delete cloned.aspectRatio;
+            }
+            // 帯の縦横（bandOrientation）の状態保存
+            // state.ui全体をクローンに含める前にbandOrientationを除外
+            if (cloned && cloned.ui && cloned.ui.bandOrientation !== undefined) {
+                delete cloned.ui.bandOrientation;
+            }
+            return cloned;
+        },
+        saveState: function(currentState) {
+            const stateCopy = this.cloneStateForHistory(currentState);
+            this.undoStack.push(stateCopy);
+            if (this.undoStack.length > this.maxSteps) {
+                this.undoStack.shift();
+            }
+            this.redoStack = [];
+            this.updateHistoryUI();
+        },
+        saveSnapshot: function(stateSnapshot) {
+            if(!stateSnapshot) return;
+            this.undoStack.push(stateSnapshot);
+            if (this.undoStack.length > this.maxSteps) {
+                this.undoStack.shift();
+            }
+            this.redoStack = [];
+            this.updateHistoryUI();
+        },
+        undo: function() {
+            if (this.undoStack.length === 0) return null;
+            const currentStateCopy = this.cloneStateForHistory(state);
+            this.redoStack.push(currentStateCopy);
+            const previousState = this.undoStack.pop();
+            this.updateHistoryUI();
+            return previousState;
+        },
+        redo: function() {
+            if (this.redoStack.length === 0) return null;
+            const currentStateCopy = this.cloneStateForHistory(state);
+            this.undoStack.push(currentStateCopy);
+            const nextState = this.redoStack.pop();
+            this.updateHistoryUI();
+            return nextState;
+        },
+        canUndo: function() {
+            return this.undoStack.length > 0;
+        },
+        canRedo: function() {
+            return this.redoStack.length > 0;
+        },
+        updateHistoryUI: function() {
+            const undoBtn = document.getElementById('undoBtn');
+            const redoBtn = document.getElementById('redoBtn');
+            if (undoBtn) {
+                undoBtn.disabled = !this.canUndo();
+                undoBtn.dataset.tooltip = '元に戻す';
+            }
+            if (redoBtn) {
+                redoBtn.disabled = !this.canRedo();
+                redoBtn.dataset.tooltip = 'やり直す';
+            }
+        }
+    };
+
+    // 初期化時にUIを更新（最初は履歴がないので両方無効）
+    history.updateHistoryUI();
+
     window.APP = window.APP || {};
     window.APP.canvas = canvas;
     window.APP.ctx = ctx;
@@ -97,4 +190,5 @@
     window.APP.refPos = refPos;
     window.APP.state = state;
     window.APP.fontOptions = fontOptions;
+    window.APP.history = history;
 })();

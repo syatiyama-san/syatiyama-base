@@ -31,6 +31,18 @@
         }
     }
 
+    function isDrawableImage(img){
+        if(!img) return false;
+        if(typeof HTMLImageElement !== 'undefined' && img instanceof HTMLImageElement) return true;
+        if(typeof HTMLCanvasElement !== 'undefined' && img instanceof HTMLCanvasElement) return true;
+        if(typeof ImageBitmap !== 'undefined' && img instanceof ImageBitmap) return true;
+        if(typeof OffscreenCanvas !== 'undefined' && img instanceof OffscreenCanvas) return true;
+        if(typeof HTMLVideoElement !== 'undefined' && img instanceof HTMLVideoElement) return true;
+        if(typeof SVGImageElement !== 'undefined' && img instanceof SVGImageElement) return true;
+        if(typeof VideoFrame !== 'undefined' && img instanceof VideoFrame) return true;
+        return false;
+    }
+
     async function draw(){
         const ctx = ensureCanvasAndContext();
         if(!ctx){
@@ -47,12 +59,13 @@
         const ui = window.APP.ui || {};
         const uiRefs = ui.refs || {};
         const bgColor = (uiRefs && uiRefs.bgSubPic) ? uiRefs.bgSubPic.value : '#ffffff';
+        const bgColorOpacity = (state.images && state.images.subPic && typeof state.images.subPic.bgOpacity === 'number') ? state.images.subPic.bgOpacity : 1.0;
         const bandCol = (uiRefs && uiRefs.bandColor) ? uiRefs.bandColor.value : '#ffffff';
         const bandHVal = (uiRefs && uiRefs.bandHeight) ? (parseInt(uiRefs.bandHeight.value,10) || 100) : 100;
         const orient = (state.ui && state.ui.bandOrientation) ? state.ui.bandOrientation : 'horizontal';
         try {
             const bgPic = state.images && state.images.bgPic;
-            if(bgPic && bgPic.img){
+            if(bgPic && isDrawableImage(bgPic.img)){
                 const w4 = bgPic.img.width * (bgPic.scale || 1);
                 const h4 = bgPic.img.height * (bgPic.scale || 1);
                 ctx.drawImage(bgPic.img, bgPic.x || 0, bgPic.y || 0, w4, h4);
@@ -76,7 +89,7 @@
         }
         try {
             const overlay = state.images && state.images.overlayAsset;
-            if (overlay && overlay.img) {
+            if(overlay && isDrawableImage(overlay.img)){
                 const desiredW = overlay.widthPx || 700;
                 const maxAllowedW = Math.max(0, state.width - (overlay.marginLeft || 20) - 20);
                 const drawW = Math.min(desiredW, maxAllowedW);
@@ -99,7 +112,7 @@
         }
         try {
             const sysPic = state.images && state.images.sysPic;
-            if(sysPic && sysPic.img){
+            if(sysPic && isDrawableImage(sysPic.img)){
                 const img = sysPic.img;
                 const scale = (typeof sysPic.scale === 'number') ? sysPic.scale : 1;
                 const drawW = Math.round(img.width * scale);
@@ -119,7 +132,7 @@
         }
         try {
             const subPic = state.images && state.images.subPic;
-            if(subPic && subPic.img){
+            if(subPic && isDrawableImage(subPic.img)){
                 const sizePx = subPic.sizePx || (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) || 200;
                 const drawX = (typeof subPic.x === 'number') ? subPic.x : 0;
                 const drawY = (typeof subPic.y === 'number') ? subPic.y : 0;
@@ -148,7 +161,9 @@
                 if (shape === 'circle') {
                     ctx.beginPath(); ctx.arc(clipCx, clipCy, radius, 0, Math.PI * 2); ctx.closePath();
                     ctx.fillStyle = bgColor || '#ffffff';
+                    ctx.globalAlpha = bgColorOpacity;
                     ctx.fill();
+                    ctx.globalAlpha = 1.0;
                     ctx.beginPath(); ctx.arc(clipCx, clipCy, radius, 0, Math.PI * 2); ctx.closePath();
                     ctx.clip();
                 } else if (shape === 'diamond') {
@@ -159,12 +174,35 @@
                     ctx.lineTo(clipCx - radius, clipCy);
                     ctx.closePath();
                     ctx.fillStyle = bgColor || '#ffffff';
+                    ctx.globalAlpha = bgColorOpacity;
                     ctx.fill();
+                    ctx.globalAlpha = 1.0;
+                    ctx.clip();
+                } else if (shape === 'heart') {
+                    ctx.beginPath();
+                    const s = radius / 100;
+                    const cx = clipCx;
+                    const cy = clipCy;
+                    const hcx = 100, hcy = 107.5;
+                    ctx.moveTo(cx + (100 - hcx) * s, cy + (65 - hcy) * s);
+                    ctx.bezierCurveTo(cx + (90 - hcx) * s, cy + (40 - hcy) * s, cx + (70 - hcx) * s, cy + (25 - hcy) * s, cx + (50 - hcx) * s, cy + (25 - hcy) * s);
+                    ctx.bezierCurveTo(cx + (40 - hcx) * s, cy + (25 - hcy) * s, cx + (0 - hcx) * s, cy + (25 - hcy) * s, cx + (0 - hcx) * s, cy + (75 - hcy) * s);
+                    ctx.bezierCurveTo(cx + (0 - hcx) * s, cy + (145 - hcy) * s, cx + (90 - hcx) * s, cy + (170 - hcy) * s, cx + (100 - hcx) * s, cy + (190 - hcy) * s);
+                    ctx.bezierCurveTo(cx + (110 - hcx) * s, cy + (170 - hcy) * s, cx + (200 - hcx) * s, cy + (145 - hcy) * s, cx + (200 - hcx) * s, cy + (75 - hcy) * s);
+                    ctx.bezierCurveTo(cx + (200 - hcx) * s, cy + (25 - hcy) * s, cx + (160 - hcx) * s, cy + (25 - hcy) * s, cx + (150 - hcx) * s, cy + (25 - hcy) * s);
+                    ctx.bezierCurveTo(cx + (130 - hcx) * s, cy + (25 - hcy) * s, cx + (110 - hcx) * s, cy + (40 - hcy) * s, cx + (100 - hcx) * s, cy + (65 - hcy) * s);
+                    ctx.closePath();
+                    ctx.fillStyle = bgColor || '#ffffff';
+                    ctx.globalAlpha = bgColorOpacity;
+                    ctx.fill();
+                    ctx.globalAlpha = 1.0;
                     ctx.clip();
                 } else {
                     ctx.beginPath(); ctx.arc(clipCx, clipCy, radius, 0, Math.PI * 2); ctx.closePath();
                     ctx.fillStyle = bgColor || '#ffffff';
+                    ctx.globalAlpha = bgColorOpacity;
                     ctx.fill();
+                    ctx.globalAlpha = 1.0;
                     ctx.beginPath(); ctx.arc(clipCx, clipCy, radius, 0, Math.PI * 2); ctx.closePath();
                     ctx.clip();
                 }
@@ -183,6 +221,19 @@
                         ctx.lineTo(clipCx, clipCy + radius);
                         ctx.lineTo(clipCx - radius, clipCy);
                         ctx.closePath();
+                    } else if (shape === 'heart') {
+                        const s = radius / 100;
+                        const cx = clipCx;
+                        const cy = clipCy;
+                        const hcx = 100, hcy = 107.5;
+                        ctx.moveTo(cx + (100 - hcx) * s, cy + (65 - hcy) * s);
+                        ctx.bezierCurveTo(cx + (90 - hcx) * s, cy + (40 - hcy) * s, cx + (70 - hcx) * s, cy + (25 - hcy) * s, cx + (50 - hcx) * s, cy + (25 - hcy) * s);
+                        ctx.bezierCurveTo(cx + (40 - hcx) * s, cy + (25 - hcy) * s, cx + (0 - hcx) * s, cy + (25 - hcy) * s, cx + (0 - hcx) * s, cy + (75 - hcy) * s);
+                        ctx.bezierCurveTo(cx + (0 - hcx) * s, cy + (145 - hcy) * s, cx + (90 - hcx) * s, cy + (170 - hcy) * s, cx + (100 - hcx) * s, cy + (190 - hcy) * s);
+                        ctx.bezierCurveTo(cx + (110 - hcx) * s, cy + (170 - hcy) * s, cx + (200 - hcx) * s, cy + (145 - hcy) * s, cx + (200 - hcx) * s, cy + (75 - hcy) * s);
+                        ctx.bezierCurveTo(cx + (200 - hcx) * s, cy + (25 - hcy) * s, cx + (160 - hcx) * s, cy + (25 - hcy) * s, cx + (150 - hcx) * s, cy + (25 - hcy) * s);
+                        ctx.bezierCurveTo(cx + (130 - hcx) * s, cy + (25 - hcy) * s, cx + (110 - hcx) * s, cy + (40 - hcy) * s, cx + (100 - hcx) * s, cy + (65 - hcy) * s);
+                        ctx.closePath();
                     } else {
                         ctx.arc(clipCx, clipCy, radius, 0, Math.PI * 2);
                     }
@@ -196,7 +247,7 @@
         }
         try {
             const mainPic = state.images && state.images.mainPic;
-            if(mainPic && mainPic.img){
+            if(mainPic && isDrawableImage(mainPic.img)){
                 const w1 = mainPic.img.width * (mainPic.scale || 1);
                 const h1 = mainPic.img.height * (mainPic.scale || 1);
                 ctx.drawImage(mainPic.img, mainPic.x || 0, mainPic.y || 0, w1, h1);
@@ -206,7 +257,7 @@
         }
         try {
             const sysPic = state.images && state.images.sysPic;
-            if(sysPic && sysPic.img){
+            if(sysPic && isDrawableImage(sysPic.img)){
                 const img = sysPic.img;
                 const scale = (typeof sysPic.scale === 'number') ? sysPic.scale : 1;
                 const drawW = Math.round(img.width * scale);
@@ -251,7 +302,7 @@
         }
         try {
             const wmPic = state.images && state.images.wmPic;
-            if (wmPic && wmPic.img) {
+            if(wmPic && isDrawableImage(wmPic.img)){
                 ctx.save();
                 ctx.globalAlpha = (wmPic.opacity != null) ? wmPic.opacity : 0.5;
                 const w5 = wmPic.img.width * (wmPic.scale || 1);
@@ -311,6 +362,22 @@
                             ctx.lineTo(clipCx + radius + 2, clipCy);
                             ctx.lineTo(clipCx, clipCy + radius + 2);
                             ctx.lineTo(clipCx - radius - 2, clipCy);
+                            ctx.closePath();
+                            ctx.fill();
+                            ctx.stroke();
+                        } else if (shape === 'heart') {
+                            ctx.beginPath();
+                            const s = (radius + 2) / 100;
+                            const cx = clipCx;
+                            const cy = clipCy;
+                            const hcx = 100, hcy = 107.5;
+                            ctx.moveTo(cx + (100 - hcx) * s, cy + (65 - hcy) * s);
+                            ctx.bezierCurveTo(cx + (90 - hcx) * s, cy + (40 - hcy) * s, cx + (70 - hcx) * s, cy + (25 - hcy) * s, cx + (50 - hcx) * s, cy + (25 - hcy) * s);
+                            ctx.bezierCurveTo(cx + (40 - hcx) * s, cy + (25 - hcy) * s, cx + (0 - hcx) * s, cy + (25 - hcy) * s, cx + (0 - hcx) * s, cy + (75 - hcy) * s);
+                            ctx.bezierCurveTo(cx + (0 - hcx) * s, cy + (145 - hcy) * s, cx + (90 - hcx) * s, cy + (170 - hcy) * s, cx + (100 - hcx) * s, cy + (190 - hcy) * s);
+                            ctx.bezierCurveTo(cx + (110 - hcx) * s, cy + (170 - hcy) * s, cx + (200 - hcx) * s, cy + (145 - hcy) * s, cx + (200 - hcx) * s, cy + (75 - hcy) * s);
+                            ctx.bezierCurveTo(cx + (200 - hcx) * s, cy + (25 - hcy) * s, cx + (160 - hcx) * s, cy + (25 - hcy) * s, cx + (150 - hcx) * s, cy + (25 - hcy) * s);
+                            ctx.bezierCurveTo(cx + (130 - hcx) * s, cy + (25 - hcy) * s, cx + (110 - hcx) * s, cy + (40 - hcy) * s, cx + (100 - hcx) * s, cy + (65 - hcy) * s);
                             ctx.closePath();
                             ctx.fill();
                             ctx.stroke();
