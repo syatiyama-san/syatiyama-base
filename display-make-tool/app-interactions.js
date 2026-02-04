@@ -590,7 +590,26 @@
         refs.bgSubPicAlpha.addEventListener('change', ()=>{ commitHistorySnapshot(refs.bgSubPicAlpha); });
     }
     if(refs.fontSelect) {
-        refs.fontSelect.addEventListener('change', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+        const applyFontChange = ()=>{
+            try {
+                state.ui = state.ui || {};
+                const f = (refs.fontSelect.value || 'Arial').toString();
+                state.ui.fontFamily = f;
+                if (document && document.fonts && typeof document.fonts.load === 'function') {
+                    document.fonts.load(`16px "${f}"`).then(()=>{
+                        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                    }).catch(()=>{
+                        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                    });
+                } else {
+                    if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                }
+            } catch(e){
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            }
+        };
+        refs.fontSelect.addEventListener('change', applyFontChange);
+        refs.fontSelect.addEventListener('input', applyFontChange);
     }
     if(refs.fontSizeEl) {
         bindHistoryStart(refs.fontSizeEl);

@@ -276,6 +276,9 @@
             if(fontColorEl && state.ui && typeof state.ui.fontColor === 'string'){
                 fontColorEl.value = state.ui.fontColor;
             }
+            if(fontSelect && state.ui && typeof state.ui.fontFamily === 'string'){
+                fontSelect.value = state.ui.fontFamily;
+            }
             // テキスト要素の値を復元
             if(text1El && state.texts && state.texts[0]){
                 text1El.value = state.texts[0].text || '';

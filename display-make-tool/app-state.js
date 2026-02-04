@@ -87,9 +87,10 @@
     };
 
     const fontOptions = [
-        'Arial','Georgia','Times New Roman','Noto Sans JP','Roboto',
-        'Zen Old Mincho','Montserrat','Open Sans','Lato','Poppins',
-        'Inter','Noto Serif JP'
+        'Arial','Georgia','Times New Roman','Noto Sans JP',
+        'Zen Old Mincho','Noto Serif JP',
+        'Kiwi Maru','Hina Mincho','Kaisei Decol','Mochiy Pop One',
+        'Yomogi','Pacifico','Ballet'
     ];
 
     // 履歴管理システム
