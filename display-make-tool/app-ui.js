@@ -61,11 +61,27 @@
     const text1El = document.getElementById('text1');
     const text2El = document.getElementById('text2');
     const text3El = document.getElementById('text3');
+    const text1X = document.getElementById('text1X');
+    const text1Y = document.getElementById('text1Y');
+    const text2X = document.getElementById('text2X');
+    const text2Y = document.getElementById('text2Y');
+    const text3X = document.getElementById('text3X');
+    const text3Y = document.getElementById('text3Y');
     const fontSelect = document.getElementById('fontSelect');
     const fontSizeEl = document.getElementById('fontSize');
     const fontColorEl = document.getElementById('fontColor');
     const textOrientHorizontal = document.getElementById('textOrientHorizontal');
     const textOrientVertical = document.getElementById('textOrientVertical');
+    const mainPicX = document.getElementById('mainPicX');
+    const mainPicY = document.getElementById('mainPicY');
+    const subPicX = document.getElementById('subPicX');
+    const subPicY = document.getElementById('subPicY');
+    const bgPicX = document.getElementById('bgPicX');
+    const bgPicY = document.getElementById('bgPicY');
+    const wmPicX = document.getElementById('wmPicX');
+    const wmPicY = document.getElementById('wmPicY');
+    const sysPicX = document.getElementById('sysPicX');
+    const sysPicY = document.getElementById('sysPicY');
 
     const exportBtn = document.getElementById('exportBtn');
     const formatSel = document.getElementById('format');
@@ -295,6 +311,12 @@
             if(text3El && state.texts && state.texts[2]){
                 text3El.value = state.texts[2].text || '';
             }
+            if(text1X && state.texts && state.texts[0]) text1X.value = Math.round(state.texts[0].x || 0);
+            if(text1Y && state.texts && state.texts[0]) text1Y.value = Math.round(state.texts[0].y || 0);
+            if(text2X && state.texts && state.texts[1]) text2X.value = Math.round(state.texts[1].x || 0);
+            if(text2Y && state.texts && state.texts[1]) text2Y.value = Math.round(state.texts[1].y || 0);
+            if(text3X && state.texts && state.texts[2]) text3X.value = Math.round(state.texts[2].x || 0);
+            if(text3Y && state.texts && state.texts[2]) text3Y.value = Math.round(state.texts[2].y || 0);
         } catch(e){
             console.warn('updateSlidersFromState error', e);
         }
@@ -1121,12 +1143,13 @@
         fileMainPic,fileSubPic,fileBgPic,fileWmPic,sysPicInput,
         slotMainPic,slotSubPic,slotBgPic,slotWmPic,slotSysPic,
         resetMainPicPos,resetSubPicPos,resetBgPicPos,resetWmPicPos,resetSysPicPos,
+        mainPicX,mainPicY,subPicX,subPicY,bgPicX,bgPicY,wmPicX,wmPicY,sysPicX,sysPicY,
         subPicCropY,subPicZoom,subPicZoomVal,subPicBorder,subPicBorderColor,centerTopBtn,
         subPicCropX,
         subPicShapeCircle, subPicShapeDiamond,
         bandColor, bandHeight, bandOrientHorizontal, bandOrientVertical,
         bgSubPic, bgSubPicAlpha, bgSubPicAlphaVal,
-        text1El,text2El,text3El,fontSelect,fontSizeEl,fontColorEl,
+        text1El,text2El,text3El,text1X,text1Y,text2X,text2Y,text3X,text3Y,fontSelect,fontSizeEl,fontColorEl,
         textOrientHorizontal,textOrientVertical,
         exportBtn,formatSel,
         wmPicOpacity

@@ -67,7 +67,13 @@
             <button id="removeMainPic" class="removeBtn">削除</button>
           </div>
         </div>
-        <div class="slotControls"><button id="resetMainPicPos" class="btn">デフォルト位置に戻す</button></div>
+        <div class="row positionRow">
+          <label>X：</label>
+          <input id="mainPicX" class="posInput" type="number" step="1">
+          <label>Y：</label>
+          <input id="mainPicY" class="posInput" type="number" step="1">
+        </div>
+        <div class="slotControls"><button id="resetMainPicPos" class="btn">デフォルト配置に戻す</button></div>
 
 
         <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
@@ -146,7 +152,13 @@
           </div>
         </div>
 
-        <div class="slotControls"><button id="resetSubPicPos" class="btn">デフォルト位置に戻す</button></div>
+        <div class="row positionRow">
+          <label>X：</label>
+          <input id="subPicX" class="posInput" type="number" step="1">
+          <label>Y：</label>
+          <input id="subPicY" class="posInput" type="number" step="1">
+        </div>
+        <div class="slotControls"><button id="resetSubPicPos" class="btn">デフォルト配置に戻す</button></div>
 
         <div style="height:10px;"></div>
 
@@ -170,8 +182,14 @@
         <div id="wmPicOpacityVal" class="val">50%</div>
         </div>
 
+        <div class="row positionRow">
+          <label>X：</label>
+          <input id="wmPicX" class="posInput" type="number" step="1">
+          <label>Y：</label>
+          <input id="wmPicY" class="posInput" type="number" step="1">
+        </div>
         <div class="slotControls" style="margin-top:8px;">
-          <button id="resetWmPicPos" class="btn">デフォルト位置に戻す</button>
+          <button id="resetWmPicPos" class="btn">デフォルト配置に戻す</button>
         </div>
 
 
@@ -188,8 +206,14 @@
             <button id="removeSysPic" class="removeBtn">削除</button>
           </div>
         </div>
+        <div class="row positionRow">
+          <label>X：</label>
+          <input id="sysPicX" class="posInput" type="number" step="1">
+          <label>Y：</label>
+          <input id="sysPicY" class="posInput" type="number" step="1">
+        </div>
         <div class="slotControls">
-          <button id="resetSysPicPos" class="btn">デフォルト位置に戻す</button>
+          <button id="resetSysPicPos" class="btn">デフォルト配置に戻す</button>
         </div>
 
         <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
@@ -205,7 +229,13 @@
             <button id="removeBgPic" class="removeBtn">削除</button>
           </div>
         </div>
-        <div class="slotControls"><button id="resetBgPicPos" class="btn">背景をフィット</button></div>
+        <div class="row positionRow">
+          <label>X：</label>
+          <input id="bgPicX" class="posInput" type="number" step="1">
+          <label>Y：</label>
+          <input id="bgPicY" class="posInput" type="number" step="1">
+        </div>
+        <div class="slotControls"><button id="resetBgPicPos" class="btn">デフォルト配置に戻す</button></div>
 
       </div>
 
@@ -243,12 +273,33 @@
         </label>
         <br>
 
-        <label>text1</label><textarea id="text1">シナリオ</textarea>
-        <label>text2</label><textarea id="text2">ハンドアウト</textarea>
-        <label>text3</label><textarea id="text3">お名前</textarea>
+        <div class="row positionRow">
+          <label>text1</label>
+          <label>X：</label>
+          <input id="text1X" class="posInput" type="number" step="1">
+          <label>Y：</label>
+          <input id="text1Y" class="posInput" type="number" step="1">
+        </div>
+        <textarea id="text1">シナリオ</textarea>
+        <div class="row positionRow">
+          <label>text2</label>
+          <label>X：</label>
+          <input id="text2X" class="posInput" type="number" step="1">
+          <label>Y：</label>
+          <input id="text2Y" class="posInput" type="number" step="1">
+        </div>
+        <textarea id="text2">ハンドアウト</textarea>
+        <div class="row positionRow">
+          <label>text3</label>
+          <label>X：</label>
+          <input id="text3X" class="posInput" type="number" step="1">
+          <label>Y：</label>
+          <input id="text3Y" class="posInput" type="number" step="1">
+        </div>
+        <textarea id="text3">お名前</textarea>
 
         <div class="slotControls" style="margin-top:8px;">
-          <button id="resetTextPosBtn" class="btn">デフォルト位置に戻す</button>
+          <button id="resetTextPosBtn" class="btn">デフォルト配置に戻す</button>
         </div>
 
       </div>

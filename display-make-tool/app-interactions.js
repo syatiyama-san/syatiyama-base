@@ -29,6 +29,12 @@
         text1El: document.getElementById('text1'),
         text2El: document.getElementById('text2'),
         text3El: document.getElementById('text3'),
+        text1X: document.getElementById('text1X'),
+        text1Y: document.getElementById('text1Y'),
+        text2X: document.getElementById('text2X'),
+        text2Y: document.getElementById('text2Y'),
+        text3X: document.getElementById('text3X'),
+        text3Y: document.getElementById('text3Y'),
         textOrientHorizontal: document.getElementById('textOrientHorizontal'),
         textOrientVertical: document.getElementById('textOrientVertical'),
         exportBtn: document.getElementById('exportBtn'),
@@ -41,12 +47,20 @@
         sysPicInput: document.getElementById('fileSysPic') || document.getElementById('sysPicInput'),
         removeSysPicBtn: document.getElementById('removeSysPic') || document.getElementById('removeSysPicBtn'),
         resetSysPicPos: document.getElementById('resetSysPicPos') || document.getElementById('resetSysPicPosBtn'),
+        mainPicX: document.getElementById('mainPicX'),
+        mainPicY: document.getElementById('mainPicY'),
+        subPicX: document.getElementById('subPicX'),
+        subPicY: document.getElementById('subPicY'),
+        bgPicX: document.getElementById('bgPicX'),
+        bgPicY: document.getElementById('bgPicY'),
+        wmPicX: document.getElementById('wmPicX'),
+        wmPicY: document.getElementById('wmPicY'),
+        sysPicX: document.getElementById('sysPicX'),
+        sysPicY: document.getElementById('sysPicY'),
         slotSysPic: document.getElementById('slotSysPic'),
         infoSysPic: document.getElementById('infoSysPic'),
         thumbSysPic: document.getElementById('thumbSysPic'),
-        metaSysPic: document.getElementById('metaSysPic'),
-        textOrientHorizontal: document.getElementById('textOrientHorizontal'),
-        textOrientVertical: document.getElementById('textOrientVertical')
+        metaSysPic: document.getElementById('metaSysPic')
     };
 
     state.images = state.images || {};
@@ -78,6 +92,12 @@
         state.ui.textOrientation = 'horizontal';
         if(refs.textOrientHorizontal) refs.textOrientHorizontal.checked = true;
         if(refs.textOrientVertical) refs.textOrientVertical.checked = false;
+        if(refs.text1X) refs.text1X.value = Math.round(state.texts[0].x || 0);
+        if(refs.text1Y) refs.text1Y.value = Math.round(state.texts[0].y || 0);
+        if(refs.text2X) refs.text2X.value = Math.round(state.texts[1].x || 0);
+        if(refs.text2Y) refs.text2Y.value = Math.round(state.texts[1].y || 0);
+        if(refs.text3X) refs.text3X.value = Math.round(state.texts[2].x || 0);
+        if(refs.text3Y) refs.text3Y.value = Math.round(state.texts[2].y || 0);
         if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
     }
 
@@ -185,9 +205,13 @@
             if(state.dragging.type === 'text'){
                 const t = state.texts[state.dragging.index];
                 t.x = p.x - state.dragOffset.x; t.y = p.y - state.dragOffset.y;
+                if(state.dragging.index === 0){ if(refs.text1X) refs.text1X.value = Math.round(t.x); if(refs.text1Y) refs.text1Y.value = Math.round(t.y); }
+                if(state.dragging.index === 1){ if(refs.text2X) refs.text2X.value = Math.round(t.x); if(refs.text2Y) refs.text2Y.value = Math.round(t.y); }
+                if(state.dragging.index === 2){ if(refs.text3X) refs.text3X.value = Math.round(t.x); if(refs.text3Y) refs.text3Y.value = Math.round(t.y); }
             } else {
                 const obj = state.images[state.dragging.key];
                 obj.x = p.x - state.dragOffset.x; obj.y = p.y - state.dragOffset.y;
+                    setPosInputs(state.dragging.key);
             }
             if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
         } catch(err){
@@ -398,6 +422,7 @@
             sysPic.y = Math.round(state.height - 200 - margin);
             sysPic.scale = 1;
             state.images.sysPic = sysPic;
+            setPosInputs('sysPic');
             if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
             return;
         }
@@ -410,6 +435,7 @@
         const h = Math.round(img.height * scale);
         sysPic.x = margin;
         sysPic.y = Math.round(state.height - h - margin);
+        setPosInputs('sysPic');
         if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
     }
     window.resetSysPicToDefault = resetSysPicToDefault;
@@ -565,6 +591,45 @@
         el._historyStartBound = true;
     }
 
+    function setPosInputs(key){
+        const map = {
+            mainPic: { x: refs.mainPicX, y: refs.mainPicY },
+            subPic: { x: refs.subPicX, y: refs.subPicY },
+            bgPic: { x: refs.bgPicX, y: refs.bgPicY },
+            wmPic: { x: refs.wmPicX, y: refs.wmPicY },
+            sysPic: { x: refs.sysPicX, y: refs.sysPicY }
+        };
+        const target = map[key];
+        const obj = state.images && state.images[key];
+        if(!target || !obj) return;
+        if(target.x) target.x.value = Math.round(typeof obj.x === 'number' ? obj.x : 0);
+        if(target.y) target.y.value = Math.round(typeof obj.y === 'number' ? obj.y : 0);
+    }
+
+    function bindPosInputs(key, xEl, yEl){
+        const obj = state.images && state.images[key];
+        if(!obj) return;
+        if(xEl && !xEl._bound){
+            bindHistoryStart(xEl);
+            xEl.addEventListener('input', ()=>{
+                obj.x = parseInt(xEl.value,10) || 0;
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            });
+            xEl.addEventListener('change', ()=>{ commitHistorySnapshot(xEl); });
+            xEl._bound = true;
+        }
+        if(yEl && !yEl._bound){
+            bindHistoryStart(yEl);
+            yEl.addEventListener('input', ()=>{
+                obj.y = parseInt(yEl.value,10) || 0;
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            });
+            yEl.addEventListener('change', ()=>{ commitHistorySnapshot(yEl); });
+            yEl._bound = true;
+        }
+        setPosInputs(key);
+    }
+
     if(refs.subPicCropX) {
         bindHistoryStart(refs.subPicCropX);
         refs.subPicCropX.addEventListener('input', ()=>{ state.images.subPic.crop.cx = parseInt(refs.subPicCropX.value,10)/100; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
@@ -585,7 +650,7 @@
         refs.subPicBorder.addEventListener('input', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
         refs.subPicBorder.addEventListener('change', ()=>{ commitHistorySnapshot(refs.subPicBorder); });
     }
-    if(refs.resetSubPicPos) refs.resetSubPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); state.images.subPic.x = window.APP.subPicDefault.x; state.images.subPic.y = window.APP.subPicDefault.y; state.images.subPic.sizePx = window.APP.subPicDefault.sizePx; state.images.subPic.rectangleWidth = 1200; state.images.subPic.rectangleHeight = 1200; state.images.subPic.crop = {cx:0.5,cy:0.33}; state.images.subPic.zoom = 1.0; state.images.subPic.bgOpacity = 1.0; if(refs.subPicCropX) refs.subPicCropX.value = 50; if(refs.subPicCropY) refs.subPicCropY.value = 33; if(refs.subPicZoom) refs.subPicZoom.value = 100; if(refs.subPicZoomVal) refs.subPicZoomVal.textContent='100%'; if(refs.bgSubPic) refs.bgSubPic.value = '#FFFF00'; if(refs.bgSubPicAlpha) refs.bgSubPicAlpha.value = 100; if(refs.bgSubPicAlphaVal) refs.bgSubPicAlphaVal.textContent = '100%'; const subPicHeightPx = document.getElementById('subPicHeightPx'); const subPicHeightPxVal = document.getElementById('subPicHeightPxVal'); const subPicWidthPx = document.getElementById('subPicWidthPx'); const subPicWidthPxVal = document.getElementById('subPicWidthPxVal'); if(subPicHeightPx) subPicHeightPx.value = 1200; if(subPicHeightPxVal) subPicHeightPxVal.textContent = '1200'; if(subPicWidthPx) subPicWidthPx.value = 1200; if(subPicWidthPxVal) subPicWidthPxVal.textContent = '1200'; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+    if(refs.resetSubPicPos) refs.resetSubPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); state.images.subPic.x = window.APP.subPicDefault.x; state.images.subPic.y = window.APP.subPicDefault.y; state.images.subPic.sizePx = window.APP.subPicDefault.sizePx; state.images.subPic.rectangleWidth = 1200; state.images.subPic.rectangleHeight = 1200; state.images.subPic.crop = {cx:0.5,cy:0.33}; state.images.subPic.zoom = 1.0; state.images.subPic.bgOpacity = 1.0; if(refs.subPicCropX) refs.subPicCropX.value = 50; if(refs.subPicCropY) refs.subPicCropY.value = 33; if(refs.subPicZoom) refs.subPicZoom.value = 100; if(refs.subPicZoomVal) refs.subPicZoomVal.textContent='100%'; if(refs.bgSubPic) refs.bgSubPic.value = '#FFFF00'; if(refs.bgSubPicAlpha) refs.bgSubPicAlpha.value = 100; if(refs.bgSubPicAlphaVal) refs.bgSubPicAlphaVal.textContent = '100%'; const subPicHeightPx = document.getElementById('subPicHeightPx'); const subPicHeightPxVal = document.getElementById('subPicHeightPxVal'); const subPicWidthPx = document.getElementById('subPicWidthPx'); const subPicWidthPxVal = document.getElementById('subPicWidthPxVal'); if(subPicHeightPx) subPicHeightPx.value = 1200; if(subPicHeightPxVal) subPicHeightPxVal.textContent = '1200'; if(subPicWidthPx) subPicWidthPx.value = 1200; if(subPicWidthPxVal) subPicWidthPxVal.textContent = '1200'; setPosInputs('subPic'); if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
 
     if(refs.text1El) {
         refs.text1El.addEventListener('input', ()=>{ if(!refs.text1El._historySnapshot) startHistorySnapshot(refs.text1El); state.texts[0].text = refs.text1El.value; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
@@ -599,6 +664,34 @@
         refs.text3El.addEventListener('input', ()=>{ if(!refs.text3El._historySnapshot) startHistorySnapshot(refs.text3El); state.texts[2].text = refs.text3El.value; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
         refs.text3El.addEventListener('blur', ()=>{ commitHistorySnapshot(refs.text3El); });
     }
+
+    function bindTextPosInputs(idx, xEl, yEl){
+        if(!state.texts || !state.texts[idx]) return;
+        if(xEl && !xEl._bound){
+            bindHistoryStart(xEl);
+            xEl.addEventListener('input', ()=>{
+                state.texts[idx].x = parseInt(xEl.value,10) || 0;
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            });
+            xEl.addEventListener('change', ()=>{ commitHistorySnapshot(xEl); });
+            xEl._bound = true;
+        }
+        if(yEl && !yEl._bound){
+            bindHistoryStart(yEl);
+            yEl.addEventListener('input', ()=>{
+                state.texts[idx].y = parseInt(yEl.value,10) || 0;
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            });
+            yEl.addEventListener('change', ()=>{ commitHistorySnapshot(yEl); });
+            yEl._bound = true;
+        }
+        if(xEl) xEl.value = Math.round(state.texts[idx].x || 0);
+        if(yEl) yEl.value = Math.round(state.texts[idx].y || 0);
+    }
+
+    bindTextPosInputs(0, refs.text1X, refs.text1Y);
+    bindTextPosInputs(1, refs.text2X, refs.text2Y);
+    bindTextPosInputs(2, refs.text3X, refs.text3Y);
 
     if(refs.bgSubPicAlpha) {
         bindHistoryStart(refs.bgSubPicAlpha);
@@ -638,8 +731,14 @@
         refs.wmPicOpacity.addEventListener('change', ()=>{ commitHistorySnapshot(refs.wmPicOpacity); });
     }
 
-    if(refs.resetMainPicPos) refs.resetMainPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); state.images.mainPic.x = window.APP.refPos.mainPic.x; state.images.mainPic.y = window.APP.refPos.mainPic.y; if(typeof state.images.mainPic.initialScale==='number') state.images.mainPic.scale = state.images.mainPic.initialScale; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
-    if(refs.resetBgPicPos) refs.resetBgPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); if(state.images.bgPic.img && window.APP && window.APP.ui && typeof window.APP.ui.fitBgPicToCanvas === 'function') window.APP.ui.fitBgPicToCanvas(state.images.bgPic.img); if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+    bindPosInputs('mainPic', refs.mainPicX, refs.mainPicY);
+    bindPosInputs('subPic', refs.subPicX, refs.subPicY);
+    bindPosInputs('bgPic', refs.bgPicX, refs.bgPicY);
+    bindPosInputs('wmPic', refs.wmPicX, refs.wmPicY);
+    bindPosInputs('sysPic', refs.sysPicX, refs.sysPicY);
+
+    if(refs.resetMainPicPos) refs.resetMainPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); state.images.mainPic.x = window.APP.refPos.mainPic.x; state.images.mainPic.y = window.APP.refPos.mainPic.y; if(typeof state.images.mainPic.initialScale==='number') state.images.mainPic.scale = state.images.mainPic.initialScale; setPosInputs('mainPic'); if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+    if(refs.resetBgPicPos) refs.resetBgPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); if(state.images.bgPic.img && window.APP && window.APP.ui && typeof window.APP.ui.fitBgPicToCanvas === 'function') window.APP.ui.fitBgPicToCanvas(state.images.bgPic.img); setPosInputs('bgPic'); if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
 
     if(refs.resetWmPicPos) refs.resetWmPicPos.addEventListener('click', ()=>{
         if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
@@ -659,6 +758,7 @@
             wmPic.y = Math.round((state.height / 2) + verticalOffset);
             wmPic.scale = 1;
         }
+        setPosInputs('wmPic');
         if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
     });
 
