@@ -92,12 +92,31 @@
           <strong>立ち絵アップ設定</strong><br>
           <div style="margin-top:8px;">
           <label style="display:block; margin-bottom:6px;">切り抜き形状</label>
-          <label style="margin-right:12px;">
+          <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
+          <label style="margin-right:0px;">
           <input id="subPicShapeCircle" name="subPicShape" type="radio" value="circle" checked>丸</label>
-          <label style="margin-right:12px;">
+          <label style="margin-right:0px;">
           <input id="subPicShapeDiamond" name="subPicShape" type="radio" value="diamond">ひし形</label>
           <label>
           <input id="subPicShapeHeart" name="subPicShape" type="radio" value="heart">ハート</label>
+          </div>
+
+          <div style="display:flex;gap:12px;margin-bottom:8px;align-items:flex-start;">
+            <label style="padding-top:20px;">
+            <input id="subPicShapeRectangle" name="subPicShape" type="radio" value="rectangle">四角形</label>
+
+            <div style="display:flex;flex-direction:column;gap:8px;min-width:140px;">
+              <label style="margin-top:4px;">四角形：縦</label>
+              <div class="row">
+                <input id="subPicHeightPx" type="range" min="400" max="2500" value="1200" step="10">
+                <div id="subPicHeightPxVal" class="val">1200</div>
+              </div>
+              <label style="margin-top:4px;">四角形：横</label>
+              <div class="row">
+                <input id="subPicWidthPx" type="range" min="400" max="2020" value="1200" step="10">
+                <div id="subPicWidthPxVal" class="val">1200</div>
+              </div>
+            </div>
           </div>
 
           <label style="margin-top:8px;">ズーム</label>

@@ -37,7 +37,13 @@
 
     const subPicShapeCircle = document.getElementById('subPicShapeCircle');
     const subPicShapeDiamond = document.getElementById('subPicShapeDiamond');
+    const subPicShapeRectangle = document.getElementById('subPicShapeRectangle');
     const subPicShapeHeart = document.getElementById('subPicShapeHeart');
+    const subPicSizeControls = document.getElementById('subPicSizeControls');
+    const subPicHeightPx = document.getElementById('subPicHeightPx');
+    const subPicHeightPxVal = document.getElementById('subPicHeightPxVal');
+    const subPicWidthPx = document.getElementById('subPicWidthPx');
+    const subPicWidthPxVal = document.getElementById('subPicWidthPxVal');
 
     const bandColor = document.getElementById('bandColor');
     const bandHeight = document.getElementById('bandHeight');
@@ -322,18 +328,38 @@
         state.images = state.images || {};
         state.images.subPic = state.images.subPic || {};
         state.images.subPic.crop = state.images.subPic.crop || {};
-        state.images.subPic.crop.shape = (shape === 'diamond' || shape === 'heart') ? shape : 'circle';
+        state.images.subPic.crop.shape = (shape === 'diamond' || shape === 'rectangle' || shape === 'heart') ? shape : 'circle';
+        
+        // Enable/disable size sliders based on shape
+        const isRectangle = (shape === 'rectangle');
+        if (subPicHeightPx) {
+            subPicHeightPx.disabled = !isRectangle;
+            subPicHeightPx.style.opacity = isRectangle ? '1' : '0.5';
+        }
+        if (subPicWidthPx) {
+            subPicWidthPx.disabled = !isRectangle;
+            subPicWidthPx.style.opacity = isRectangle ? '1' : '0.5';
+        }
+        
         if (state.images.subPic.crop.shape === 'diamond') {
             if (subPicShapeDiamond) subPicShapeDiamond.checked = true;
             if (subPicShapeCircle) subPicShapeCircle.checked = false;
+            if (subPicShapeRectangle) subPicShapeRectangle.checked = false;
+            if (subPicShapeHeart) subPicShapeHeart.checked = false;
+        } else if (state.images.subPic.crop.shape === 'rectangle') {
+            if (subPicShapeRectangle) subPicShapeRectangle.checked = true;
+            if (subPicShapeCircle) subPicShapeCircle.checked = false;
+            if (subPicShapeDiamond) subPicShapeDiamond.checked = false;
             if (subPicShapeHeart) subPicShapeHeart.checked = false;
         } else if (state.images.subPic.crop.shape === 'heart') {
             if (subPicShapeHeart) subPicShapeHeart.checked = true;
             if (subPicShapeCircle) subPicShapeCircle.checked = false;
             if (subPicShapeDiamond) subPicShapeDiamond.checked = false;
+            if (subPicShapeRectangle) subPicShapeRectangle.checked = false;
         } else {
             if (subPicShapeCircle) subPicShapeCircle.checked = true;
             if (subPicShapeDiamond) subPicShapeDiamond.checked = false;
+            if (subPicShapeRectangle) subPicShapeRectangle.checked = false;
             if (subPicShapeHeart) subPicShapeHeart.checked = false;
         }
         if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
@@ -350,6 +376,12 @@
             if(this.checked) setSubPicShape('diamond');
         });
         subPicShapeDiamond._bound = true;
+    }
+    if(subPicShapeRectangle && !subPicShapeRectangle._bound){
+        subPicShapeRectangle.addEventListener('change', function(){
+            if(this.checked) setSubPicShape('rectangle');
+        });
+        subPicShapeRectangle._bound = true;
     }
     if(subPicShapeHeart && !subPicShapeHeart._bound){
         subPicShapeHeart.addEventListener('change', function(){
@@ -387,6 +419,59 @@
         });
         subPicBorderColor._bound = true;
     }
+
+    if(subPicHeightPx && !subPicHeightPx._bound){
+        subPicHeightPx.addEventListener('input', function(){
+            try {
+                state.images = state.images || {};
+                state.images.subPic = state.images.subPic || {};
+                const h = Math.max(400, Math.min(2500, parseInt(subPicHeightPx.value,10) || 1200));
+                state.images.subPic.rectangleHeight = h;
+                if(subPicHeightPxVal) subPicHeightPxVal.textContent = h;
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            } catch(e){
+                console.warn('subPicHeightPx input error', e);
+            }
+        });
+        subPicHeightPx.addEventListener('change', function(){
+            if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
+        });
+        subPicHeightPx._bound = true;
+    }
+
+    if(subPicWidthPx && !subPicWidthPx._bound){
+        subPicWidthPx.addEventListener('input', function(){
+            try {
+                state.images = state.images || {};
+                state.images.subPic = state.images.subPic || {};
+                const w = Math.max(400, Math.min(2020, parseInt(subPicWidthPx.value,10) || 1200));
+                state.images.subPic.rectangleWidth = w;
+                if(subPicWidthPxVal) subPicWidthPxVal.textContent = w;
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            } catch(e){
+                console.warn('subPicWidthPx input error', e);
+            }
+        });
+        subPicWidthPx.addEventListener('change', function(){
+            if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
+        });
+        subPicWidthPx._bound = true;
+    }
+
+    // Initialize rectangle size sliders disabled state
+    function initializeSubPicSizeControls(){
+        const shape = (state.images && state.images.subPic && state.images.subPic.crop && state.images.subPic.crop.shape) || 'circle';
+        const isRectangle = (shape === 'rectangle');
+        if (subPicHeightPx) {
+            subPicHeightPx.disabled = !isRectangle;
+            subPicHeightPx.style.opacity = isRectangle ? '1' : '0.5';
+        }
+        if (subPicWidthPx) {
+            subPicWidthPx.disabled = !isRectangle;
+            subPicWidthPx.style.opacity = isRectangle ? '1' : '0.5';
+        }
+    }
+    initializeSubPicSizeControls();
 
     if(bandHeight && !bandHeight._bound){
         bandHeight.addEventListener('input', function(){

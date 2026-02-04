@@ -107,8 +107,24 @@
                 const obj = state.images[k];
                 if(!obj || !obj.img) continue;
                 if(k === 'subPic'){
+                    const crop = obj.crop || {};
+                    const shape = (crop && typeof crop.shape === 'string') ? crop.shape : 'circle';
+                    let hitWidth, hitHeight, hitX, hitY;
+                    
                     const sizePx = obj.sizePx || (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) || 300;
-                    if(p.x >= obj.x && p.x <= obj.x + sizePx && p.y >= obj.y && p.y <= obj.y + sizePx){
+                    if(shape === 'rectangle'){
+                        hitWidth = obj.rectangleWidth || 1200;
+                        hitHeight = obj.rectangleHeight || 1200;
+                        hitX = obj.x + (sizePx - hitWidth) / 2;
+                        hitY = obj.y + (sizePx - hitHeight) / 2;
+                    } else {
+                        hitWidth = sizePx;
+                        hitHeight = sizePx;
+                        hitX = obj.x;
+                        hitY = obj.y;
+                    }
+                    
+                    if(p.x >= hitX && p.x <= hitX + hitWidth && p.y >= hitY && p.y <= hitY + hitHeight){
                         if(window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
                             state._dragSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
                         }
@@ -194,16 +210,57 @@
                 const obj = state.images[k];
                 if(!obj || !obj.img) continue;
                 if(k === 'subPic'){
+                    const crop = obj.crop || {};
+                    const shape = (crop && typeof crop.shape === 'string') ? crop.shape : 'circle';
+                    let hitWidth, hitHeight, hitX, hitY;
+                    
                     const sizePx = obj.sizePx || (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) || 300;
-                    if(p.x >= obj.x && p.x <= obj.x + sizePx && p.y >= obj.y && p.y <= obj.y + sizePx){
+                    if(shape === 'rectangle'){
+                        hitWidth = obj.rectangleWidth || 1200;
+                        hitHeight = obj.rectangleHeight || 1200;
+                        hitX = obj.x + (sizePx - hitWidth) / 2;
+                        hitY = obj.y + (sizePx - hitHeight) / 2;
+                    } else {
+                        hitWidth = sizePx;
+                        hitHeight = sizePx;
+                        hitX = obj.x;
+                        hitY = obj.y;
+                    }
+                    
+                    if(p.x >= hitX && p.x <= hitX + hitWidth && p.y >= hitY && p.y <= hitY + hitHeight){
                         const delta = e.deltaY < 0 ? 1.06 : 0.94;
-                        let newSize = Math.round(sizePx * delta);
-                        if(window.APP && window.APP.subPicDefault){
-                            newSize = Math.max(window.APP.subPicDefault.min, Math.min(window.APP.subPicDefault.max, newSize));
+                        
+                        if(shape === 'rectangle'){
+                            // For rectangle, scale width and height proportionally while maintaining aspect ratio
+                            const currentWidth = obj.rectangleWidth || 1200;
+                            const currentHeight = obj.rectangleHeight || 1200;
+                            
+                            let newHeight = Math.round(currentHeight * delta);
+                            let newWidth = Math.round(currentWidth * delta);
+                            
+                            // Check limits and scale both dimensions equally if either hits a limit
+                            const heightRatio = newHeight < 400 ? 400 / newHeight : (newHeight > 2500 ? 2500 / newHeight : 1);
+                            const widthRatio = newWidth < 400 ? 400 / newWidth : (newWidth > 2020 ? 2020 / newWidth : 1);
+                            const limitRatio = Math.min(heightRatio, widthRatio);
+                            
+                            newHeight = Math.round(newHeight * limitRatio);
+                            newWidth = Math.round(newWidth * limitRatio);
+                            
+                            obj.rectangleHeight = newHeight;
+                            obj.rectangleWidth = newWidth;
+                            // Don't update sizePx to keep position stable
                         } else {
-                            newSize = Math.max(10, Math.min(2000, newSize));
+                            // For other shapes, use sizePx
+                            let newSize = Math.round(hitWidth * delta);
+                            if(window.APP && window.APP.subPicDefault){
+                                newSize = Math.max(window.APP.subPicDefault.min, Math.min(window.APP.subPicDefault.max, newSize));
+                            } else {
+                                newSize = Math.max(10, Math.min(2000, newSize));
+                            }
+                            obj.sizePx = newSize;
                         }
-                        obj.sizePx = newSize; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); return;
+                        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                        return;
                     }
                     continue;
                 }
@@ -512,7 +569,7 @@
         refs.subPicBorder.addEventListener('input', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
         refs.subPicBorder.addEventListener('change', ()=>{ commitHistorySnapshot(refs.subPicBorder); });
     }
-    if(refs.resetSubPicPos) refs.resetSubPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); state.images.subPic.x = window.APP.subPicDefault.x; state.images.subPic.y = window.APP.subPicDefault.y; state.images.subPic.sizePx = window.APP.subPicDefault.sizePx; state.images.subPic.crop = {cx:0.5,cy:0.33}; state.images.subPic.zoom = 1.0; state.images.subPic.bgOpacity = 1.0; if(refs.subPicCropX) refs.subPicCropX.value = 50; if(refs.subPicCropY) refs.subPicCropY.value = 33; if(refs.subPicZoom) refs.subPicZoom.value = 100; if(refs.subPicZoomVal) refs.subPicZoomVal.textContent='100%'; if(refs.bgSubPic) refs.bgSubPic.value = '#FFFF00'; if(refs.bgSubPicAlpha) refs.bgSubPicAlpha.value = 100; if(refs.bgSubPicAlphaVal) refs.bgSubPicAlphaVal.textContent = '100%'; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+    if(refs.resetSubPicPos) refs.resetSubPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); state.images.subPic.x = window.APP.subPicDefault.x; state.images.subPic.y = window.APP.subPicDefault.y; state.images.subPic.sizePx = window.APP.subPicDefault.sizePx; state.images.subPic.rectangleWidth = 1200; state.images.subPic.rectangleHeight = 1200; state.images.subPic.crop = {cx:0.5,cy:0.33}; state.images.subPic.zoom = 1.0; state.images.subPic.bgOpacity = 1.0; if(refs.subPicCropX) refs.subPicCropX.value = 50; if(refs.subPicCropY) refs.subPicCropY.value = 33; if(refs.subPicZoom) refs.subPicZoom.value = 100; if(refs.subPicZoomVal) refs.subPicZoomVal.textContent='100%'; if(refs.bgSubPic) refs.bgSubPic.value = '#FFFF00'; if(refs.bgSubPicAlpha) refs.bgSubPicAlpha.value = 100; if(refs.bgSubPicAlphaVal) refs.bgSubPicAlphaVal.textContent = '100%'; const subPicHeightPx = document.getElementById('subPicHeightPx'); const subPicHeightPxVal = document.getElementById('subPicHeightPxVal'); const subPicWidthPx = document.getElementById('subPicWidthPx'); const subPicWidthPxVal = document.getElementById('subPicWidthPxVal'); if(subPicHeightPx) subPicHeightPx.value = 1200; if(subPicHeightPxVal) subPicHeightPxVal.textContent = '1200'; if(subPicWidthPx) subPicWidthPx.value = 1200; if(subPicWidthPxVal) subPicWidthPxVal.textContent = '1200'; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
 
     if(refs.text1El) {
         refs.text1El.addEventListener('input', ()=>{ if(!refs.text1El._historySnapshot) startHistorySnapshot(refs.text1El); state.texts[0].text = refs.text1El.value; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });

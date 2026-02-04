@@ -43,8 +43,24 @@
             if(!obj || !obj.img) continue;
             
             if(k === 'subPic'){
+                const crop = obj.crop || {};
+                const shape = (crop && typeof crop.shape === 'string') ? crop.shape : 'circle';
+                let hitWidth, hitHeight, hitX, hitY;
+                
                 const sizePx = obj.sizePx || (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) || 200;
-                if(p.x >= obj.x && p.x <= obj.x + sizePx && p.y >= obj.y && p.y <= obj.y + sizePx){
+                if(shape === 'rectangle'){
+                    hitWidth = obj.rectangleWidth || 1200;
+                    hitHeight = obj.rectangleHeight || 1200;
+                    hitX = obj.x + (sizePx - hitWidth) / 2;
+                    hitY = obj.y + (sizePx - hitHeight) / 2;
+                } else {
+                    hitWidth = sizePx;
+                    hitHeight = sizePx;
+                    hitX = obj.x;
+                    hitY = obj.y;
+                }
+                
+                if(p.x >= hitX && p.x <= hitX + hitWidth && p.y >= hitY && p.y <= hitY + hitHeight){
                     return { type: 'image', key: k };
                 }
                 continue;

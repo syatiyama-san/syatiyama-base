@@ -29,10 +29,12 @@
                 y: Math.round(canvas.height * 0.08),
                 sizePx: subPicDefault.sizePx,
                 z: 2,
-                crop: { cx: 0.5, cy: 0.33 },
+                crop: { cx: 0.5, cy: 0.33, shape: 'circle' },
                 zoom: 1.0,
                 filename: null,
-                thumb: null
+                thumb: null,
+                rectangleWidth: 1200,
+                rectangleHeight: 1200
             },
             bgPic: {
                 img: null,
