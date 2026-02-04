@@ -217,6 +217,31 @@ main#main{
 }
 .sns-btn.has-image .sns-icon{ opacity:1; }
 .sns-btn.has-image .sns-label{ opacity:0; }
+.sns-btn[data-tooltip]::after{
+  content:attr(data-tooltip);
+  position:absolute;
+  left:50%;
+  bottom:calc(100% + 8px);
+  transform:translateX(-50%);
+  white-space:nowrap;
+  background:rgba(0,0,0,0.85);
+  color:#fff;
+  font-size:12px;
+  padding:6px 8px;
+  border-radius:4px;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .12s ease, transform .12s ease;
+  z-index:5;
+  max-width:calc(100vw - 40px);
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.sns-btn[data-tooltip]:hover::after,
+.sns-btn[data-tooltip]:focus::after{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
 .sns-spacer{ width:72px; height:72px; }
 
 /* 右カラム：Tools ヘッダー */
