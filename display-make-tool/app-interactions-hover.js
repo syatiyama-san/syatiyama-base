@@ -25,13 +25,26 @@
         const font = (uiRefs && uiRefs.fontSelect) ? uiRefs.fontSelect.value || 'Arial' : 'Arial';
         const fontSpec = `${size}px "${font}"`;
         const lineHeight = Math.round(size * 1.15);
+        const textOrient = (state.ui && state.ui.textOrientation) ? state.ui.textOrientation : 'horizontal';
         const maxWidth = Math.max(200, state.width - 220 - 220);
         
         for(let i = state.texts.length - 1; i >= 0; i--){
             const t = state.texts[i];
-            const block = utils.measureTextBlock ? utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight) : { lines: [t.text] };
-            const w = block.width || maxWidth;
-            const h = block.height || lineHeight;
+            let w = 0; let h = 0;
+            if(textOrient === 'vertical'){
+                const cols = String(t.text || '').split('\n');
+                let maxRows = 0;
+                for(const col of cols){
+                    const len = Array.from(col).length;
+                    if(len > maxRows) maxRows = len;
+                }
+                w = Math.max(1, cols.length) * lineHeight;
+                h = Math.max(1, maxRows) * lineHeight;
+            } else {
+                const block = utils.measureTextBlock ? utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight) : { lines: [t.text] };
+                w = block.width || maxWidth;
+                h = block.height || lineHeight;
+            }
             if(p.x >= t.x && p.x <= t.x + w && p.y >= t.y && p.y <= t.y + h){
                 return { type: 'text', index: i };
             }

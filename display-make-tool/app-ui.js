@@ -64,6 +64,8 @@
     const fontSelect = document.getElementById('fontSelect');
     const fontSizeEl = document.getElementById('fontSize');
     const fontColorEl = document.getElementById('fontColor');
+    const textOrientHorizontal = document.getElementById('textOrientHorizontal');
+    const textOrientVertical = document.getElementById('textOrientVertical');
 
     const exportBtn = document.getElementById('exportBtn');
     const formatSel = document.getElementById('format');
@@ -111,7 +113,7 @@
     function clearWmPicState(inputEl){
         state.images = state.images || {};
         state.images.wmPic = { _preventDefault: true };
-        try { if(inputEl && typeof inputEl.value !== 'undefined') inputEl.value = ''; } catch(e){ /* ignore */ }
+        try { if(inputEl && typeof inputEl.value !== 'undefined') inputEl.value = ''; } catch(e){ }
     }
 
     function allowWmPicDefault(){
@@ -155,13 +157,13 @@
                     state.images.sysPic.x = margin;
                     state.images.sysPic.y = Math.round(state.height - h - margin);
                     state.images.sysPic.z = 0;
-                    try { updateSlotUI('sysPic'); } catch(e){ /* ignore */ }
+                    try { updateSlotUI('sysPic'); } catch(e){ }
                     if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
                     try {
                         if (window.APP && window.APP.state && window.APP.state.dragging) {
                             window.APP.state.dragging = null;
                         }
-                    } catch(e){ /* ignore */ }
+                    } catch(e){ }
                 };
                 img.onerror = function(){
                     tryNext();
@@ -239,7 +241,7 @@
     }
 
     function updateSlidersFromState(){
-        try { updateSubPicCropSliders(); } catch(e){ /* ignore */ }
+        try { updateSubPicCropSliders(); } catch(e){ }
         try {
             const subPic = (state.images && state.images.subPic) ? state.images.subPic : {};
             if(subPicZoom){
@@ -276,10 +278,14 @@
             if(fontColorEl && state.ui && typeof state.ui.fontColor === 'string'){
                 fontColorEl.value = state.ui.fontColor;
             }
+            if(textOrientHorizontal && textOrientVertical && state.ui && typeof state.ui.textOrientation === 'string'){
+                const orient = (state.ui.textOrientation === 'vertical') ? 'vertical' : 'horizontal';
+                textOrientHorizontal.checked = (orient === 'horizontal');
+                textOrientVertical.checked = (orient === 'vertical');
+            }
             if(fontSelect && state.ui && typeof state.ui.fontFamily === 'string'){
                 fontSelect.value = state.ui.fontFamily;
             }
-            // テキスト要素の値を復元
             if(text1El && state.texts && state.texts[0]){
                 text1El.value = state.texts[0].text || '';
             }
@@ -333,7 +339,6 @@
         state.images.subPic.crop = state.images.subPic.crop || {};
         state.images.subPic.crop.shape = (shape === 'diamond' || shape === 'rectangle' || shape === 'heart') ? shape : 'circle';
         
-        // Enable/disable size sliders based on shape
         const isRectangle = (shape === 'rectangle');
         if (subPicHeightPx) {
             subPicHeightPx.disabled = !isRectangle;
@@ -461,7 +466,6 @@
         subPicWidthPx._bound = true;
     }
 
-    // Initialize rectangle size sliders disabled state
     function initializeSubPicSizeControls(){
         const shape = (state.images && state.images.subPic && state.images.subPic.crop && state.images.subPic.crop.shape) || 'circle';
         const isRectangle = (shape === 'rectangle');
@@ -541,6 +545,27 @@
             if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
         });
         fontColorEl._bound = true;
+    }
+
+    function setTextOrientation(orient){
+        state.ui = state.ui || {};
+        state.ui.textOrientation = (orient === 'vertical') ? 'vertical' : 'horizontal';
+        if(textOrientHorizontal) textOrientHorizontal.checked = (state.ui.textOrientation === 'horizontal');
+        if(textOrientVertical) textOrientVertical.checked = (state.ui.textOrientation === 'vertical');
+        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+    }
+
+    if(textOrientHorizontal && !textOrientHorizontal._bound){
+        textOrientHorizontal.addEventListener('change', function(){
+            if(this.checked) setTextOrientation('horizontal');
+        });
+        textOrientHorizontal._bound = true;
+    }
+    if(textOrientVertical && !textOrientVertical._bound){
+        textOrientVertical.addEventListener('change', function(){
+            if(this.checked) setTextOrientation('vertical');
+        });
+        textOrientVertical._bound = true;
     }
 
     function setBandOrientation(orient){
@@ -643,7 +668,7 @@
                         if(typeof state.images.subPic.crop.shape !== 'string') state.images.subPic.crop.shape = 'circle';
                         if(typeof state.images.subPic.borderWidth !== 'number') state.images.subPic.borderWidth = (subPicBorder ? parseInt(subPicBorder.value,10) || 0 : 0);
                         if(typeof state.images.subPic.borderColor !== 'string') state.images.subPic.borderColor = (subPicBorderColor ? subPicBorderColor.value || '#000000' : '#000000');
-                        try { updateSubPicCropSliders(); } catch(e){ /* ignore */ }
+                        try { updateSubPicCropSliders(); } catch(e){ }
                     } else if(key === 'wmPic') {
                          const canvasW = Math.max(1, state.width || 2000);
                         const canvasH = Math.max(1, state.height || 2000);
@@ -670,7 +695,7 @@
                     updateSlotUI(key);
                     syncHistoryForImageKeys([key]);
                     if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
-                    try { if(inputEl && typeof inputEl.value !== 'undefined') inputEl.value = ''; } catch(e){ /* ignore */ }
+                    try { if(inputEl && typeof inputEl.value !== 'undefined') inputEl.value = ''; } catch(e){ }
                 });
             });
             inputEl._changeBound = true;
@@ -713,7 +738,7 @@
                         if(typeof state.images.subPic.crop.shape !== 'string') state.images.subPic.crop.shape = 'circle';
                         if(typeof state.images.subPic.borderWidth !== 'number') state.images.subPic.borderWidth = (subPicBorder ? parseInt(subPicBorder.value,10) || 0 : 0);
                         if(typeof state.images.subPic.borderColor !== 'string') state.images.subPic.borderColor = (subPicBorderColor ? subPicBorderColor.value || '#000000' : '#000000');
-                        try { updateSubPicCropSliders(); } catch(e){ /* ignore */ }
+                        try { updateSubPicCropSliders(); } catch(e){ }
                     } else if(key === 'wmPic') {
                         const canvasW = Math.max(1, state.width || 2000);
                         const canvasH = Math.max(1, state.height || 2000);
@@ -740,7 +765,7 @@
                     updateSlotUI(key);
                     syncHistoryForImageKeys([key]);
                     if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
-                    try { if(inputEl && typeof inputEl.value !== 'undefined') inputEl.value = ''; } catch(e){ /* ignore */ }
+                    try { if(inputEl && typeof inputEl.value !== 'undefined') inputEl.value = ''; } catch(e){ }
                 });
             });
             slotEl._dragBound = true;
@@ -753,7 +778,7 @@
                     state.images = state.images || {};
                     state.images.wmPic = state.images.wmPic || {};
                     state.images.wmPic._preventDefault = true;
-                    try { window.APP.removeWmPic(); } catch(e){ /* ignore */ }
+                    try { window.APP.removeWmPic(); } catch(e){ }
                     clearWmPicState(inputEl);
                     updateSlotUI(key);
                     syncHistoryForImageKeys([key]);
@@ -772,7 +797,7 @@
                 state.images[key] = {};
                 try { inputEl.value = ''; } catch(e){}
                 if(key === 'subPic'){
-                    try { updateSlidersFromState(); } catch(e){ /* ignore */ }
+                    try { updateSlidersFromState(); } catch(e){ }
                 }
                 updateSlotUI(key);
                 syncHistoryForImageKeys([key]);
@@ -784,7 +809,7 @@
 
     function slotPicClickBind(slotEl, inputEl){
         slotEl.addEventListener('click', ()=> {
-            try { inputEl.click(); } catch(e){ /* ignore */ }
+            try { inputEl.click(); } catch(e){ }
         });
         slotEl._clickBound = true;
     }
@@ -993,7 +1018,7 @@
                     state.images.wmPic.y = def.y;
                 }
                 if(window.APP && window.APP.ui && typeof window.APP.ui.updateSlotUI === 'function'){
-                    try { window.APP.ui.updateSlotUI('wmPic'); } catch(e){ /* ignore */ }
+                    try { window.APP.ui.updateSlotUI('wmPic'); } catch(e){ }
                 }
                 if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
             } catch(err){
@@ -1079,7 +1104,7 @@
                 state.images.subPic.borderColor = '#000000';
                 if (subPicBorder) subPicBorder.value = 2;
                 if (subPicBorderColor) subPicBorderColor.value = '#000000';
-                try { updateSubPicCropSliders(); } catch(e){ /* ignore */ }
+                try { updateSubPicCropSliders(); } catch(e){ }
                 if (window.APP && typeof window.APP.draw === 'function') window.APP.draw();
             } catch (err) {
                 console.warn('resetSubPicPos handler error', err);
@@ -1102,6 +1127,7 @@
         bandColor, bandHeight, bandOrientHorizontal, bandOrientVertical,
         bgSubPic, bgSubPicAlpha, bgSubPicAlphaVal,
         text1El,text2El,text3El,fontSelect,fontSizeEl,fontColorEl,
+        textOrientHorizontal,textOrientVertical,
         exportBtn,formatSel,
         wmPicOpacity
     };
@@ -1119,11 +1145,12 @@
 
     state.ui = state.ui || {};
     if(typeof state.ui.bandOrientation !== 'string') state.ui.bandOrientation = 'horizontal';
-    try { setBandOrientation(state.ui.bandOrientation); } catch(e){ /* ignore */ }
+    if(typeof state.ui.textOrientation !== 'string') state.ui.textOrientation = 'horizontal';
+    try { setBandOrientation(state.ui.bandOrientation); } catch(e){ }
 
-    try { ensureDefaultSysPic(); } catch(e){ /* ignore */ }
+    try { ensureDefaultSysPic(); } catch(e){ }
 
-    try { updateSubPicCropSliders(); } catch(e){ /* ignore */ }
+    try { updateSubPicCropSliders(); } catch(e){ }
 
     function setAspectRatio(ratio) {
         const ratios = {
@@ -1328,7 +1355,6 @@
         aspectPortrait._bound = true;
     }
 
-    // アンドゥ・リドゥボタンのイベント設定
     const undoBtn = document.getElementById('undoBtn');
     const redoBtn = document.getElementById('redoBtn');
     if (undoBtn) {
@@ -1336,7 +1362,6 @@
             if (window.APP && window.APP.history && window.APP.history.canUndo()) {
                 const previousState = window.APP.history.undo();
                 if (previousState) {
-                    // img オブジェクトを保持しながら状態を復元
                     const savedImages = {};
                     ['mainPic', 'subPic', 'bgPic', 'wmPic', 'sysPic', 'overlayAsset'].forEach(key => {
                         if (window.APP.state.images[key] && window.APP.state.images[key].img) {
@@ -1344,7 +1369,6 @@
                         }
                     });
                     Object.assign(window.APP.state, previousState);
-                    // bandOrientationは履歴外であるため削除
                     if (window.APP.state.ui) {
                         delete window.APP.state.ui.bandOrientation;
                     }
@@ -1353,7 +1377,7 @@
                             window.APP.state.images[key].img = savedImages[key];
                         }
                     });
-                    try { updateSlidersFromState(); } catch(e){ /* ignore */ }
+                    try { updateSlidersFromState(); } catch(e){ }
                     if (typeof window.APP.draw === 'function') window.APP.draw();
                 }
             }
@@ -1364,7 +1388,6 @@
             if (window.APP && window.APP.history && window.APP.history.canRedo()) {
                 const nextState = window.APP.history.redo();
                 if (nextState) {
-                    // img オブジェクトを保持しながら状態を復元
                     const savedImages = {};
                     ['mainPic', 'subPic', 'bgPic', 'wmPic', 'sysPic', 'overlayAsset'].forEach(key => {
                         if (window.APP.state.images[key] && window.APP.state.images[key].img) {
@@ -1372,7 +1395,6 @@
                         }
                     });
                     Object.assign(window.APP.state, nextState);
-                    // bandOrientationは履歴外であるため削除
                     if (window.APP.state.ui) {
                         delete window.APP.state.ui.bandOrientation;
                     }
@@ -1381,7 +1403,7 @@
                             window.APP.state.images[key].img = savedImages[key];
                         }
                     });
-                    try { updateSlidersFromState(); } catch(e){ /* ignore */ }
+                    try { updateSlidersFromState(); } catch(e){ }
                     if (typeof window.APP.draw === 'function') window.APP.draw();
                 }
             }
@@ -1391,7 +1413,6 @@
     window.APP.ui.setAspectRatio = setAspectRatio;
     window.APP.ui.scaleImagesToNewRatio = scaleImagesToNewRatio;
 
-    // 初期化完了時に履歴スタックをクリア（初期化中の draw 呼び出しによる履歴を除外）
     if (window.APP && window.APP.history) {
         window.APP.history.undoStack = [];
         window.APP.history.redoStack = [];
@@ -1399,7 +1420,7 @@
     }
 
     window.addEventListener('resize', function(){
-        try { updateSubPicCropSliders(); } catch(e){ /* ignore */ }
+        try { updateSubPicCropSliders(); } catch(e){ }
     });
 
 })();

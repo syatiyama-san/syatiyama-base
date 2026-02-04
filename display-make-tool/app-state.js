@@ -93,15 +93,12 @@
         'Yomogi','Pacifico','Ballet'
     ];
 
-    // 履歴管理システム
     const history = {
         undoStack: [],
         redoStack: [],
         maxSteps: 50,
-        // state から画像オブジェクトを除外してディープコピーを作成
         cloneStateForHistory: function(currentState) {
             const cloned = JSON.parse(JSON.stringify(currentState));
-            // 画像オブジェクト（img）は履歴に保存しない
             if (cloned && cloned.images) {
                 Object.keys(cloned.images).forEach(key => {
                     if (cloned.images[key] && Object.prototype.hasOwnProperty.call(cloned.images[key], 'img')) {
@@ -109,21 +106,17 @@
                     }
                 });
             }
-            // ホバー/ドラッグ状態は履歴に保存しない
             if (cloned) {
                 delete cloned.hovering;
                 delete cloned.dragging;
                 delete cloned.dragOffset;
             }
-            // ラジオボタン要素（画像比率、切り抜き形、帯の縦横）は履歴に保存しない
             if (cloned && cloned.images && cloned.images.subPic && cloned.images.subPic.crop) {
                 delete cloned.images.subPic.crop.shape;
             }
             if (cloned) {
                 delete cloned.aspectRatio;
             }
-            // 帯の縦横（bandOrientation）の状態保存
-            // state.ui全体をクローンに含める前にbandOrientationを除外
             if (cloned && cloned.ui && cloned.ui.bandOrientation !== undefined) {
                 delete cloned.ui.bandOrientation;
             }
@@ -183,7 +176,6 @@
         }
     };
 
-    // 初期化時にUIを更新（最初は履歴がないので両方無効）
     history.updateHistoryUI();
 
     window.APP = window.APP || {};

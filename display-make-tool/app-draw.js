@@ -48,7 +48,7 @@
         if(!ctx){
             return;
         }
-        try { await (utils && typeof utils.loadGoogleFontIfNeeded === 'function' ? utils.loadGoogleFontIfNeeded() : Promise.resolve()); } catch(e){ /* ignore */ }
+        try { await (utils && typeof utils.loadGoogleFontIfNeeded === 'function' ? utils.loadGoogleFontIfNeeded() : Promise.resolve()); } catch(e){ }
         try {
             ctx.clearRect(0,0,state.width,state.height);
             ctx.fillStyle = '#ffffff';
@@ -314,6 +314,7 @@
             const font = (uiRefs && uiRefs.fontSelect) ? uiRefs.fontSelect.value || 'Arial' : 'Arial';
             const fontSpec = `${size}px "${font}"`;
             const lineHeight = Math.round(size * 1.15);
+            const textOrient = (state.ui && state.ui.textOrientation) ? state.ui.textOrientation : 'horizontal';
             ctx.textBaseline = 'top';
             ctx.fillStyle = color;
             ctx.font = fontSpec;
@@ -323,10 +324,21 @@
             const maxWidth = Math.max(200, state.width - margin - 220);
             for(let i = 0; i < (state.texts || []).length; i++){
                 const t = state.texts[i];
-                const block = utils.measureTextBlock ? utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight) : { lines: [t.text] };
-                const lines = block.lines || [];
-                for(let li = 0; li < lines.length; li++){
-                    ctx.fillText(lines[li], t.x, t.y + li * lineHeight);
+                if(textOrient === 'vertical'){
+                    const cols = String(t.text || '').split('\n');
+                    for(let ci = 0; ci < cols.length; ci++){
+                        let row = 0;
+                        for(const ch of cols[ci]){
+                            ctx.fillText(ch, t.x + ci * lineHeight, t.y + row * lineHeight);
+                            row++;
+                        }
+                    }
+                } else {
+                    const block = utils.measureTextBlock ? utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight) : { lines: [t.text] };
+                    const lines = block.lines || [];
+                    for(let li = 0; li < lines.length; li++){
+                        ctx.fillText(lines[li], t.x, t.y + li * lineHeight);
+                    }
                 }
             }
             ctx.shadowBlur = 0;
@@ -354,10 +366,23 @@
                 const font = (uiRefs && uiRefs.fontSelect) ? uiRefs.fontSelect.value || 'Arial' : 'Arial';
                 const fontSpec = `${size}px "${font}"`;
                 const lineHeight = Math.round(size * 1.15);
-                const maxWidth = Math.max(200, state.width - 220 - 220);
-                const block = utils.measureTextBlock ? utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight) : { lines: [t.text] };
-                const w = block.width || maxWidth;
-                const h = block.height || lineHeight;
+                const textOrient = (state.ui && state.ui.textOrientation) ? state.ui.textOrientation : 'horizontal';
+                let w = 0; let h = 0;
+                if(textOrient === 'vertical'){
+                    const cols = String(t.text || '').split('\n');
+                    let maxRows = 0;
+                    for(const col of cols){
+                        const len = Array.from(col).length;
+                        if(len > maxRows) maxRows = len;
+                    }
+                    w = Math.max(1, cols.length) * lineHeight;
+                    h = Math.max(1, maxRows) * lineHeight;
+                } else {
+                    const maxWidth = Math.max(200, state.width - 220 - 220);
+                    const block = utils.measureTextBlock ? utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight) : { lines: [t.text] };
+                    w = block.width || maxWidth;
+                    h = block.height || lineHeight;
+                }
                 
                 ctx.save();
                 ctx.fillStyle = 'rgba(70, 130, 180, 0.5)';

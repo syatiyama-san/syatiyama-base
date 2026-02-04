@@ -3,14 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>DisplayMakeTool</title>
+  <title>ディスプレイ製作ツール</title>
 
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho&family=Noto+Sans+JP&family=Noto+Serif+JP&family=Kiwi+Maru&family=Hina+Mincho&family=Kaisei+Decol&family=Mochiy+Pop+One&family=Yomogi&family=Pacifico&family=Ballet&display=swap" rel="stylesheet">
-
-  <!-- 外部CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -21,7 +18,7 @@
       <a href="../" class="home-btn" title="しゃちやまベース-Top">
         <span class="home-icon">🏠</span>
       </a>
-      <h3>DisplayMakeTool</h3>
+      <h3>ディスプレイ製作ツール</h3>
       <div class="header-undo-redo">
         <button id="undoBtn" class="undo-redo-btn undo-btn" title="元に戻す" aria-label="元に戻す">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
@@ -151,24 +148,6 @@
 
         <div class="slotControls"><button id="resetSubPicPos" class="btn">デフォルト位置に戻す</button></div>
 
-        
-        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
-        <div style="height:10px;"></div>
-
-
-        <strong style="display:block;margin-bottom:8px;">背景</strong>
-        <div id="slotBgPic" class="fileSlot">
-          <div class="title">背景</div>
-          <input id="fileBgPic" type="file" accept="image/*" style="display:none;">
-          <div id="infoBgPic" class="slotInfo" style="display:none;">
-            <img id="thumbBgPic" class="thumb">
-            <div id="metaBgPic" class="fileMeta"></div>
-            <button id="removeBgPic" class="removeBtn">削除</button>
-          </div>
-        </div>
-        <div class="slotControls"><button id="resetBgPicPos" class="btn">背景をフィット</button></div>
-
-
         <div style="height:10px;"></div>
 
 
@@ -213,6 +192,21 @@
           <button id="resetSysPicPos" class="btn">デフォルト位置に戻す</button>
         </div>
 
+        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
+        <div style="height:10px;"></div>
+
+        <strong style="display:block;margin-bottom:8px;">背景</strong>
+        <div id="slotBgPic" class="fileSlot">
+          <div class="title">背景</div>
+          <input id="fileBgPic" type="file" accept="image/*" style="display:none;">
+          <div id="infoBgPic" class="slotInfo" style="display:none;">
+            <img id="thumbBgPic" class="thumb">
+            <div id="metaBgPic" class="fileMeta"></div>
+            <button id="removeBgPic" class="removeBtn">削除</button>
+          </div>
+        </div>
+        <div class="slotControls"><button id="resetBgPicPos" class="btn">背景をフィット</button></div>
+
       </div>
 
 
@@ -228,18 +222,26 @@
           <input id="bandHeight" type="number" value="1000" min="0" max="2000">
         </div>
 
-    <div style="margin-top:8px;">
-      <label style="display:block; margin-bottom:6px;">帯の向き</label>
-      <label style="margin-right:12px;">
-        <input id="bandOrientHorizontal" name="bandOrient" type="radio" value="horizontal" checked>横</label>
-      <label>
-        <input id="bandOrientVertical" name="bandOrient" type="radio" value="vertical">縦</label>
-    </div>
+        <div style="margin-top:8px;">
+          <label style="display:block; margin-bottom:6px;">帯の向き</label>
+          <label style="margin-right:12px;">
+            <input id="bandOrientHorizontal" name="bandOrient" type="radio" value="horizontal" checked>横</label>
+          <label>
+            <input id="bandOrientVertical" name="bandOrient" type="radio" value="vertical">縦</label>
+        </div>
 
         <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
         <label style="margin-top:8px;">フォント</label><select id="fontSelect"></select>
         <label style="margin-top:8px;">サイズ</label><input id="fontSize" type="number" value="60">
         <label style="margin-top:8px;">色</label><input id="fontColor" type="color" value="#000000">
+        <label style="margin-top:8px;display:block;">文字の向き</label>
+        <label style="margin-right:12px;">
+          <input id="textOrientHorizontal" name="textOrient" type="radio" value="horizontal" checked>横
+        </label>
+        <label>
+          <input id="textOrientVertical" name="textOrient" type="radio" value="vertical">縦
+        </label>
+        <br>
 
         <label>text1</label><textarea id="text1">シナリオ</textarea>
         <label>text2</label><textarea id="text2">ハンドアウト</textarea>
@@ -264,16 +266,14 @@
     </aside>
   </div>
 
+  <script src="../libs/gif.js" defer></script>
 
-  <!-- 外部JS -->
-    <script src="../libs/gif.js" defer></script>
-
-    <script src="app-state.js" defer></script>
-    <script src="app-utils.js" defer></script>
-    <script src="app-ui.js" defer></script>
-    <script src="app-interactions.js" defer></script>
-    <script src="app-interactions-hover.js" defer></script>
-    <script src="app-draw.js" defer></script>
+  <script src="app-state.js" defer></script>
+  <script src="app-utils.js" defer></script>
+  <script src="app-ui.js" defer></script>
+  <script src="app-interactions.js" defer></script>
+  <script src="app-interactions-hover.js" defer></script>
+  <script src="app-draw.js" defer></script>
 
 </body>
 </html>

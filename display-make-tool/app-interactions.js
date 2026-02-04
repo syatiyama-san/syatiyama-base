@@ -29,6 +29,8 @@
         text1El: document.getElementById('text1'),
         text2El: document.getElementById('text2'),
         text3El: document.getElementById('text3'),
+        textOrientHorizontal: document.getElementById('textOrientHorizontal'),
+        textOrientVertical: document.getElementById('textOrientVertical'),
         exportBtn: document.getElementById('exportBtn'),
         formatSel: document.getElementById('format'),
         wmPicOpacity: document.getElementById('wmPicOpacity'),
@@ -42,7 +44,9 @@
         slotSysPic: document.getElementById('slotSysPic'),
         infoSysPic: document.getElementById('infoSysPic'),
         thumbSysPic: document.getElementById('thumbSysPic'),
-        metaSysPic: document.getElementById('metaSysPic')
+        metaSysPic: document.getElementById('metaSysPic'),
+        textOrientHorizontal: document.getElementById('textOrientHorizontal'),
+        textOrientVertical: document.getElementById('textOrientVertical')
     };
 
     state.images = state.images || {};
@@ -70,6 +74,10 @@
                 state.texts[i].y = Math.round(state.height * textDefaultPos[i].y);
             }
         }
+        state.ui = state.ui || {};
+        state.ui.textOrientation = 'horizontal';
+        if(refs.textOrientHorizontal) refs.textOrientHorizontal.checked = true;
+        if(refs.textOrientVertical) refs.textOrientVertical.checked = false;
         if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
     }
 
@@ -87,12 +95,25 @@
             const font = (refs.fontSelect && refs.fontSelect.value) || 'Arial';
             const fontSpec = `${size}px "${font}"`;
             const lineHeight = Math.round(size * 1.15);
+            const textOrient = (state.ui && state.ui.textOrientation) ? state.ui.textOrientation : 'horizontal';
             const maxWidth = Math.max(200, state.width - 220 - 220);
             for(let i = state.texts.length - 1; i >= 0; i--){
                 const t = state.texts[i];
-                const block = utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight);
-                const w = block.width || maxWidth;
-                const h = block.height;
+                let w = 0; let h = 0;
+                if(textOrient === 'vertical'){
+                    const cols = String(t.text || '').split('\n');
+                    let maxRows = 0;
+                    for(const col of cols){
+                        const len = Array.from(col).length;
+                        if(len > maxRows) maxRows = len;
+                    }
+                    w = Math.max(1, cols.length) * lineHeight;
+                    h = Math.max(1, maxRows) * lineHeight;
+                } else {
+                    const block = utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight);
+                    w = block.width || maxWidth;
+                    h = block.height;
+                }
                 if(p.x >= t.x && p.x <= t.x + w && p.y >= t.y && p.y <= t.y + h){
                     if(window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
                         state._dragSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
@@ -231,14 +252,12 @@
                         const delta = e.deltaY < 0 ? 1.06 : 0.94;
                         
                         if(shape === 'rectangle'){
-                            // For rectangle, scale width and height proportionally while maintaining aspect ratio
                             const currentWidth = obj.rectangleWidth || 1200;
                             const currentHeight = obj.rectangleHeight || 1200;
                             
                             let newHeight = Math.round(currentHeight * delta);
                             let newWidth = Math.round(currentWidth * delta);
                             
-                            // Check limits and scale both dimensions equally if either hits a limit
                             const heightRatio = newHeight < 400 ? 400 / newHeight : (newHeight > 2500 ? 2500 / newHeight : 1);
                             const widthRatio = newWidth < 400 ? 400 / newWidth : (newWidth > 2020 ? 2020 / newWidth : 1);
                             const limitRatio = Math.min(heightRatio, widthRatio);
@@ -248,9 +267,7 @@
                             
                             obj.rectangleHeight = newHeight;
                             obj.rectangleWidth = newWidth;
-                            // Don't update sizePx to keep position stable
                         } else {
-                            // For other shapes, use sizePx
                             let newSize = Math.round(hitWidth * delta);
                             if(window.APP && window.APP.subPicDefault){
                                 newSize = Math.max(window.APP.subPicDefault.min, Math.min(window.APP.subPicDefault.max, newSize));
@@ -405,7 +422,6 @@
             original.parentNode && original.parentNode.replaceChild(clone, original);
             refs.exportBtn = clone;
         } catch(e){
-            // ignore
         }
         const btn = refs.exportBtn;
         let exporting = false;
@@ -420,14 +436,14 @@
             btn.disabled = true;
             try {
                 if(document.fonts && document.fonts.ready){
-                    try { await document.fonts.ready; } catch(e){ /* ignore font readiness errors */ }
+                    try { await document.fonts.ready; } catch(e){ }
                 }
                 if(window.APP && typeof window.APP.draw === 'function'){
                     await window.APP.draw();
                 }
                 const fmt = (refs.formatSel && refs.formatSel.value) || 'image/png';
                 if(fmt === 'gif' && window.APP && window.APP.ui && typeof window.APP.ui.exportCanvasImage === 'function'){
-                    try { await window.APP.ui.exportCanvasImage(); } catch(e){ /* ignore */ }
+                    try { await window.APP.ui.exportCanvasImage(); } catch(e){ }
                     exporting = false;
                     btn.disabled = false;
                     return;
