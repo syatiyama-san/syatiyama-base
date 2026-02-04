@@ -61,7 +61,11 @@
         const bgColor = (uiRefs && uiRefs.bgSubPic) ? uiRefs.bgSubPic.value : '#ffffff';
         const bgColorOpacity = (state.images && state.images.subPic && typeof state.images.subPic.bgOpacity === 'number') ? state.images.subPic.bgOpacity : 1.0;
         const bandCol = (uiRefs && uiRefs.bandColor) ? uiRefs.bandColor.value : '#ffffff';
-        const bandHVal = (uiRefs && uiRefs.bandHeight) ? (parseInt(uiRefs.bandHeight.value,10) || 100) : 100;
+        let bandHVal = 100;
+        if (uiRefs && uiRefs.bandHeight) {
+            const parsedBandH = parseInt(uiRefs.bandHeight.value, 10);
+            bandHVal = Number.isNaN(parsedBandH) ? 100 : parsedBandH;
+        }
         const orient = (state.ui && state.ui.bandOrientation) ? state.ui.bandOrientation : 'horizontal';
         try {
             const bgPic = state.images && state.images.bgPic;
