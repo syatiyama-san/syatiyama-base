@@ -3,14 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>DisplayMakeTool</title>
+  <title>ディスプレイ製作ツール</title>
 
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho&display=swap" rel="stylesheet">
-
-  <!-- 外部CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho&family=Noto+Sans+JP&family=Noto+Serif+JP&family=Kiwi+Maru&family=Hina+Mincho&family=Kaisei+Decol&family=Mochiy+Pop+One&family=Yomogi&family=Pacifico&family=Ballet&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -21,7 +18,7 @@
       <a href="../" class="home-btn" title="しゃちやまベース-Top">
         <span class="home-icon">🏠</span>
       </a>
-      <h3>DisplayMakeTool</h3>
+      <h3>ディスプレイ製作ツール</h3>
       <div class="header-undo-redo">
         <button id="undoBtn" class="undo-redo-btn undo-btn" title="元に戻す" aria-label="元に戻す">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
@@ -70,7 +67,13 @@
             <button id="removeMainPic" class="removeBtn">削除</button>
           </div>
         </div>
-        <div class="slotControls"><button id="resetMainPicPos" class="btn">デフォルト位置に戻す</button></div>
+        <div class="row positionRow">
+          <label>X：</label>
+          <input id="mainPicX" class="posInput" type="number" step="1">
+          <label>Y：</label>
+          <input id="mainPicY" class="posInput" type="number" step="1">
+        </div>
+        <div class="slotControls"><button id="resetMainPicPos" class="btn">デフォルト配置に戻す</button></div>
 
 
         <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
@@ -92,12 +95,31 @@
           <strong>立ち絵アップ設定</strong><br>
           <div style="margin-top:8px;">
           <label style="display:block; margin-bottom:6px;">切り抜き形状</label>
-          <label style="margin-right:12px;">
+          <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
+          <label style="margin-right:0px;">
           <input id="subPicShapeCircle" name="subPicShape" type="radio" value="circle" checked>丸</label>
-          <label style="margin-right:12px;">
+          <label style="margin-right:0px;">
           <input id="subPicShapeDiamond" name="subPicShape" type="radio" value="diamond">ひし形</label>
           <label>
           <input id="subPicShapeHeart" name="subPicShape" type="radio" value="heart">ハート</label>
+          </div>
+
+          <div style="display:flex;gap:12px;margin-bottom:8px;align-items:flex-start;">
+            <label style="padding-top:20px;">
+            <input id="subPicShapeRectangle" name="subPicShape" type="radio" value="rectangle">四角形</label>
+
+            <div style="display:flex;flex-direction:column;gap:8px;min-width:140px;">
+              <label style="margin-top:4px;">四角形：縦</label>
+              <div class="row">
+                <input id="subPicHeightPx" type="range" min="400" max="2500" value="1200" step="10">
+                <div id="subPicHeightPxVal" class="val">1200</div>
+              </div>
+              <label style="margin-top:4px;">四角形：横</label>
+              <div class="row">
+                <input id="subPicWidthPx" type="range" min="400" max="2020" value="1200" step="10">
+                <div id="subPicWidthPxVal" class="val">1200</div>
+              </div>
+            </div>
           </div>
 
           <label style="margin-top:8px;">ズーム</label>
@@ -130,25 +152,13 @@
           </div>
         </div>
 
-        <div class="slotControls"><button id="resetSubPicPos" class="btn">デフォルト位置に戻す</button></div>
-
-        
-        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
-        <div style="height:10px;"></div>
-
-
-        <strong style="display:block;margin-bottom:8px;">背景</strong>
-        <div id="slotBgPic" class="fileSlot">
-          <div class="title">背景</div>
-          <input id="fileBgPic" type="file" accept="image/*" style="display:none;">
-          <div id="infoBgPic" class="slotInfo" style="display:none;">
-            <img id="thumbBgPic" class="thumb">
-            <div id="metaBgPic" class="fileMeta"></div>
-            <button id="removeBgPic" class="removeBtn">削除</button>
-          </div>
+        <div class="row positionRow">
+          <label>X：</label>
+          <input id="subPicX" class="posInput" type="number" step="1">
+          <label>Y：</label>
+          <input id="subPicY" class="posInput" type="number" step="1">
         </div>
-        <div class="slotControls"><button id="resetBgPicPos" class="btn">背景をフィット</button></div>
-
+        <div class="slotControls"><button id="resetSubPicPos" class="btn">デフォルト配置に戻す</button></div>
 
         <div style="height:10px;"></div>
 
@@ -172,8 +182,14 @@
         <div id="wmPicOpacityVal" class="val">50%</div>
         </div>
 
+        <div class="row positionRow">
+          <label>X：</label>
+          <input id="wmPicX" class="posInput" type="number" step="1">
+          <label>Y：</label>
+          <input id="wmPicY" class="posInput" type="number" step="1">
+        </div>
         <div class="slotControls" style="margin-top:8px;">
-          <button id="resetWmPicPos" class="btn">デフォルト位置に戻す</button>
+          <button id="resetWmPicPos" class="btn">デフォルト配置に戻す</button>
         </div>
 
 
@@ -190,9 +206,36 @@
             <button id="removeSysPic" class="removeBtn">削除</button>
           </div>
         </div>
-        <div class="slotControls">
-          <button id="resetSysPicPos" class="btn">デフォルト位置に戻す</button>
+        <div class="row positionRow">
+          <label>X：</label>
+          <input id="sysPicX" class="posInput" type="number" step="1">
+          <label>Y：</label>
+          <input id="sysPicY" class="posInput" type="number" step="1">
         </div>
+        <div class="slotControls">
+          <button id="resetSysPicPos" class="btn">デフォルト配置に戻す</button>
+        </div>
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
+        <div style="height:10px;"></div>
+
+        <strong style="display:block;margin-bottom:8px;">背景</strong>
+        <div id="slotBgPic" class="fileSlot">
+          <div class="title">背景</div>
+          <input id="fileBgPic" type="file" accept="image/*" style="display:none;">
+          <div id="infoBgPic" class="slotInfo" style="display:none;">
+            <img id="thumbBgPic" class="thumb">
+            <div id="metaBgPic" class="fileMeta"></div>
+            <button id="removeBgPic" class="removeBtn">削除</button>
+          </div>
+        </div>
+        <div class="row positionRow">
+          <label>X：</label>
+          <input id="bgPicX" class="posInput" type="number" step="1">
+          <label>Y：</label>
+          <input id="bgPicY" class="posInput" type="number" step="1">
+        </div>
+        <div class="slotControls"><button id="resetBgPicPos" class="btn">デフォルト配置に戻す</button></div>
 
       </div>
 
@@ -206,28 +249,57 @@
         <div class="bandRow">
           <input id="bandColor" type="color" value="#ffffff">
           <label style="margin-top:8px;">幅</label>
-          <input id="bandHeight" type="number" value="1000" min="20" max="2000">
+          <input id="bandHeight" type="number" value="1000" min="0" max="2000">
         </div>
 
-    <div style="margin-top:8px;">
-      <label style="display:block; margin-bottom:6px;">帯の向き</label>
-      <label style="margin-right:12px;">
-        <input id="bandOrientHorizontal" name="bandOrient" type="radio" value="horizontal" checked>横</label>
-      <label>
-        <input id="bandOrientVertical" name="bandOrient" type="radio" value="vertical">縦</label>
-    </div>
+        <div style="margin-top:8px;">
+          <label style="display:block; margin-bottom:6px;">帯の向き</label>
+          <label style="margin-right:12px;">
+            <input id="bandOrientHorizontal" name="bandOrient" type="radio" value="horizontal" checked>横</label>
+          <label>
+            <input id="bandOrientVertical" name="bandOrient" type="radio" value="vertical">縦</label>
+        </div>
 
         <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
         <label style="margin-top:8px;">フォント</label><select id="fontSelect"></select>
         <label style="margin-top:8px;">サイズ</label><input id="fontSize" type="number" value="60">
         <label style="margin-top:8px;">色</label><input id="fontColor" type="color" value="#000000">
+        <label style="margin-top:8px;display:block;">文字の向き</label>
+        <label style="margin-right:12px;">
+          <input id="textOrientHorizontal" name="textOrient" type="radio" value="horizontal" checked>横
+        </label>
+        <label>
+          <input id="textOrientVertical" name="textOrient" type="radio" value="vertical">縦
+        </label>
+        <br>
 
-        <label>text1</label><textarea id="text1">シナリオ</textarea>
-        <label>text2</label><textarea id="text2">ハンドアウト</textarea>
-        <label>text3</label><textarea id="text3">お名前</textarea>
+        <div class="row positionRow">
+          <label>text1</label>
+          <label>X：</label>
+          <input id="text1X" class="posInput" type="number" step="1">
+          <label>Y：</label>
+          <input id="text1Y" class="posInput" type="number" step="1">
+        </div>
+        <textarea id="text1">シナリオ</textarea>
+        <div class="row positionRow">
+          <label>text2</label>
+          <label>X：</label>
+          <input id="text2X" class="posInput" type="number" step="1">
+          <label>Y：</label>
+          <input id="text2Y" class="posInput" type="number" step="1">
+        </div>
+        <textarea id="text2">ハンドアウト</textarea>
+        <div class="row positionRow">
+          <label>text3</label>
+          <label>X：</label>
+          <input id="text3X" class="posInput" type="number" step="1">
+          <label>Y：</label>
+          <input id="text3Y" class="posInput" type="number" step="1">
+        </div>
+        <textarea id="text3">お名前</textarea>
 
         <div class="slotControls" style="margin-top:8px;">
-          <button id="resetTextPosBtn" class="btn">デフォルト位置に戻す</button>
+          <button id="resetTextPosBtn" class="btn">デフォルト配置に戻す</button>
         </div>
 
       </div>
@@ -245,16 +317,14 @@
     </aside>
   </div>
 
+  <script src="../libs/gif.js" defer></script>
 
-  <!-- 外部JS -->
-    <script src="../libs/gif.js" defer></script>
-
-    <script src="app-state.js" defer></script>
-    <script src="app-utils.js" defer></script>
-    <script src="app-ui.js" defer></script>
-    <script src="app-interactions.js" defer></script>
-    <script src="app-interactions-hover.js" defer></script>
-    <script src="app-draw.js" defer></script>
+  <script src="app-state.js" defer></script>
+  <script src="app-utils.js" defer></script>
+  <script src="app-ui.js" defer></script>
+  <script src="app-interactions.js" defer></script>
+  <script src="app-interactions-hover.js" defer></script>
+  <script src="app-draw.js" defer></script>
 
 </body>
 </html>

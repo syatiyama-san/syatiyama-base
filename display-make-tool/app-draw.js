@@ -48,7 +48,7 @@
         if(!ctx){
             return;
         }
-        try { await (utils && typeof utils.loadGoogleFontIfNeeded === 'function' ? utils.loadGoogleFontIfNeeded() : Promise.resolve()); } catch(e){ /* ignore */ }
+        try { await (utils && typeof utils.loadGoogleFontIfNeeded === 'function' ? utils.loadGoogleFontIfNeeded() : Promise.resolve()); } catch(e){ }
         try {
             ctx.clearRect(0,0,state.width,state.height);
             ctx.fillStyle = '#ffffff';
@@ -61,7 +61,11 @@
         const bgColor = (uiRefs && uiRefs.bgSubPic) ? uiRefs.bgSubPic.value : '#ffffff';
         const bgColorOpacity = (state.images && state.images.subPic && typeof state.images.subPic.bgOpacity === 'number') ? state.images.subPic.bgOpacity : 1.0;
         const bandCol = (uiRefs && uiRefs.bandColor) ? uiRefs.bandColor.value : '#ffffff';
-        const bandHVal = (uiRefs && uiRefs.bandHeight) ? (parseInt(uiRefs.bandHeight.value,10) || 100) : 100;
+        let bandHVal = 100;
+        if (uiRefs && uiRefs.bandHeight) {
+            const parsedBandH = parseInt(uiRefs.bandHeight.value, 10);
+            bandHVal = Number.isNaN(parsedBandH) ? 100 : parsedBandH;
+        }
         const orient = (state.ui && state.ui.bandOrientation) ? state.ui.bandOrientation : 'horizontal';
         try {
             const bgPic = state.images && state.images.bgPic;
@@ -136,14 +140,17 @@
                 const sizePx = subPic.sizePx || (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) || 200;
                 const drawX = (typeof subPic.x === 'number') ? subPic.x : 0;
                 const drawY = (typeof subPic.y === 'number') ? subPic.y : 0;
-                const radius = sizePx / 2;
-                const clipCx = drawX + radius;
-                const clipCy = drawY + radius;
                 const baseSrcSize = Math.min(subPic.img.width, subPic.img.height);
                 const zoom = subPic.zoom && subPic.zoom > 0 ? subPic.zoom : 1.0;
                 let srcSize = Math.round(baseSrcSize / zoom);
                 srcSize = Math.max(8, Math.min(baseSrcSize, srcSize));
                 const crop = subPic.crop || {};
+                const shape = (crop && typeof crop.shape === 'string') ? crop.shape : 'circle';
+                const rectW = (shape === 'rectangle') ? ((subPic && typeof subPic.rectangleWidth === 'number') ? subPic.rectangleWidth : 1200) : sizePx;
+                const rectH = (shape === 'rectangle') ? ((subPic && typeof subPic.rectangleHeight === 'number') ? subPic.rectangleHeight : 1200) : sizePx;
+                const radius = sizePx / 2;
+                const clipCx = drawX + radius;
+                const clipCy = drawY + radius;
                 const centerX = (typeof crop.cx === 'number') ? Math.round(crop.cx * subPic.img.width) : Math.round(subPic.img.width / 2);
                 let centerY;
                 if (typeof crop.cy === 'number') {
@@ -156,8 +163,14 @@
                 if(srcX < 0) srcX = 0; if(srcY < 0) srcY = 0;
                 if(srcX + srcSize > subPic.img.width) srcX = subPic.img.width - srcSize;
                 if(srcY + srcSize > subPic.img.height) srcY = subPic.img.height - srcSize;
-                const shape = (crop && typeof crop.shape === 'string') ? crop.shape : 'circle';
+                const imgCenterX = drawX + radius;
+                const imgCenterY = drawY + radius;
+                const imgSize = (shape === 'rectangle') ? Math.max(sizePx, rectW, rectH) : sizePx;
+                const imgDrawX = imgCenterX - imgSize / 2;
+                const imgDrawY = imgCenterY - imgSize / 2;
                 ctx.save();
+                let rectX = drawX;
+                let rectY = drawY;
                 if (shape === 'circle') {
                     ctx.beginPath(); ctx.arc(clipCx, clipCy, radius, 0, Math.PI * 2); ctx.closePath();
                     ctx.fillStyle = bgColor || '#ffffff';
@@ -177,6 +190,16 @@
                     ctx.globalAlpha = bgColorOpacity;
                     ctx.fill();
                     ctx.globalAlpha = 1.0;
+                    ctx.clip();
+                } else if (shape === 'rectangle') {
+                    rectX = drawX + (sizePx - rectW) / 2;
+                    rectY = drawY + (sizePx - rectH) / 2;
+                    ctx.fillStyle = bgColor || '#ffffff';
+                    ctx.globalAlpha = bgColorOpacity;
+                    ctx.fillRect(rectX, rectY, rectW, rectH);
+                    ctx.globalAlpha = 1.0;
+                    ctx.beginPath();
+                    ctx.rect(rectX, rectY, rectW, rectH);
                     ctx.clip();
                 } else if (shape === 'heart') {
                     ctx.beginPath();
@@ -206,7 +229,11 @@
                     ctx.beginPath(); ctx.arc(clipCx, clipCy, radius, 0, Math.PI * 2); ctx.closePath();
                     ctx.clip();
                 }
-                ctx.drawImage(subPic.img, srcX, srcY, srcSize, srcSize, drawX, drawY, sizePx, sizePx);
+                const destW = (shape === 'rectangle') ? imgSize : sizePx;
+                const destH = (shape === 'rectangle') ? imgSize : sizePx;
+                const destX = (shape === 'rectangle') ? imgDrawX : drawX;
+                const destY = (shape === 'rectangle') ? imgDrawY : drawY;
+                ctx.drawImage(subPic.img, srcX, srcY, srcSize, srcSize, destX, destY, destW, destH);
                 ctx.restore();
                 let strokePx = (subPic && typeof subPic.borderWidth === 'number') ? subPic.borderWidth : ((uiRefs && uiRefs.subPicBorder) ? (parseInt(uiRefs.subPicBorder.value,10) || 0) : 0);
                 strokePx = Math.max(0, Math.min(100, strokePx));
@@ -221,6 +248,12 @@
                         ctx.lineTo(clipCx, clipCy + radius);
                         ctx.lineTo(clipCx - radius, clipCy);
                         ctx.closePath();
+                    } else if (shape === 'rectangle') {
+                        const rectW = (subPic && typeof subPic.rectangleWidth === 'number') ? subPic.rectangleWidth : 1200;
+                        const rectH = (subPic && typeof subPic.rectangleHeight === 'number') ? subPic.rectangleHeight : 1200;
+                        const rectX = drawX + (sizePx - rectW) / 2;
+                        const rectY = drawY + (sizePx - rectH) / 2;
+                        ctx.rect(rectX, rectY, rectW, rectH);
                     } else if (shape === 'heart') {
                         const s = radius / 100;
                         const cx = clipCx;
@@ -281,6 +314,7 @@
             const font = (uiRefs && uiRefs.fontSelect) ? uiRefs.fontSelect.value || 'Arial' : 'Arial';
             const fontSpec = `${size}px "${font}"`;
             const lineHeight = Math.round(size * 1.15);
+            const textOrient = (state.ui && state.ui.textOrientation) ? state.ui.textOrientation : 'horizontal';
             ctx.textBaseline = 'top';
             ctx.fillStyle = color;
             ctx.font = fontSpec;
@@ -290,10 +324,21 @@
             const maxWidth = Math.max(200, state.width - margin - 220);
             for(let i = 0; i < (state.texts || []).length; i++){
                 const t = state.texts[i];
-                const block = utils.measureTextBlock ? utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight) : { lines: [t.text] };
-                const lines = block.lines || [];
-                for(let li = 0; li < lines.length; li++){
-                    ctx.fillText(lines[li], t.x, t.y + li * lineHeight);
+                if(textOrient === 'vertical'){
+                    const cols = String(t.text || '').split('\n');
+                    for(let ci = 0; ci < cols.length; ci++){
+                        let row = 0;
+                        for(const ch of cols[ci]){
+                            ctx.fillText(ch, t.x + ci * lineHeight, t.y + row * lineHeight);
+                            row++;
+                        }
+                    }
+                } else {
+                    const block = utils.measureTextBlock ? utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight) : { lines: [t.text] };
+                    const lines = block.lines || [];
+                    for(let li = 0; li < lines.length; li++){
+                        ctx.fillText(lines[li], t.x, t.y + li * lineHeight);
+                    }
                 }
             }
             ctx.shadowBlur = 0;
@@ -321,10 +366,23 @@
                 const font = (uiRefs && uiRefs.fontSelect) ? uiRefs.fontSelect.value || 'Arial' : 'Arial';
                 const fontSpec = `${size}px "${font}"`;
                 const lineHeight = Math.round(size * 1.15);
-                const maxWidth = Math.max(200, state.width - 220 - 220);
-                const block = utils.measureTextBlock ? utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight) : { lines: [t.text] };
-                const w = block.width || maxWidth;
-                const h = block.height || lineHeight;
+                const textOrient = (state.ui && state.ui.textOrientation) ? state.ui.textOrientation : 'horizontal';
+                let w = 0; let h = 0;
+                if(textOrient === 'vertical'){
+                    const cols = String(t.text || '').split('\n');
+                    let maxRows = 0;
+                    for(const col of cols){
+                        const len = Array.from(col).length;
+                        if(len > maxRows) maxRows = len;
+                    }
+                    w = Math.max(1, cols.length) * lineHeight;
+                    h = Math.max(1, maxRows) * lineHeight;
+                } else {
+                    const maxWidth = Math.max(200, state.width - 220 - 220);
+                    const block = utils.measureTextBlock ? utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight) : { lines: [t.text] };
+                    w = block.width || maxWidth;
+                    h = block.height || lineHeight;
+                }
                 
                 ctx.save();
                 ctx.fillStyle = 'rgba(70, 130, 180, 0.5)';
@@ -345,11 +403,13 @@
                     
                     if(state.hovering.key === 'subPic'){
                         const sizePx = obj.sizePx || (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) || 200;
+                        const crop = obj.crop || {};
+                        const shape = (crop && typeof crop.shape === 'string') ? crop.shape : 'circle';
+                        const rectW = (shape === 'rectangle') ? ((obj && typeof obj.rectangleWidth === 'number') ? obj.rectangleWidth : 1200) : sizePx;
+                        const rectH = (shape === 'rectangle') ? ((obj && typeof obj.rectangleHeight === 'number') ? obj.rectangleHeight : 1200) : sizePx;
                         const radius = sizePx / 2;
                         const clipCx = obj.x + radius;
                         const clipCy = obj.y + radius;
-                        const crop = obj.crop || {};
-                        const shape = (crop && typeof crop.shape === 'string') ? crop.shape : 'circle';
                         
                         if (shape === 'circle') {
                             ctx.beginPath();
@@ -363,6 +423,13 @@
                             ctx.lineTo(clipCx, clipCy + radius + 2);
                             ctx.lineTo(clipCx - radius - 2, clipCy);
                             ctx.closePath();
+                            ctx.fill();
+                            ctx.stroke();
+                        } else if (shape === 'rectangle') {
+                            const rectX = obj.x + (sizePx - rectW) / 2;
+                            const rectY = obj.y + (sizePx - rectH) / 2;
+                            ctx.beginPath();
+                            ctx.rect(rectX - 2, rectY - 2, rectW + 4, rectH + 4);
                             ctx.fill();
                             ctx.stroke();
                         } else if (shape === 'heart') {

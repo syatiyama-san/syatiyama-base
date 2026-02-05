@@ -29,10 +29,12 @@
                 y: Math.round(canvas.height * 0.08),
                 sizePx: subPicDefault.sizePx,
                 z: 2,
-                crop: { cx: 0.5, cy: 0.33 },
+                crop: { cx: 0.5, cy: 0.33, shape: 'circle' },
                 zoom: 1.0,
                 filename: null,
-                thumb: null
+                thumb: null,
+                rectangleWidth: 1200,
+                rectangleHeight: 1200
             },
             bgPic: {
                 img: null,
@@ -85,20 +87,18 @@
     };
 
     const fontOptions = [
-        'Arial','Georgia','Times New Roman','Noto Sans JP','Roboto',
-        'Zen Old Mincho','Montserrat','Open Sans','Lato','Poppins',
-        'Inter','Noto Serif JP'
+        'Arial','Georgia','Times New Roman','Noto Sans JP',
+        'Zen Old Mincho','Noto Serif JP',
+        'Kiwi Maru','Hina Mincho','Kaisei Decol','Mochiy Pop One',
+        'Yomogi','Pacifico','Ballet'
     ];
 
-    // 履歴管理システム
     const history = {
         undoStack: [],
         redoStack: [],
         maxSteps: 50,
-        // state から画像オブジェクトを除外してディープコピーを作成
         cloneStateForHistory: function(currentState) {
             const cloned = JSON.parse(JSON.stringify(currentState));
-            // 画像オブジェクト（img）は履歴に保存しない
             if (cloned && cloned.images) {
                 Object.keys(cloned.images).forEach(key => {
                     if (cloned.images[key] && Object.prototype.hasOwnProperty.call(cloned.images[key], 'img')) {
@@ -106,21 +106,17 @@
                     }
                 });
             }
-            // ホバー/ドラッグ状態は履歴に保存しない
             if (cloned) {
                 delete cloned.hovering;
                 delete cloned.dragging;
                 delete cloned.dragOffset;
             }
-            // ラジオボタン要素（画像比率、切り抜き形、帯の縦横）は履歴に保存しない
             if (cloned && cloned.images && cloned.images.subPic && cloned.images.subPic.crop) {
                 delete cloned.images.subPic.crop.shape;
             }
             if (cloned) {
                 delete cloned.aspectRatio;
             }
-            // 帯の縦横（bandOrientation）の状態保存
-            // state.ui全体をクローンに含める前にbandOrientationを除外
             if (cloned && cloned.ui && cloned.ui.bandOrientation !== undefined) {
                 delete cloned.ui.bandOrientation;
             }
@@ -180,7 +176,6 @@
         }
     };
 
-    // 初期化時にUIを更新（最初は履歴がないので両方無効）
     history.updateHistoryUI();
 
     window.APP = window.APP || {};

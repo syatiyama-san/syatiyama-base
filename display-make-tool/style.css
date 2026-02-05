@@ -378,3 +378,16 @@ input[type="range"]:disabled {
     width: 20px;
     height: 20px;
 }
+
+.positionRow {
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+}
+
+.posInput {
+    width: 50px;
+    padding: 2px 4px;
+    font-size: 11px;
+}

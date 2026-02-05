@@ -25,13 +25,26 @@
         const font = (uiRefs && uiRefs.fontSelect) ? uiRefs.fontSelect.value || 'Arial' : 'Arial';
         const fontSpec = `${size}px "${font}"`;
         const lineHeight = Math.round(size * 1.15);
+        const textOrient = (state.ui && state.ui.textOrientation) ? state.ui.textOrientation : 'horizontal';
         const maxWidth = Math.max(200, state.width - 220 - 220);
         
         for(let i = state.texts.length - 1; i >= 0; i--){
             const t = state.texts[i];
-            const block = utils.measureTextBlock ? utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight) : { lines: [t.text] };
-            const w = block.width || maxWidth;
-            const h = block.height || lineHeight;
+            let w = 0; let h = 0;
+            if(textOrient === 'vertical'){
+                const cols = String(t.text || '').split('\n');
+                let maxRows = 0;
+                for(const col of cols){
+                    const len = Array.from(col).length;
+                    if(len > maxRows) maxRows = len;
+                }
+                w = Math.max(1, cols.length) * lineHeight;
+                h = Math.max(1, maxRows) * lineHeight;
+            } else {
+                const block = utils.measureTextBlock ? utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight) : { lines: [t.text] };
+                w = block.width || maxWidth;
+                h = block.height || lineHeight;
+            }
             if(p.x >= t.x && p.x <= t.x + w && p.y >= t.y && p.y <= t.y + h){
                 return { type: 'text', index: i };
             }
@@ -43,8 +56,24 @@
             if(!obj || !obj.img) continue;
             
             if(k === 'subPic'){
+                const crop = obj.crop || {};
+                const shape = (crop && typeof crop.shape === 'string') ? crop.shape : 'circle';
+                let hitWidth, hitHeight, hitX, hitY;
+                
                 const sizePx = obj.sizePx || (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) || 200;
-                if(p.x >= obj.x && p.x <= obj.x + sizePx && p.y >= obj.y && p.y <= obj.y + sizePx){
+                if(shape === 'rectangle'){
+                    hitWidth = obj.rectangleWidth || 1200;
+                    hitHeight = obj.rectangleHeight || 1200;
+                    hitX = obj.x + (sizePx - hitWidth) / 2;
+                    hitY = obj.y + (sizePx - hitHeight) / 2;
+                } else {
+                    hitWidth = sizePx;
+                    hitHeight = sizePx;
+                    hitX = obj.x;
+                    hitY = obj.y;
+                }
+                
+                if(p.x >= hitX && p.x <= hitX + hitWidth && p.y >= hitY && p.y <= hitY + hitHeight){
                     return { type: 'image', key: k };
                 }
                 continue;

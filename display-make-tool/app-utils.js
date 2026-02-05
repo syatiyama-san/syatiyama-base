@@ -7,7 +7,8 @@
 
     function populateFontSelect(selEl){
         selEl.innerHTML = '';
-        for(const f of fontOptions){
+        const sortedFonts = (fontOptions || []).slice().sort((a,b)=> (a || '').localeCompare((b || ''), 'en'));
+        for(const f of sortedFonts){
             const opt = document.createElement('option');
             opt.value = f; opt.textContent = f;
             selEl.appendChild(opt);
@@ -19,7 +20,17 @@
         if(_fontsLoaded) return;
         try {
             await document.fonts.load('16px "Zen Old Mincho"');
-            await Promise.all([document.fonts.load('16px "Noto Sans JP"').catch(()=>{}), document.fonts.load('16px "Roboto"').catch(()=>{})]);
+            await Promise.all([
+                document.fonts.load('16px "Noto Sans JP"').catch(()=>{}),
+                document.fonts.load('16px "Noto Serif JP"').catch(()=>{}),
+                document.fonts.load('16px "Kiwi Maru"').catch(()=>{}),
+                document.fonts.load('16px "Hina Mincho"').catch(()=>{}),
+                document.fonts.load('16px "Kaisei Decol"').catch(()=>{}),
+                document.fonts.load('16px "Mochiy Pop One"').catch(()=>{}),
+                document.fonts.load('16px "Yomogi"').catch(()=>{}),
+                document.fonts.load('16px "Pacifico"').catch(()=>{}),
+                document.fonts.load('16px "Ballet"').catch(()=>{})
+            ]);
         } catch(e){}
         _fontsLoaded = true;
     }

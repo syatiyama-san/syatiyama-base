@@ -40,37 +40,64 @@
     <section id="left-column" aria-label="SNSリンク">
       <h2 class="column-title">SNSリンク</h2>
       <div class="grid-sns" role="list">
-        <a role="listitem" class="sns-btn" href="https://x.com/syatiyama_TRPG" aria-label="Twitter">
-          <img src="path/to/twitter.png" alt="Twitter">
+        <a role="listitem" class="sns-btn" href="https://x.com/syatiyama_TRPG" aria-label="X" target="_blank" rel="noopener noreferrer" data-tooltip="主な生息地" title="主な生息地">
+          <img class="sns-icon" src="path/to/x.png" alt="X">
+          <span class="sns-label">X</span>
         </a>
-        <a role="listitem" class="sns-btn" href="https://xfolio.jp/portfolio/syatiyama_san" aria-label="xfolio">
-          <img src="path/to/xfolio.png" alt="xfolio">
+        <a role="listitem" class="sns-btn" href="https://mixi.social/@syatiyama_san" aria-label="mixi2" target="_blank" rel="noopener noreferrer" data-tooltip="主な生息地2" title="主な生息地2">
+          <img class="sns-icon" src="path/to/mixi2.png" alt="mixi2">
+          <span class="sns-label">mixi2</span>
         </a>
-        <a role="listitem" class="sns-btn" href="https://commons.nicovideo.jp/users/34289370" aria-label="ニコニ・コモンズ">
-          <img src="path/to/commons.png" alt="commons">
+        <a role="listitem" class="sns-btn" href="https://bsky.app/profile/syatiyama-san.bsky.social" aria-label="ブルスカ" target="_blank" rel="noopener noreferrer" data-tooltip="あんまいない" title="あんまいない">
+          <img class="sns-icon" src="path/to/bluesky.png" alt="ブルスカ">
+          <span class="sns-label">ブルスカ</span>
         </a>
-        <a role="listitem" class="sns-btn" href="#" aria-label="空リンク">
-          <img src="path/to/sns4.png" alt="SNS4">
+
+        <a role="listitem" class="sns-btn" href="https://xfolio.jp/portfolio/syatiyama_san" aria-label="Xfolio" target="_blank" rel="noopener noreferrer" data-tooltip="イラストまとめ" title="イラストまとめ">
+          <img class="sns-icon" src="path/to/xfolio.png" alt="Xfolio">
+          <span class="sns-label">Xfolio</span>
         </a>
-        <a role="listitem" class="sns-btn" href="#" aria-label="空リンク">
-          <img src="path/to/sns5.png" alt="SNS5">
+        <a role="listitem" class="sns-btn" href="https://xissmie.xfolio.jp/@syatiyama_san" aria-label="Xissmie" target="_blank" rel="noopener noreferrer" data-tooltip="そんないない" title="そんないない">
+          <img class="sns-icon" src="path/to/xissmie.png" alt="Xissmie">
+          <span class="sns-label">Xissmie</span>
         </a>
-        <a role="listitem" class="sns-btn" href="#" aria-label="空リンク">
-          <img src="path/to/sns6.png" alt="SNS6">
+        <span class="sns-spacer" aria-hidden="true"></span>
+
+        <a role="listitem" class="sns-btn" href="https://xfolio.jp/portfolio/syatiyama_san/series/2702049" aria-label="探索者まとめ" target="_blank" rel="noopener noreferrer" data-tooltip="ディスプレイ一覧" title="ディスプレイ一覧">
+          <img class="sns-icon" src="path/to/tansakusha.png" alt="探索者まとめ">
+          <span class="sns-label">探索者<br>まとめ</span>
         </a>
+        <a role="listitem" class="sns-btn" href="#" aria-label="卓報告まとめ" target="_blank" rel="noopener noreferrer">
+          <img class="sns-icon" src="path/to/takuhoukoku.png" alt="卓報告まとめ">
+          <span class="sns-label">卓報告<br>まとめ</span>
+        </a>
+        <a role="listitem" class="sns-btn" href="https://fusetter.com/u/syatiyama_TRPG" aria-label="ふせったー" target="_blank" rel="noopener noreferrer">
+          <img class="sns-icon" src="path/to/fusetta.png" alt="ふせったー">
+          <span class="sns-label">ふせったー</span>
+        </a>
+
+        <a role="listitem" class="sns-btn" href="https://commons.nicovideo.jp/users/34289370" aria-label="コモンズ" target="_blank" rel="noopener noreferrer" data-tooltip="画像素材を配布してます" title="画像素材を配布してます">
+          <img class="sns-icon" src="path/to/commons.png" alt="コモンズ">
+          <span class="sns-label">コモンズ</span>
+        </a>
+        <a role="listitem" class="sns-btn" href="https://syatiyama.booth.pm/" aria-label="BOOTH" target="_blank" rel="noopener noreferrer" data-tooltip="今は何もないヨ" title="今は何もないヨ">
+          <img class="sns-icon" src="path/to/booth.png" alt="BOOTH">
+          <span class="sns-label">BOOTH</span>
+        </a>
+        <span class="sns-spacer" aria-hidden="true"></span>
       </div>
     </section>
 
     <!-- 右カラム：Tools 見出し → ReadMe → 本文 → ツール一覧 -->
     <section id="right-column" aria-label="ツール一覧">
-      <h2 class="column-title tools-title">Tools</h2>
-
-      <article id="readme">
-        <h3>ReadMe</h3>
-        <p>ブラウザ上で動作するフリーツールです。</p>
-        <p>アップロードした画像はエクスポートのみに使用され、外部サーバーへの送信は行われません。</p>
-        <p>これらのツールはAIコーディングで作成されています。動作確認はWindows版Chromeでのみ行っており、環境によっては動作しないかもしれません。</p>
-      </article>
+      <div class="tools-header">
+        <h2 class="column-title tools-title">Tools</h2>
+      </div>
+      <div class="readme-row">
+        <a href="#readme-modal" id="readme-link" class="readme-link" aria-haspopup="dialog" aria-controls="readme-modal">
+          ReadMe
+        </a>
+      </div>
 
       <nav id="tools-list" aria-label="ツール一覧">
         <a class="tool-card" href="display-make-tool/" aria-labelledby="tool1-title">
@@ -86,21 +113,103 @@
 -->
         </nav>
 
-        <h3>更新履歴</h3>
-        <p>2026/2/3 ディスプレイ製作ツール Ver.0.2公開！</p>
-        <p>2026/2/2 Topページを改修しました。ディスプレイ製作ツールのGIF出力機能を修正しました。</p>
-        <p>2026/2/1 サイト開設！ディスプレイ製作ツール Ver.0.1を公開しました。</p>
-
-        <h3>お返事</h3>
+        <br>
+        <h3>お便り</h3>
         <p>お問い合わせへの回答をまとめるページを作る予定です。</p>
+        <br>
+        <p>
+          最終更新日：2026/2/5
+          <a href="https://github.com/syatiyama-san/syatiyama-base/releases" target="_blank" rel="noopener noreferrer">リリースノート</a>
+        </p>
       </article>
-
-      <small>@2026 syatiyama-san</small>
-      <a href="https://github.com/syatiyama-san/syatiyama-base/blob/main/LICENSE" id="footer-link" aria-label="ライセンス情報">
-        <small>MIT License</small>
-      </a>
 
     </section>
   </main>
+
+  <footer id="site-footer" role="contentinfo" aria-label="サイト情報">
+    <p>
+      <small>@2026 syatiyama-san</small>
+      <a href="https://github.com/syatiyama-san/syatiyama-base/blob/main/LICENSE" id="footer-link" aria-label="ライセンス情報" target="_blank" rel="noopener noreferrer">
+        <small>MIT License</small>
+      </a>
+    </p>
+  </footer>
+
+  <div id="readme-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="readme-modal-title" aria-hidden="true">
+    <div class="modal__backdrop" data-close="true"></div>
+    <div class="modal__content" role="document">
+      <div class="modal__header">
+        <h3 id="readme-modal-title">ReadMe</h3>
+      </div>
+      <div class="modal__body">
+        <p>ブラウザ上で動作するフリーツールです。</p>
+        <p>アップロードした画像はエクスポートのみに使用され、外部サーバーへの送信は行われません。</p>
+        <p>これらのツールはAIコーディングで作成されています。動作確認はWindows版Chromeでのみ行っており、環境によっては動作しないかもしれません。</p>
+      </div>
+      <div class="modal__footer">
+        <button type="button" class="modal__close" aria-label="閉じる" data-close="true">OK！</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const openLink = document.getElementById('readme-link');
+      const modal = document.getElementById('readme-modal');
+      const closeTargets = modal.querySelectorAll('[data-close="true"]');
+
+      const openModal = () => {
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      };
+
+      const closeModal = () => {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        openLink.focus();
+      };
+
+      openLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        openModal();
+      });
+
+      closeTargets.forEach((el) => {
+        el.addEventListener('click', closeModal);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && modal.classList.contains('is-open')) {
+          closeModal();
+        }
+      });
+    })();
+
+    (function () {
+      const icons = document.querySelectorAll('.sns-icon');
+
+      icons.forEach((img) => {
+        const parent = img.closest('.sns-btn');
+        if (!parent) return;
+
+        const markLoaded = () => parent.classList.add('has-image');
+        const markError = () => parent.classList.remove('has-image');
+
+        if (img.complete) {
+          if (img.naturalWidth > 0) {
+            markLoaded();
+          } else {
+            markError();
+          }
+          return;
+        }
+
+        img.addEventListener('load', markLoaded);
+        img.addEventListener('error', markError);
+      });
+    })();
+  </script>
 </body>
 </html>
