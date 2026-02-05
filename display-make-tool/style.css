@@ -428,3 +428,7 @@ input[type="range"]:disabled {
 .tabPanel.active {
     display: block;
 }
+
+.tabPanel .panel + .panel {
+    margin-top: 10px;
+}

@@ -61,9 +61,10 @@
       <div class="panel">
         <strong>画像読み込み(クリックorドロップ)</strong><br>
         <label>プレビュー内で掴んで移動、スクロールで拡縮できます。</label>
+      </div>
 
-
-        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
+      <div class="panel">
+        <strong>立ち絵</strong><br>
         <div id="slotMainPic" class="fileSlot">
           <div class="title">立ち絵</div>
           <input id="fileMainPic" type="file" accept="image/*" style="display:none;">
@@ -80,12 +81,10 @@
           <input id="mainPicY" class="posInput" type="number" step="1">
         </div>
         <div class="slotControls"><button id="resetMainPicPos" class="btn">デフォルト配置に戻す</button></div>
+      </div>
 
-
-        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
-        <div style="height:10px;"></div>
-
-
+      <div class="panel">
+        <strong>立ち絵のアップ</strong><br>
         <div id="slotSubPic" class="fileSlot">
           <div class="title">立ち絵のアップ</div>
           <input id="fileSubPic" type="file" accept="image/*" style="display:none;">
@@ -95,11 +94,7 @@
             <button id="removeSubPic" class="removeBtn">削除</button>
           </div>
         </div>
-        <br>
-
-        <div class="panel">
-          <strong>立ち絵アップ設定</strong><br>
-          <div style="margin-top:8px;">
+        <div style="margin-top:8px;">
           <label style="display:block; margin-bottom:6px;">切り抜き形状</label>
           <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
           <label style="margin-right:0px;">
@@ -156,7 +151,6 @@
           <input id="bgSubPicAlpha" type="range" min="0" max="100" value="100">
           <div id="bgSubPicAlphaVal" class="val">100%</div>
           </div>
-          </div>
         </div>
 
         <div class="row positionRow">
@@ -166,13 +160,10 @@
           <input id="subPicY" class="posInput" type="number" step="1">
         </div>
         <div class="slotControls"><button id="resetSubPicPos" class="btn">デフォルト配置に戻す</button></div>
+      </div>
 
-        <div style="height:10px;"></div>
-
-
-        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
+      <div class="panel">
         <strong style="display:block;margin-bottom:8px;">ウォーターマーク</strong>
-
         <div id="slotWmPic" class="fileSlot">
           <div class="title">ウォーターマーク</div>
           <input id="fileWmPic" type="file" accept="image/*" style="display:none;">
@@ -198,11 +189,9 @@
         <div class="slotControls" style="margin-top:8px;">
           <button id="resetWmPicPos" class="btn">デフォルト配置に戻す</button>
         </div>
+      </div>
 
-
-        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
-
-
+      <div class="panel">
         <strong style="display:block;margin-bottom:8px;">システムロゴ</strong>
         <div id="slotSysPic" class="fileSlot">
           <div class="title">システム</div>
@@ -222,10 +211,9 @@
         <div class="slotControls">
           <button id="resetSysPicPos" class="btn">デフォルト配置に戻す</button>
         </div>
+      </div>
 
-        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
-        <div style="height:10px;"></div>
-
+      <div class="panel">
         <strong style="display:block;margin-bottom:8px;">背景</strong>
         <div id="slotBgPic" class="fileSlot">
           <div class="title">背景</div>
@@ -249,9 +237,8 @@
 
       <div id="tabText" class="tabPanel">
       <div class="panel">
-        <strong>テキスト</strong><br>
+        <strong>テキスト背景</strong><br>
 
-        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
         <label style="margin-top:8px;">背景色</label>
 
         <div class="bandRow">
@@ -267,8 +254,10 @@
           <label>
             <input id="bandOrientVertical" name="bandOrient" type="radio" value="vertical">縦</label>
         </div>
+      </div>
 
-        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
+      <div class="panel">
+        <strong>テキスト</strong><br>
         <label style="margin-top:8px;">フォント</label><select id="fontSelect"></select>
         <label style="margin-top:8px;">サイズ</label><input id="fontSize" type="number" value="60">
         <label style="margin-top:8px;">色</label><input id="fontColor" type="color" value="#000000">
