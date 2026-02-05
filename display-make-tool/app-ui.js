@@ -1156,6 +1156,40 @@
     };
     window.APP.ui.exportCanvasImage = exportCanvasImage;
 
+    function setupTabs(){
+        const btnImages = document.getElementById('tabBtnImages');
+        const btnText = document.getElementById('tabBtnText');
+        const btnExport = document.getElementById('tabBtnExport');
+        const tabImages = document.getElementById('tabImages');
+        const tabText = document.getElementById('tabText');
+        const tabExport = document.getElementById('tabExport');
+        if(!btnImages || !btnText || !btnExport || !tabImages || !tabText || !tabExport) return;
+        const setActive = (key)=>{
+            const isImages = key === 'images';
+            const isText = key === 'text';
+            const isExport = key === 'export';
+            btnImages.classList.toggle('active', isImages);
+            btnText.classList.toggle('active', isText);
+            btnExport.classList.toggle('active', isExport);
+            tabImages.classList.toggle('active', isImages);
+            tabText.classList.toggle('active', isText);
+            tabExport.classList.toggle('active', isExport);
+        };
+        if(!btnImages._bound){
+            btnImages.addEventListener('click', ()=> setActive('images'));
+            btnImages._bound = true;
+        }
+        if(!btnText._bound){
+            btnText.addEventListener('click', ()=> setActive('text'));
+            btnText._bound = true;
+        }
+        if(!btnExport._bound){
+            btnExport.addEventListener('click', ()=> setActive('export'));
+            btnExport._bound = true;
+        }
+        setActive('images');
+    }
+
     setupSlot(slotMainPic, fileMainPic, 'mainPic', infoMainPic, thumbMainPic, metaMainPic, removeMainPic);
     setupSlot(slotSubPic, fileSubPic, 'subPic', infoSubPic, thumbSubPic, metaSubPic, removeSubPic);
     setupSlot(slotBgPic, fileBgPic, 'bgPic', infoBgPic, thumbBgPic, metaBgPic, removeBgPic);
@@ -1174,6 +1208,7 @@
     try { ensureDefaultSysPic(); } catch(e){ }
 
     try { updateSubPicCropSliders(); } catch(e){ }
+    try { setupTabs(); } catch(e){ }
 
     function setAspectRatio(ratio) {
         const ratios = {

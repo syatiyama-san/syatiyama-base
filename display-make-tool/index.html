@@ -51,7 +51,13 @@
     </div>
 
     <aside class="sidebar" aria-label="操作パネル">
+      <div class="tabBar">
+        <button id="tabBtnImages" class="tabBtn active" type="button">画像</button>
+        <button id="tabBtnText" class="tabBtn" type="button">テキスト</button>
+        <button id="tabBtnExport" class="tabBtn" type="button">出力</button>
+      </div>
 
+      <div id="tabImages" class="tabPanel active">
       <div class="panel">
         <strong>画像読み込み(クリックorドロップ)</strong><br>
         <label>プレビュー内で掴んで移動、スクロールで拡縮できます。</label>
@@ -150,6 +156,7 @@
           <input id="bgSubPicAlpha" type="range" min="0" max="100" value="100">
           <div id="bgSubPicAlphaVal" class="val">100%</div>
           </div>
+          </div>
         </div>
 
         <div class="row positionRow">
@@ -236,10 +243,11 @@
           <input id="bgPicY" class="posInput" type="number" step="1">
         </div>
         <div class="slotControls"><button id="resetBgPicPos" class="btn">デフォルト配置に戻す</button></div>
-
+      </div>
       </div>
 
 
+      <div id="tabText" class="tabPanel">
       <div class="panel">
         <strong>テキスト</strong><br>
 
@@ -303,7 +311,9 @@
         </div>
 
       </div>
+      </div>
 
+      <div id="tabExport" class="tabPanel">
       <div class="panel">
         <strong>出力形式</strong>
         <select id="format">
@@ -312,6 +322,7 @@
           <option value="gif">GIF</option>
         </select>
         <button id="exportBtn" class="btn btnPrimary">エクスポート</button>
+      </div>
       </div>
 
     </aside>

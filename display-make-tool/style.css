@@ -391,3 +391,40 @@ input[type="range"]:disabled {
     padding: 2px 4px;
     font-size: 11px;
 }
+
+.tabBar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 0;
+}
+
+.tabBtn {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    background: #f3f3f3;
+    border-radius: 6px 6px 0 0;
+    font-size: 13px;
+    color: #555;
+    cursor: pointer;
+}
+
+.tabBtn.active {
+    background: #fff;
+    color: #222;
+    border-color: #ddd;
+    border-bottom-color: transparent;
+}
+
+.tabPanel {
+    display: none;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 10px 10px 0;
+    background: #fff;
+}
+
+.tabPanel.active {
+    display: block;
+}
