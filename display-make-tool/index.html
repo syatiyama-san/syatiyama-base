@@ -257,49 +257,84 @@
       </div>
 
       <div class="panel">
-        <strong>テキスト</strong><br>
-        <label style="margin-top:8px;">フォント</label><select id="fontSelect"></select>
-        <label style="margin-top:8px;">サイズ</label><input id="fontSize" type="number" value="60">
-        <label style="margin-top:8px;">色</label><input id="fontColor" type="color" value="#000000">
+        <strong>テキスト1</strong>
+        <textarea id="text1">シナリオ</textarea>
         <label style="margin-top:8px;display:block;">文字の向き</label>
         <label style="margin-right:12px;">
-          <input id="textOrientHorizontal" name="textOrient" type="radio" value="horizontal" checked>横
+          <input id="text1OrientHorizontal" name="text1Orient" type="radio" value="horizontal" checked>横書き
         </label>
         <label>
-          <input id="textOrientVertical" name="textOrient" type="radio" value="vertical">縦
+          <input id="text1OrientVertical" name="text1Orient" type="radio" value="vertical">縦書き
         </label>
         <br>
-
-        <div class="row positionRow">
-          <label>text1</label>
+        <label style="margin-top:8px;">フォント</label><select id="text1FontSelect"></select>
+        <label style="margin-top:8px;">サイズ</label><input id="text1FontSize" type="number" value="60">
+        <label style="margin-top:8px;">色</label><input id="text1FontColor" type="color" value="#000000">
+        <div class="row positionRow" style="margin-top:8px;">
           <label>X：</label>
           <input id="text1X" class="posInput" type="number" step="1">
           <label>Y：</label>
           <input id="text1Y" class="posInput" type="number" step="1">
         </div>
-        <textarea id="text1">シナリオ</textarea>
-        <div class="row positionRow">
-          <label>text2</label>
+        <div class="slotControls" style="margin-top:6px;">
+          <button id="resetText1PosBtn" class="btn">デフォルト配置に戻す</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <strong>テキスト2</strong>
+        <textarea id="text2">ハンドアウト</textarea>
+        <label style="margin-top:8px;display:block;">文字の向き</label>
+        <label style="margin-right:12px;">
+          <input id="text2OrientHorizontal" name="text2Orient" type="radio" value="horizontal" checked>横書き
+        </label>
+        <label>
+          <input id="text2OrientVertical" name="text2Orient" type="radio" value="vertical">縦書き
+        </label>
+        <br>
+        <label style="margin-top:8px;">フォント</label><select id="text2FontSelect"></select>
+        <label style="margin-top:8px;">サイズ</label><input id="text2FontSize" type="number" value="60">
+        <label style="margin-top:8px;">色</label><input id="text2FontColor" type="color" value="#000000">
+        <div class="row positionRow" style="margin-top:8px;">
           <label>X：</label>
           <input id="text2X" class="posInput" type="number" step="1">
           <label>Y：</label>
           <input id="text2Y" class="posInput" type="number" step="1">
         </div>
-        <textarea id="text2">ハンドアウト</textarea>
-        <div class="row positionRow">
-          <label>text3</label>
+        <div class="slotControls" style="margin-top:6px;">
+          <button id="resetText2PosBtn" class="btn">デフォルト配置に戻す</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <strong>テキスト3</strong>
+        <textarea id="text3">お名前</textarea>
+        <label style="margin-top:8px;display:block;">文字の向き</label>
+        <label style="margin-right:12px;">
+          <input id="text3OrientHorizontal" name="text3Orient" type="radio" value="horizontal" checked>横書き
+        </label>
+        <label>
+          <input id="text3OrientVertical" name="text3Orient" type="radio" value="vertical">縦書き
+        </label>
+        <br>
+        <label style="margin-top:8px;">フォント</label><select id="text3FontSelect"></select>
+        <label style="margin-top:8px;">サイズ</label><input id="text3FontSize" type="number" value="60">
+        <label style="margin-top:8px;">色</label><input id="text3FontColor" type="color" value="#000000">
+        <div class="row positionRow" style="margin-top:8px;">
           <label>X：</label>
           <input id="text3X" class="posInput" type="number" step="1">
           <label>Y：</label>
           <input id="text3Y" class="posInput" type="number" step="1">
         </div>
-        <textarea id="text3">お名前</textarea>
-
-        <div class="slotControls" style="margin-top:8px;">
-          <button id="resetTextPosBtn" class="btn">デフォルト配置に戻す</button>
+        <div class="slotControls" style="margin-top:6px;">
+          <button id="resetText3PosBtn" class="btn">デフォルト配置に戻す</button>
         </div>
-
       </div>
+
+      <div class="slotControls" style="margin-top:8px;">
+        <button id="resetTextPosBtn" class="btn">全てデフォルト配置に戻す</button>
+      </div>
+      <div style="height:8px;"></div>
       </div>
 
       <div id="tabExport" class="tabPanel">

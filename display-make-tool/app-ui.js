@@ -67,11 +67,24 @@
     const text2Y = document.getElementById('text2Y');
     const text3X = document.getElementById('text3X');
     const text3Y = document.getElementById('text3Y');
-    const fontSelect = document.getElementById('fontSelect');
-    const fontSizeEl = document.getElementById('fontSize');
-    const fontColorEl = document.getElementById('fontColor');
-    const textOrientHorizontal = document.getElementById('textOrientHorizontal');
-    const textOrientVertical = document.getElementById('textOrientVertical');
+
+    const text1FontSelect = document.getElementById('text1FontSelect');
+    const text1FontSize = document.getElementById('text1FontSize');
+    const text1FontColor = document.getElementById('text1FontColor');
+    const text1OrientHorizontal = document.getElementById('text1OrientHorizontal');
+    const text1OrientVertical = document.getElementById('text1OrientVertical');
+
+    const text2FontSelect = document.getElementById('text2FontSelect');
+    const text2FontSize = document.getElementById('text2FontSize');
+    const text2FontColor = document.getElementById('text2FontColor');
+    const text2OrientHorizontal = document.getElementById('text2OrientHorizontal');
+    const text2OrientVertical = document.getElementById('text2OrientVertical');
+
+    const text3FontSelect = document.getElementById('text3FontSelect');
+    const text3FontSize = document.getElementById('text3FontSize');
+    const text3FontColor = document.getElementById('text3FontColor');
+    const text3OrientHorizontal = document.getElementById('text3OrientHorizontal');
+    const text3OrientVertical = document.getElementById('text3OrientVertical');
     const mainPicX = document.getElementById('mainPicX');
     const mainPicY = document.getElementById('mainPicY');
     const subPicX = document.getElementById('subPicX');
@@ -288,19 +301,49 @@
             if(bandColor && state.ui && typeof state.ui.bandColor === 'string'){
                 bandColor.value = state.ui.bandColor;
             }
-            if(fontSizeEl && state.ui && typeof state.ui.fontSize === 'number'){
-                fontSizeEl.value = state.ui.fontSize;
+            const defaultFontSize = (state.ui && typeof state.ui.fontSize === 'number') ? state.ui.fontSize : 60;
+            const defaultFontColor = (state.ui && typeof state.ui.fontColor === 'string') ? state.ui.fontColor : '#000000';
+            const defaultFontFamily = (state.ui && typeof state.ui.fontFamily === 'string') ? state.ui.fontFamily : 'Arial';
+
+            function applyTextStyleToUI(textObj, controls){
+                if(!controls) return;
+                const fontSize = (textObj && typeof textObj.fontSize === 'number') ? textObj.fontSize : defaultFontSize;
+                const fontColor = (textObj && typeof textObj.fontColor === 'string') ? textObj.fontColor : defaultFontColor;
+                const fontFamily = (textObj && typeof textObj.fontFamily === 'string') ? textObj.fontFamily : defaultFontFamily;
+                const orient = (textObj && textObj.textOrientation === 'vertical') ? 'vertical' : 'horizontal';
+                if(controls.fontSize) controls.fontSize.value = fontSize;
+                if(controls.fontColor) controls.fontColor.value = fontColor;
+                if(controls.fontSelect) controls.fontSelect.value = fontFamily;
+                if(controls.orientH) controls.orientH.checked = (orient === 'horizontal');
+                if(controls.orientV) controls.orientV.checked = (orient === 'vertical');
             }
-            if(fontColorEl && state.ui && typeof state.ui.fontColor === 'string'){
-                fontColorEl.value = state.ui.fontColor;
+
+            if(state.texts && state.texts[0]){
+                applyTextStyleToUI(state.texts[0], {
+                    fontSize: text1FontSize,
+                    fontColor: text1FontColor,
+                    fontSelect: text1FontSelect,
+                    orientH: text1OrientHorizontal,
+                    orientV: text1OrientVertical
+                });
             }
-            if(textOrientHorizontal && textOrientVertical && state.ui && typeof state.ui.textOrientation === 'string'){
-                const orient = (state.ui.textOrientation === 'vertical') ? 'vertical' : 'horizontal';
-                textOrientHorizontal.checked = (orient === 'horizontal');
-                textOrientVertical.checked = (orient === 'vertical');
+            if(state.texts && state.texts[1]){
+                applyTextStyleToUI(state.texts[1], {
+                    fontSize: text2FontSize,
+                    fontColor: text2FontColor,
+                    fontSelect: text2FontSelect,
+                    orientH: text2OrientHorizontal,
+                    orientV: text2OrientVertical
+                });
             }
-            if(fontSelect && state.ui && typeof state.ui.fontFamily === 'string'){
-                fontSelect.value = state.ui.fontFamily;
+            if(state.texts && state.texts[2]){
+                applyTextStyleToUI(state.texts[2], {
+                    fontSize: text3FontSize,
+                    fontColor: text3FontColor,
+                    fontSelect: text3FontSelect,
+                    orientH: text3OrientHorizontal,
+                    orientV: text3OrientVertical
+                });
             }
             if(text1El && state.texts && state.texts[0]){
                 text1El.value = state.texts[0].text || '';
@@ -551,43 +594,6 @@
             if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
         });
         bandColor._bound = true;
-    }
-
-    if(fontColorEl && !fontColorEl._bound){
-        fontColorEl.addEventListener('input', function(){
-            try {
-                state.ui = state.ui || {};
-                state.ui.fontColor = fontColorEl.value;
-                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
-            } catch(e){
-                console.warn('fontColorEl input error', e);
-            }
-        });
-        fontColorEl.addEventListener('change', function(){
-            if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
-        });
-        fontColorEl._bound = true;
-    }
-
-    function setTextOrientation(orient){
-        state.ui = state.ui || {};
-        state.ui.textOrientation = (orient === 'vertical') ? 'vertical' : 'horizontal';
-        if(textOrientHorizontal) textOrientHorizontal.checked = (state.ui.textOrientation === 'horizontal');
-        if(textOrientVertical) textOrientVertical.checked = (state.ui.textOrientation === 'vertical');
-        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
-    }
-
-    if(textOrientHorizontal && !textOrientHorizontal._bound){
-        textOrientHorizontal.addEventListener('change', function(){
-            if(this.checked) setTextOrientation('horizontal');
-        });
-        textOrientHorizontal._bound = true;
-    }
-    if(textOrientVertical && !textOrientVertical._bound){
-        textOrientVertical.addEventListener('change', function(){
-            if(this.checked) setTextOrientation('vertical');
-        });
-        textOrientVertical._bound = true;
     }
 
     function setBandOrientation(orient){
@@ -1149,8 +1155,10 @@
         subPicShapeCircle, subPicShapeDiamond,
         bandColor, bandHeight, bandOrientHorizontal, bandOrientVertical,
         bgSubPic, bgSubPicAlpha, bgSubPicAlphaVal,
-        text1El,text2El,text3El,text1X,text1Y,text2X,text2Y,text3X,text3Y,fontSelect,fontSizeEl,fontColorEl,
-        textOrientHorizontal,textOrientVertical,
+        text1El,text2El,text3El,text1X,text1Y,text2X,text2Y,text3X,text3Y,
+        text1FontSelect,text1FontSize,text1FontColor,text1OrientHorizontal,text1OrientVertical,
+        text2FontSelect,text2FontSize,text2FontColor,text2OrientHorizontal,text2OrientVertical,
+        text3FontSelect,text3FontSize,text3FontColor,text3OrientHorizontal,text3OrientVertical,
         exportBtn,formatSel,
         wmPicOpacity
     };
@@ -1197,7 +1205,9 @@
     setupSlot(slotSysPic, sysPicInput, 'sysPic', infoSysPic, thumbSysPic, metaSysPic, removeSysPic);
 
     if(utils && typeof utils.populateFontSelect === 'function'){
-        utils.populateFontSelect(fontSelect);
+        if(text1FontSelect) utils.populateFontSelect(text1FontSelect);
+        if(text2FontSelect) utils.populateFontSelect(text2FontSelect);
+        if(text3FontSelect) utils.populateFontSelect(text3FontSelect);
     }
 
     state.ui = state.ui || {};

@@ -8,6 +8,26 @@
     const subPicDefault = { x: 5, y: 160, sizePx: 1200, min: 200, max: 2000 };
     const refPos = { mainPic: { x: 1050, y: 80, scale: 1.5 }, subPic: { x: subPicDefault.x, y: subPicDefault.y } };
 
+    const textStyleDefault = {
+        fontFamily: 'Arial',
+        fontSize: 60,
+        fontColor: '#000000',
+        textOrientation: 'horizontal'
+    };
+
+    function createTextState(id, text, x, y){
+        return {
+            id,
+            text,
+            x,
+            y,
+            fontFamily: textStyleDefault.fontFamily,
+            fontSize: textStyleDefault.fontSize,
+            fontColor: textStyleDefault.fontColor,
+            textOrientation: textStyleDefault.textOrientation
+        };
+    }
+
     const state = {
         width: canvas.width || 2000,
         height: canvas.height || 2000,
@@ -78,9 +98,9 @@
             }
         },
         texts: [
-            { id:'text1', text:'シナリオ', x: Math.round(canvas.width * 0.265), y: Math.round(canvas.height * 0.825) },
-            { id:'text2', text:'ハンドアウト', x: Math.round(canvas.width * 0.265), y: Math.round(canvas.height * 0.885) },
-            { id:'text3', text:'お名前', x: Math.round(canvas.width * 0.265), y: Math.round(canvas.height * 0.945) }
+            createTextState('text1', 'シナリオ', Math.round(canvas.width * 0.265), Math.round(canvas.height * 0.825)),
+            createTextState('text2', 'ハンドアウト', Math.round(canvas.width * 0.265), Math.round(canvas.height * 0.885)),
+            createTextState('text3', 'お名前', Math.round(canvas.width * 0.265), Math.round(canvas.height * 0.945))
         ],
         dragging: null,
         dragOffset: { x:0, y:0 }

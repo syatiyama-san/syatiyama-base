@@ -43,6 +43,16 @@
         return false;
     }
 
+    function getTextStyle(t){
+        const fontSize = (t && typeof t.fontSize === 'number') ? t.fontSize : ((state.ui && typeof state.ui.fontSize === 'number') ? state.ui.fontSize : 60);
+        const fontFamily = (t && typeof t.fontFamily === 'string') ? t.fontFamily : ((state.ui && typeof state.ui.fontFamily === 'string') ? state.ui.fontFamily : 'Arial');
+        const fontColor = (t && typeof t.fontColor === 'string') ? t.fontColor : ((state.ui && typeof state.ui.fontColor === 'string') ? state.ui.fontColor : '#000000');
+        const textOrientation = (t && t.textOrientation === 'vertical') ? 'vertical' : ((state.ui && state.ui.textOrientation === 'vertical') ? 'vertical' : 'horizontal');
+            const fontSpec = `${fontSize}px "${fontFamily}"`;
+        const lineHeight = Math.round(fontSize * 1.15);
+        return { fontSize, fontFamily, fontColor, textOrientation, fontSpec, lineHeight };
+    }
+
     async function draw(){
         const ctx = ensureCanvasAndContext();
         if(!ctx){
@@ -309,32 +319,29 @@
             console.error('draw sysPic error', e);
         }
         try {
-            const size = (uiRefs && uiRefs.fontSizeEl) ? (parseInt(uiRefs.fontSizeEl.value,10) || 60) : 60;
-            const color = (uiRefs && uiRefs.fontColorEl) ? uiRefs.fontColorEl.value || '#000000' : '#000000';
-            const font = (uiRefs && uiRefs.fontSelect) ? uiRefs.fontSelect.value || 'Arial' : 'Arial';
-            const fontSpec = `${size}px "${font}"`;
-            const lineHeight = Math.round(size * 1.15);
-            const textOrient = (state.ui && state.ui.textOrientation) ? state.ui.textOrientation : 'horizontal';
             ctx.textBaseline = 'top';
-            ctx.fillStyle = color;
-            ctx.font = fontSpec;
             ctx.shadowColor = 'rgba(0,0,0,0.3)';
             ctx.shadowBlur = 8;
             const margin = 220;
             const maxWidth = Math.max(200, state.width - margin - 220);
             for(let i = 0; i < (state.texts || []).length; i++){
                 const t = state.texts[i];
+                const style = getTextStyle(t);
+                ctx.fillStyle = style.fontColor;
+                ctx.font = style.fontSpec;
+                const lineHeight = style.lineHeight;
+                const textOrient = style.textOrientation;
                 if(textOrient === 'vertical'){
                     const cols = String(t.text || '').split('\n');
                     for(let ci = 0; ci < cols.length; ci++){
                         let row = 0;
                         for(const ch of cols[ci]){
-                            ctx.fillText(ch, t.x + ci * lineHeight, t.y + row * lineHeight);
+                            ctx.fillText(ch, t.x - ci * lineHeight, t.y + row * lineHeight);
                             row++;
                         }
                     }
                 } else {
-                    const block = utils.measureTextBlock ? utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight) : { lines: [t.text] };
+                    const block = utils.measureTextBlock ? utils.measureTextBlock(t.text, maxWidth, style.fontSpec, lineHeight) : { lines: [t.text] };
                     const lines = block.lines || [];
                     for(let li = 0; li < lines.length; li++){
                         ctx.fillText(lines[li], t.x, t.y + li * lineHeight);
@@ -362,11 +369,10 @@
         if(state.hovering) {
             if(state.hovering.type === 'text') {
                 const t = state.texts[state.hovering.index];
-                const size = (uiRefs && uiRefs.fontSizeEl) ? (parseInt(uiRefs.fontSizeEl.value,10) || 60) : 60;
-                const font = (uiRefs && uiRefs.fontSelect) ? uiRefs.fontSelect.value || 'Arial' : 'Arial';
-                const fontSpec = `${size}px "${font}"`;
-                const lineHeight = Math.round(size * 1.15);
-                const textOrient = (state.ui && state.ui.textOrientation) ? state.ui.textOrientation : 'horizontal';
+                const style = getTextStyle(t);
+                const fontSpec = style.fontSpec;
+                const lineHeight = style.lineHeight;
+                const textOrient = style.textOrientation;
                 let w = 0; let h = 0;
                 if(textOrient === 'vertical'){
                     const cols = String(t.text || '').split('\n');
@@ -384,12 +390,13 @@
                     h = block.height || lineHeight;
                 }
                 
+                const hoverX = (textOrient === 'vertical') ? (t.x - (w - lineHeight)) : t.x;
                 ctx.save();
                 ctx.fillStyle = 'rgba(70, 130, 180, 0.5)';
-                ctx.fillRect(t.x - 5, t.y - 5, w + 10, h + 10);
+                ctx.fillRect(hoverX - 5, t.y - 5, w + 10, h + 10);
                 ctx.strokeStyle = 'rgba(70, 130, 180, 0.9)';
                 ctx.lineWidth = 2;
-                ctx.strokeRect(t.x - 5, t.y - 5, w + 10, h + 10);
+                ctx.strokeRect(hoverX - 5, t.y - 5, w + 10, h + 10);
                 ctx.restore();
             } else if(state.hovering.type === 'image') {
                 const obj = state.images[state.hovering.key];

@@ -13,9 +13,21 @@
     }
 
     const refs = (ui && ui.refs) ? ui.refs : {
-        fontSizeEl: document.getElementById('fontSize'),
-        fontSelect: document.getElementById('fontSelect'),
-        fontColorEl: document.getElementById('fontColor'),
+        text1FontSelect: document.getElementById('text1FontSelect'),
+        text1FontSize: document.getElementById('text1FontSize'),
+        text1FontColor: document.getElementById('text1FontColor'),
+        text1OrientHorizontal: document.getElementById('text1OrientHorizontal'),
+        text1OrientVertical: document.getElementById('text1OrientVertical'),
+        text2FontSelect: document.getElementById('text2FontSelect'),
+        text2FontSize: document.getElementById('text2FontSize'),
+        text2FontColor: document.getElementById('text2FontColor'),
+        text2OrientHorizontal: document.getElementById('text2OrientHorizontal'),
+        text2OrientVertical: document.getElementById('text2OrientVertical'),
+        text3FontSelect: document.getElementById('text3FontSelect'),
+        text3FontSize: document.getElementById('text3FontSize'),
+        text3FontColor: document.getElementById('text3FontColor'),
+        text3OrientHorizontal: document.getElementById('text3OrientHorizontal'),
+        text3OrientVertical: document.getElementById('text3OrientVertical'),
         subPicCropX: document.getElementById('subPicCropX'),
         subPicCropY: document.getElementById('subPicCropY'),
         subPicZoom: document.getElementById('subPicZoom'),
@@ -35,8 +47,6 @@
         text2Y: document.getElementById('text2Y'),
         text3X: document.getElementById('text3X'),
         text3Y: document.getElementById('text3Y'),
-        textOrientHorizontal: document.getElementById('textOrientHorizontal'),
-        textOrientVertical: document.getElementById('textOrientVertical'),
         exportBtn: document.getElementById('exportBtn'),
         formatSel: document.getElementById('format'),
         wmPicOpacity: document.getElementById('wmPicOpacity'),
@@ -81,6 +91,48 @@
         { x: 0.265, y: 0.945 }
     ];
 
+    function resetSingleTextToDefault(idx){
+        if(!state.texts || !state.texts[idx] || !textDefaultPos[idx]) return;
+        state.texts[idx].x = Math.round(state.width * textDefaultPos[idx].x);
+        state.texts[idx].y = Math.round(state.height * textDefaultPos[idx].y);
+        state.texts[idx].textOrientation = 'horizontal';
+        if(idx === 0){
+            if(refs.text1OrientHorizontal) refs.text1OrientHorizontal.checked = true;
+            if(refs.text1OrientVertical) refs.text1OrientVertical.checked = false;
+        }
+        if(idx === 1){
+            if(refs.text2OrientHorizontal) refs.text2OrientHorizontal.checked = true;
+            if(refs.text2OrientVertical) refs.text2OrientVertical.checked = false;
+        }
+        if(idx === 2){
+            if(refs.text3OrientHorizontal) refs.text3OrientHorizontal.checked = true;
+            if(refs.text3OrientVertical) refs.text3OrientVertical.checked = false;
+        }
+        if(idx === 0){ if(refs.text1X) refs.text1X.value = Math.round(state.texts[idx].x || 0); if(refs.text1Y) refs.text1Y.value = Math.round(state.texts[idx].y || 0); }
+        if(idx === 1){ if(refs.text2X) refs.text2X.value = Math.round(state.texts[idx].x || 0); if(refs.text2Y) refs.text2Y.value = Math.round(state.texts[idx].y || 0); }
+        if(idx === 2){ if(refs.text3X) refs.text3X.value = Math.round(state.texts[idx].x || 0); if(refs.text3Y) refs.text3Y.value = Math.round(state.texts[idx].y || 0); }
+        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+    }
+
+    function normalizeTextStyle(t){
+        if(!t) return;
+        if(typeof t.fontSize !== 'number') t.fontSize = (state.ui && typeof state.ui.fontSize === 'number') ? state.ui.fontSize : 60;
+        if(typeof t.fontFamily !== 'string') t.fontFamily = (state.ui && typeof state.ui.fontFamily === 'string') ? state.ui.fontFamily : 'Arial';
+        if(typeof t.fontColor !== 'string') t.fontColor = (state.ui && typeof state.ui.fontColor === 'string') ? state.ui.fontColor : '#000000';
+        if(typeof t.textOrientation !== 'string') t.textOrientation = (state.ui && typeof state.ui.textOrientation === 'string') ? state.ui.textOrientation : 'horizontal';
+    }
+
+    function getTextStyle(idx){
+        const t = (state.texts && state.texts[idx]) ? state.texts[idx] : null;
+        if(t) normalizeTextStyle(t);
+        const fontSize = (t && typeof t.fontSize === 'number') ? t.fontSize : 60;
+        const fontFamily = (t && typeof t.fontFamily === 'string') ? t.fontFamily : 'Arial';
+        const textOrientation = (t && t.textOrientation === 'vertical') ? 'vertical' : 'horizontal';
+        const fontSpec = `${fontSize}px "${fontFamily}"`;
+        const lineHeight = Math.round(fontSize * 1.15);
+        return { fontSize, fontFamily, textOrientation, fontSpec, lineHeight };
+    }
+
     function resetTextsToDefaults(){
         for(let i = 0; i < state.texts.length; i++){
             if(textDefaultPos[i]){
@@ -88,10 +140,15 @@
                 state.texts[i].y = Math.round(state.height * textDefaultPos[i].y);
             }
         }
-        state.ui = state.ui || {};
-        state.ui.textOrientation = 'horizontal';
-        if(refs.textOrientHorizontal) refs.textOrientHorizontal.checked = true;
-        if(refs.textOrientVertical) refs.textOrientVertical.checked = false;
+        for(let i = 0; i < state.texts.length; i++){
+            state.texts[i].textOrientation = 'horizontal';
+        }
+        if(refs.text1OrientHorizontal) refs.text1OrientHorizontal.checked = true;
+        if(refs.text1OrientVertical) refs.text1OrientVertical.checked = false;
+        if(refs.text2OrientHorizontal) refs.text2OrientHorizontal.checked = true;
+        if(refs.text2OrientVertical) refs.text2OrientVertical.checked = false;
+        if(refs.text3OrientHorizontal) refs.text3OrientHorizontal.checked = true;
+        if(refs.text3OrientVertical) refs.text3OrientVertical.checked = false;
         if(refs.text1X) refs.text1X.value = Math.round(state.texts[0].x || 0);
         if(refs.text1Y) refs.text1Y.value = Math.round(state.texts[0].y || 0);
         if(refs.text2X) refs.text2X.value = Math.round(state.texts[1].x || 0);
@@ -111,14 +168,13 @@
     canvas.addEventListener('mousedown', e=>{
         try {
             const p = canvasPointFromEvent(e);
-            const size = parseInt((refs.fontSizeEl && refs.fontSizeEl.value) || 80,10) || 80;
-            const font = (refs.fontSelect && refs.fontSelect.value) || 'Arial';
-            const fontSpec = `${size}px "${font}"`;
-            const lineHeight = Math.round(size * 1.15);
-            const textOrient = (state.ui && state.ui.textOrientation) ? state.ui.textOrientation : 'horizontal';
             const maxWidth = Math.max(200, state.width - 220 - 220);
             for(let i = state.texts.length - 1; i >= 0; i--){
                 const t = state.texts[i];
+                const style = getTextStyle(i);
+                const fontSpec = style.fontSpec;
+                const lineHeight = style.lineHeight;
+                const textOrient = style.textOrientation;
                 let w = 0; let h = 0;
                 if(textOrient === 'vertical'){
                     const cols = String(t.text || '').split('\n');
@@ -134,7 +190,8 @@
                     w = block.width || maxWidth;
                     h = block.height;
                 }
-                if(p.x >= t.x && p.x <= t.x + w && p.y >= t.y && p.y <= t.y + h){
+                const hitX = (textOrient === 'vertical') ? (t.x - (w - lineHeight)) : t.x;
+                if(p.x >= hitX && p.x <= hitX + w && p.y >= t.y && p.y <= t.y + h){
                     if(window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
                         state._dragSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
                     }
@@ -693,37 +750,127 @@
     bindTextPosInputs(1, refs.text2X, refs.text2Y);
     bindTextPosInputs(2, refs.text3X, refs.text3Y);
 
+    function bindTextStyleControls(idx, controls){
+        if(!state.texts || !state.texts[idx] || !controls) return;
+        const t = state.texts[idx];
+        normalizeTextStyle(t);
+
+        if(controls.fontSelect && !controls.fontSelect._bound){
+            bindHistoryStart(controls.fontSelect);
+            const applyFontChange = ()=>{
+                try {
+                    const f = (controls.fontSelect.value || 'Arial').toString();
+                    t.fontFamily = f;
+                    if (document && document.fonts && typeof document.fonts.load === 'function') {
+                        document.fonts.load(`16px "${f}"`).then(()=>{
+                            if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                        }).catch(()=>{
+                            if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                        });
+                    } else {
+                        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                    }
+                } catch(e){
+                    if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                }
+            };
+            controls.fontSelect.addEventListener('change', applyFontChange);
+            controls.fontSelect.addEventListener('input', applyFontChange);
+            controls.fontSelect.addEventListener('change', ()=>{ commitHistorySnapshot(controls.fontSelect); });
+            controls.fontSelect._bound = true;
+        }
+
+        if(controls.fontSize && !controls.fontSize._bound){
+            bindHistoryStart(controls.fontSize);
+            controls.fontSize.addEventListener('input', ()=>{
+                t.fontSize = parseInt(controls.fontSize.value,10) || 0;
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            });
+            controls.fontSize.addEventListener('change', ()=>{ commitHistorySnapshot(controls.fontSize); });
+            controls.fontSize._bound = true;
+        }
+
+        if(controls.fontColor && !controls.fontColor._bound){
+            bindHistoryStart(controls.fontColor);
+            controls.fontColor.addEventListener('input', ()=>{
+                t.fontColor = controls.fontColor.value || '#000000';
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            });
+            controls.fontColor.addEventListener('change', ()=>{
+                t.fontColor = controls.fontColor.value || '#000000';
+                commitHistorySnapshot(controls.fontColor);
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            });
+            controls.fontColor._bound = true;
+        }
+
+        function setOrientation(orient){
+            t.textOrientation = (orient === 'vertical') ? 'vertical' : 'horizontal';
+            if(controls.orientH) controls.orientH.checked = (t.textOrientation === 'horizontal');
+            if(controls.orientV) controls.orientV.checked = (t.textOrientation === 'vertical');
+            if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+        }
+
+        if(controls.orientH && !controls.orientH._bound){
+            bindHistoryStart(controls.orientH);
+            controls.orientH.addEventListener('change', function(){
+                if(this.checked) setOrientation('horizontal');
+                commitHistorySnapshot(controls.orientH);
+            });
+            controls.orientH._bound = true;
+        }
+        if(controls.orientV && !controls.orientV._bound){
+            bindHistoryStart(controls.orientV);
+            controls.orientV.addEventListener('change', function(){
+                if(this.checked) setOrientation('vertical');
+                commitHistorySnapshot(controls.orientV);
+            });
+            controls.orientV._bound = true;
+        }
+
+        if(controls.fontSelect && controls.fontSelect.value) {
+            t.fontFamily = (controls.fontSelect.value || 'Arial').toString();
+        }
+        if(controls.fontSize && controls.fontSize.value){
+            t.fontSize = parseInt(controls.fontSize.value,10) || t.fontSize || 0;
+        }
+        if(controls.fontColor && controls.fontColor.value){
+            t.fontColor = controls.fontColor.value || t.fontColor || '#000000';
+        }
+        if(controls.orientV && controls.orientV.checked){
+            t.textOrientation = 'vertical';
+        } else if(controls.orientH){
+            t.textOrientation = 'horizontal';
+        }
+        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+    }
+
+    bindTextStyleControls(0, {
+        fontSelect: refs.text1FontSelect,
+        fontSize: refs.text1FontSize,
+        fontColor: refs.text1FontColor,
+        orientH: refs.text1OrientHorizontal,
+        orientV: refs.text1OrientVertical
+    });
+    bindTextStyleControls(1, {
+        fontSelect: refs.text2FontSelect,
+        fontSize: refs.text2FontSize,
+        fontColor: refs.text2FontColor,
+        orientH: refs.text2OrientHorizontal,
+        orientV: refs.text2OrientVertical
+    });
+    bindTextStyleControls(2, {
+        fontSelect: refs.text3FontSelect,
+        fontSize: refs.text3FontSize,
+        fontColor: refs.text3FontColor,
+        orientH: refs.text3OrientHorizontal,
+        orientV: refs.text3OrientVertical
+    });
+
     if(refs.bgSubPicAlpha) {
         bindHistoryStart(refs.bgSubPicAlpha);
         refs.bgSubPicAlpha.addEventListener('input', ()=>{ state.images.subPic.bgOpacity = parseInt(refs.bgSubPicAlpha.value,10)/100; if(refs.bgSubPicAlphaVal) refs.bgSubPicAlphaVal.textContent = refs.bgSubPicAlpha.value + '%'; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
         refs.bgSubPicAlpha.addEventListener('change', ()=>{ commitHistorySnapshot(refs.bgSubPicAlpha); });
-    }
-    if(refs.fontSelect) {
-        const applyFontChange = ()=>{
-            try {
-                state.ui = state.ui || {};
-                const f = (refs.fontSelect.value || 'Arial').toString();
-                state.ui.fontFamily = f;
-                if (document && document.fonts && typeof document.fonts.load === 'function') {
-                    document.fonts.load(`16px "${f}"`).then(()=>{
-                        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
-                    }).catch(()=>{
-                        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
-                    });
-                } else {
-                    if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
-                }
-            } catch(e){
-                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
-            }
-        };
-        refs.fontSelect.addEventListener('change', applyFontChange);
-        refs.fontSelect.addEventListener('input', applyFontChange);
-    }
-    if(refs.fontSizeEl) {
-        bindHistoryStart(refs.fontSizeEl);
-        refs.fontSizeEl.addEventListener('input', ()=>{ state.ui = state.ui || {}; state.ui.fontSize = parseInt(refs.fontSizeEl.value,10) || 0; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
-        refs.fontSizeEl.addEventListener('change', ()=>{ commitHistorySnapshot(refs.fontSizeEl); });
     }
     if(refs.wmPicOpacity) {
         bindHistoryStart(refs.wmPicOpacity);
@@ -873,8 +1020,8 @@
             baseX = imgX + gapX;
             baseY = imgY + imgH + gapY;
         }
-        const size = (ui && ui.refs && ui.refs.fontSizeEl) ? (parseInt(ui.refs.fontSizeEl.value,10) || 80) : 80;
-        const lineHeight = Math.round(size * 1.15);
+        const style = getTextStyle(0);
+        const lineHeight = style.lineHeight;
         const blockGap = Math.round(lineHeight * 0.6);
         for(let i = 0; i < state.texts.length; i++){
             state.texts[i].x = baseX;
@@ -904,6 +1051,27 @@
         const resetTextPosBtn = document.getElementById('resetTextPosBtn');
         if(resetTextPosBtn){
             resetTextPosBtn.addEventListener('click', ()=>{ resetTextsToDefaults(); });
+        }
+        const resetText1PosBtn = document.getElementById('resetText1PosBtn');
+        if(resetText1PosBtn){
+            resetText1PosBtn.addEventListener('click', ()=>{
+                if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
+                resetSingleTextToDefault(0);
+            });
+        }
+        const resetText2PosBtn = document.getElementById('resetText2PosBtn');
+        if(resetText2PosBtn){
+            resetText2PosBtn.addEventListener('click', ()=>{
+                if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
+                resetSingleTextToDefault(1);
+            });
+        }
+        const resetText3PosBtn = document.getElementById('resetText3PosBtn');
+        if(resetText3PosBtn){
+            resetText3PosBtn.addEventListener('click', ()=>{
+                if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
+                resetSingleTextToDefault(2);
+            });
         }
         ensureSysPicUIBindings();
     })();
