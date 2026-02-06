@@ -155,6 +155,16 @@
         if(refs.text2Y) refs.text2Y.value = Math.round(state.texts[1].y || 0);
         if(refs.text3X) refs.text3X.value = Math.round(state.texts[2].x || 0);
         if(refs.text3Y) refs.text3Y.value = Math.round(state.texts[2].y || 0);
+        state.ui = state.ui || {};
+        const defaultBandColor = (refs.bandColor && refs.bandColor.defaultValue) ? refs.bandColor.defaultValue : '#ffffff';
+        const defaultBandHeight = (refs.bandHeight && refs.bandHeight.defaultValue) ? parseInt(refs.bandHeight.defaultValue, 10) : 1000;
+        state.ui.bandColor = defaultBandColor;
+        state.ui.bandHeight = Number.isNaN(defaultBandHeight) ? 1000 : defaultBandHeight;
+        state.ui.bandOrientation = 'horizontal';
+        if(refs.bandColor) refs.bandColor.value = defaultBandColor;
+        if(refs.bandHeight) refs.bandHeight.value = state.ui.bandHeight;
+        if(refs.bandOrientHorizontal) refs.bandOrientHorizontal.checked = true;
+        if(refs.bandOrientVertical) refs.bandOrientVertical.checked = false;
         if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
     }
 
