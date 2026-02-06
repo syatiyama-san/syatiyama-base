@@ -819,13 +819,16 @@
 
     function bindTextStyleControls(idx, controls){
         if(!state.texts || !state.texts[idx] || !controls) return;
-        const t = state.texts[idx];
-        normalizeTextStyle(t);
+        const getTextRef = ()=> (state.texts && state.texts[idx]) ? state.texts[idx] : null;
+        const initText = getTextRef();
+        if(initText) normalizeTextStyle(initText);
 
         if(controls.fontSelect && !controls.fontSelect._bound){
             bindHistoryStart(controls.fontSelect);
             const applyFontChange = ()=>{
                 try {
+                    const t = getTextRef();
+                    if(!t) return;
                     const f = (controls.fontSelect.value || 'Arial').toString();
                     t.fontFamily = f;
                     if (document && document.fonts && typeof document.fonts.load === 'function') {
@@ -850,12 +853,16 @@
         if(controls.fontSize && !controls.fontSize._bound){
             bindHistoryStart(controls.fontSize);
             controls.fontSize.addEventListener('input', ()=>{
+                const t = getTextRef();
+                if(!t) return;
                 const v = parseInt(controls.fontSize.value,10);
                 if(Number.isNaN(v)) return;
                 t.fontSize = v;
                 if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
             });
             controls.fontSize.addEventListener('change', ()=>{
+                const t = getTextRef();
+                if(!t) return;
                 const v = parseInt(controls.fontSize.value,10);
                 const clamped = Number.isNaN(v) ? 20 : Math.max(20, v);
                 t.fontSize = clamped;
@@ -869,10 +876,14 @@
         if(controls.fontColor && !controls.fontColor._bound){
             bindHistoryStart(controls.fontColor);
             controls.fontColor.addEventListener('input', ()=>{
+                const t = getTextRef();
+                if(!t) return;
                 t.fontColor = controls.fontColor.value || '#000000';
                 if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
             });
             controls.fontColor.addEventListener('change', ()=>{
+                const t = getTextRef();
+                if(!t) return;
                 t.fontColor = controls.fontColor.value || '#000000';
                 commitHistorySnapshot(controls.fontColor);
                 if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
@@ -881,6 +892,8 @@
         }
 
         function setOrientation(orient){
+            const t = getTextRef();
+            if(!t) return;
             t.textOrientation = (orient === 'vertical') ? 'vertical' : 'horizontal';
             if(controls.orientH) controls.orientH.checked = (t.textOrientation === 'horizontal');
             if(controls.orientV) controls.orientV.checked = (t.textOrientation === 'vertical');
@@ -905,19 +918,24 @@
         }
 
         if(controls.fontSelect && controls.fontSelect.value) {
-            t.fontFamily = (controls.fontSelect.value || 'Arial').toString();
+            const t = getTextRef();
+            if(t) t.fontFamily = (controls.fontSelect.value || 'Arial').toString();
         }
         if(controls.fontSize && controls.fontSize.value){
             const v = parseInt(controls.fontSize.value,10);
-            if(!Number.isNaN(v)) t.fontSize = v;
+            const t = getTextRef();
+            if(!Number.isNaN(v) && t) t.fontSize = v;
         }
         if(controls.fontColor && controls.fontColor.value){
-            t.fontColor = controls.fontColor.value || t.fontColor || '#000000';
+            const t = getTextRef();
+            if(t) t.fontColor = controls.fontColor.value || t.fontColor || '#000000';
         }
         if(controls.orientV && controls.orientV.checked){
-            t.textOrientation = 'vertical';
+            const t = getTextRef();
+            if(t) t.textOrientation = 'vertical';
         } else if(controls.orientH){
-            t.textOrientation = 'horizontal';
+            const t = getTextRef();
+            if(t) t.textOrientation = 'horizontal';
         }
         if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
     }

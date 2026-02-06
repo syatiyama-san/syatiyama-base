@@ -162,6 +162,11 @@ canvas{
     background:linear-gradient(#fff,#fbfbfb);
 }
 
+.fileSlot.dragover{
+    border-color:#0b74de;
+    background:#eef6ff;
+}
+
 .slotControls{
     margin-top:8px;
     display:flex;

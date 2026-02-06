@@ -229,7 +229,7 @@
           <label>Y：</label>
           <input id="bgPicY" class="posInput" type="number" step="1">
         </div>
-        <div class="slotControls"><button id="resetBgPicPos" class="btn">デフォルト配置に戻す</button></div>
+        <div class="slotControls"><button id="resetBgPicPos" class="btn">背景をフィット</button></div>
       </div>
       </div>
 
@@ -346,6 +346,17 @@
         </select>
         <button id="exportBtn" class="btn btnPrimary">エクスポート</button>
       </div>
+      <div class="panel">
+        <strong style="display:block;margin-bottom:8px;">テンプレート</strong>
+        <div id="templateImportZone" class="fileSlot" style="margin-bottom:8px;">
+          <div class="title">テンプレートをインポート</div>
+          <input id="templateImportInput" type="file" accept="application/json" style="display:none;">
+          <div class="smallNote">クリックorドロップ</div>
+        </div>
+        <div class="slotControls">
+          <button id="templateExportBtn" class="btn btnPrimary">テンプレートをエクスポート</button>
+        </div>
+      </div>
       </div>
 
     </aside>
@@ -358,6 +369,7 @@
   <script src="app-ui.js" defer></script>
   <script src="app-interactions.js" defer></script>
   <script src="app-interactions-hover.js" defer></script>
+  <script src="app-template-io.js" defer></script>
   <script src="app-draw.js" defer></script>
 
 </body>
