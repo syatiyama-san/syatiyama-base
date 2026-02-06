@@ -96,17 +96,27 @@
         state.texts[idx].x = Math.round(state.width * textDefaultPos[idx].x);
         state.texts[idx].y = Math.round(state.height * textDefaultPos[idx].y);
         state.texts[idx].textOrientation = 'horizontal';
+        const defaultSize = (idx === 0 && refs.text1FontSize && refs.text1FontSize.defaultValue) ? parseInt(refs.text1FontSize.defaultValue,10)
+            : (idx === 1 && refs.text2FontSize && refs.text2FontSize.defaultValue) ? parseInt(refs.text2FontSize.defaultValue,10)
+            : (idx === 2 && refs.text3FontSize && refs.text3FontSize.defaultValue) ? parseInt(refs.text3FontSize.defaultValue,10)
+            : 60;
+        const safeDefaultSize = Number.isNaN(defaultSize) ? 60 : defaultSize;
+        const clampedDefaultSize = Math.max(20, safeDefaultSize);
+        state.texts[idx].fontSize = clampedDefaultSize;
         if(idx === 0){
             if(refs.text1OrientHorizontal) refs.text1OrientHorizontal.checked = true;
             if(refs.text1OrientVertical) refs.text1OrientVertical.checked = false;
+            if(refs.text1FontSize) refs.text1FontSize.value = clampedDefaultSize;
         }
         if(idx === 1){
             if(refs.text2OrientHorizontal) refs.text2OrientHorizontal.checked = true;
             if(refs.text2OrientVertical) refs.text2OrientVertical.checked = false;
+            if(refs.text2FontSize) refs.text2FontSize.value = clampedDefaultSize;
         }
         if(idx === 2){
             if(refs.text3OrientHorizontal) refs.text3OrientHorizontal.checked = true;
             if(refs.text3OrientVertical) refs.text3OrientVertical.checked = false;
+            if(refs.text3FontSize) refs.text3FontSize.value = clampedDefaultSize;
         }
         if(idx === 0){ if(refs.text1X) refs.text1X.value = Math.round(state.texts[idx].x || 0); if(refs.text1Y) refs.text1Y.value = Math.round(state.texts[idx].y || 0); }
         if(idx === 1){ if(refs.text2X) refs.text2X.value = Math.round(state.texts[idx].x || 0); if(refs.text2Y) refs.text2Y.value = Math.round(state.texts[idx].y || 0); }
@@ -143,12 +153,24 @@
         for(let i = 0; i < state.texts.length; i++){
             state.texts[i].textOrientation = 'horizontal';
         }
+        const defaultSize1Raw = (refs.text1FontSize && refs.text1FontSize.defaultValue) ? parseInt(refs.text1FontSize.defaultValue,10) : 60;
+        const defaultSize2Raw = (refs.text2FontSize && refs.text2FontSize.defaultValue) ? parseInt(refs.text2FontSize.defaultValue,10) : 60;
+        const defaultSize3Raw = (refs.text3FontSize && refs.text3FontSize.defaultValue) ? parseInt(refs.text3FontSize.defaultValue,10) : 60;
+        const defaultSize1 = Math.max(20, Number.isNaN(defaultSize1Raw) ? 60 : defaultSize1Raw);
+        const defaultSize2 = Math.max(20, Number.isNaN(defaultSize2Raw) ? 60 : defaultSize2Raw);
+        const defaultSize3 = Math.max(20, Number.isNaN(defaultSize3Raw) ? 60 : defaultSize3Raw);
+        if(state.texts[0]) state.texts[0].fontSize = defaultSize1;
+        if(state.texts[1]) state.texts[1].fontSize = defaultSize2;
+        if(state.texts[2]) state.texts[2].fontSize = defaultSize3;
         if(refs.text1OrientHorizontal) refs.text1OrientHorizontal.checked = true;
         if(refs.text1OrientVertical) refs.text1OrientVertical.checked = false;
         if(refs.text2OrientHorizontal) refs.text2OrientHorizontal.checked = true;
         if(refs.text2OrientVertical) refs.text2OrientVertical.checked = false;
         if(refs.text3OrientHorizontal) refs.text3OrientHorizontal.checked = true;
         if(refs.text3OrientVertical) refs.text3OrientVertical.checked = false;
+        if(refs.text1FontSize) refs.text1FontSize.value = defaultSize1;
+        if(refs.text2FontSize) refs.text2FontSize.value = defaultSize2;
+        if(refs.text3FontSize) refs.text3FontSize.value = defaultSize3;
         if(refs.text1X) refs.text1X.value = Math.round(state.texts[0].x || 0);
         if(refs.text1Y) refs.text1Y.value = Math.round(state.texts[0].y || 0);
         if(refs.text2X) refs.text2X.value = Math.round(state.texts[1].x || 0);
@@ -317,6 +339,41 @@
                 state._wheelCommitTimer = null;
             }, 200);
             const p = canvasPointFromEvent(e);
+            const maxWidth = Math.max(200, state.width - 220 - 220);
+            for(let i = state.texts.length - 1; i >= 0; i--){
+                const t = state.texts[i];
+                const style = getTextStyle(i);
+                const fontSpec = style.fontSpec;
+                const lineHeight = style.lineHeight;
+                const textOrient = style.textOrientation;
+                let w = 0; let h = 0;
+                if(textOrient === 'vertical'){
+                    const cols = String(t.text || '').split('\n');
+                    let maxRows = 0;
+                    for(const col of cols){
+                        const len = Array.from(col).length;
+                        if(len > maxRows) maxRows = len;
+                    }
+                    w = Math.max(1, cols.length) * lineHeight;
+                    h = Math.max(1, maxRows) * lineHeight;
+                } else {
+                    const block = utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight);
+                    w = block.width || maxWidth;
+                    h = block.height;
+                }
+                const hitX = (textOrient === 'vertical') ? (t.x - (w - lineHeight)) : t.x;
+                if(p.x >= hitX && p.x <= hitX + w && p.y >= t.y && p.y <= t.y + h){
+                    const delta = e.deltaY < 0 ? 1.05 : 0.95;
+                    const curSize = (typeof t.fontSize === 'number') ? t.fontSize : 60;
+                    const newSize = Math.max(20, Math.min(300, Math.round(curSize * delta)));
+                    t.fontSize = newSize;
+                    if(i === 0 && refs.text1FontSize) refs.text1FontSize.value = newSize;
+                    if(i === 1 && refs.text2FontSize) refs.text2FontSize.value = newSize;
+                    if(i === 2 && refs.text3FontSize) refs.text3FontSize.value = newSize;
+                    if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                    return;
+                }
+            }
             const imgs = ['mainPic','subPic','bgPic','wmPic','sysPic'].sort((a,b)=> (state.images[b] && state.images[b].z||0)-(state.images[a] && state.images[a].z||0));
             for(const k of imgs){
                 const obj = state.images[k];
@@ -793,10 +850,19 @@
         if(controls.fontSize && !controls.fontSize._bound){
             bindHistoryStart(controls.fontSize);
             controls.fontSize.addEventListener('input', ()=>{
-                t.fontSize = parseInt(controls.fontSize.value,10) || 0;
+                const v = parseInt(controls.fontSize.value,10);
+                if(Number.isNaN(v)) return;
+                t.fontSize = v;
                 if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
             });
-            controls.fontSize.addEventListener('change', ()=>{ commitHistorySnapshot(controls.fontSize); });
+            controls.fontSize.addEventListener('change', ()=>{
+                const v = parseInt(controls.fontSize.value,10);
+                const clamped = Number.isNaN(v) ? 20 : Math.max(20, v);
+                t.fontSize = clamped;
+                controls.fontSize.value = clamped;
+                commitHistorySnapshot(controls.fontSize);
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            });
             controls.fontSize._bound = true;
         }
 
@@ -842,7 +908,8 @@
             t.fontFamily = (controls.fontSelect.value || 'Arial').toString();
         }
         if(controls.fontSize && controls.fontSize.value){
-            t.fontSize = parseInt(controls.fontSize.value,10) || t.fontSize || 0;
+            const v = parseInt(controls.fontSize.value,10);
+            if(!Number.isNaN(v)) t.fontSize = v;
         }
         if(controls.fontColor && controls.fontColor.value){
             t.fontColor = controls.fontColor.value || t.fontColor || '#000000';
