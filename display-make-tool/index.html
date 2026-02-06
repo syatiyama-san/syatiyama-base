@@ -19,19 +19,25 @@
         <span class="home-icon">🏠</span>
       </a>
       <h3>ディスプレイ製作ツール</h3>
-      <div class="header-undo-redo">
-        <button id="undoBtn" class="undo-redo-btn undo-btn" title="元に戻す" aria-label="元に戻す">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-            <path d="M7 7v10c0 1.1.9 2 2 2h10v-2H9V7z"></path>
-            <path d="M15 2v2h4.59L8.41 20 10 18.41 18.59 9.82V14h2V2z" opacity="0.3"></path>
-          </svg>
-        </button>
-        <button id="redoBtn" class="undo-redo-btn redo-btn" title="やり直す" aria-label="やり直す">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-            <path d="M17 7v10c0 1.1-.9 2-2 2H5v-2h10V7z"></path>
-            <path d="M9 2v2H4.41L15.59 20 14 18.41 5.41 9.82V14h-2V2z" opacity="0.3"></path>
-          </svg>
-        </button>
+      <div class="header-actions">
+        <div class="header-undo-redo">
+          <button id="undoBtn" class="undo-redo-btn undo-btn" title="元に戻す" aria-label="元に戻す">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path d="M7 7v10c0 1.1.9 2 2 2h10v-2H9V7z"></path>
+              <path d="M15 2v2h4.59L8.41 20 10 18.41 18.59 9.82V14h2V2z" opacity="0.3"></path>
+            </svg>
+          </button>
+          <button id="redoBtn" class="undo-redo-btn redo-btn" title="やり直す" aria-label="やり直す">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path d="M17 7v10c0 1.1-.9 2-2 2H5v-2h10V7z"></path>
+              <path d="M9 2v2H4.41L15.59 20 14 18.41 5.41 9.82V14h-2V2z" opacity="0.3"></path>
+            </svg>
+          </button>
+          <button id="scrollTopBtn" class="header-action-btn" title="上へ" aria-label="上へ">上へ</button>
+        </div>
+        <div class="header-right-actions">
+          <button id="reloadBtn" class="header-action-btn" title="リセット" aria-label="リセット">リセット</button>
+        </div>
       </div>
     </div>
   </div>
@@ -59,13 +65,14 @@
 
       <div id="tabImages" class="tabPanel active">
       <div style="margin-bottom:12px;">
-        <label>クリックorドロップで画像読み込み。プレビュー内で掴んで移動、スクロールで拡縮できます。</label>
+        <label>画像はプレビュー内で掴んで移動、スクロールで拡縮できます。</label>
       </div>
 
       <div class="panel">
         <strong>立ち絵</strong><br>
         <div id="slotMainPic" class="fileSlot">
           <div class="title">立ち絵</div>
+          <div class="smallNote">クリックorドロップ</div>
           <input id="fileMainPic" type="file" accept="image/*" style="display:none;">
           <div id="infoMainPic" class="slotInfo" style="display:none;">
             <img id="thumbMainPic" class="thumb">
@@ -86,6 +93,7 @@
         <strong>立ち絵のアップ</strong><br>
         <div id="slotSubPic" class="fileSlot">
           <div class="title">立ち絵のアップ</div>
+          <div class="smallNote">クリックorドロップ</div>
           <input id="fileSubPic" type="file" accept="image/*" style="display:none;">
           <div id="infoSubPic" class="slotInfo" style="display:none;">
             <img id="thumbSubPic" class="thumb">
@@ -165,6 +173,7 @@
         <strong style="display:block;margin-bottom:8px;">ウォーターマーク</strong>
         <div id="slotWmPic" class="fileSlot">
           <div class="title">ウォーターマーク</div>
+          <div class="smallNote">クリックorドロップ</div>
           <input id="fileWmPic" type="file" accept="image/*" style="display:none;">
           <div id="infoWmPic" class="slotInfo" style="display:none;">
             <img id="thumbWmPic" class="thumb">
@@ -194,6 +203,7 @@
         <strong style="display:block;margin-bottom:8px;">システムロゴ</strong>
         <div id="slotSysPic" class="fileSlot">
           <div class="title">システム</div>
+          <div class="smallNote">クリックorドロップ</div>
           <input id="fileSysPic" type="file" accept="image/*" style="display:none;">
           <div id="infoSysPic" class="slotInfo" style="display:none;">
             <img id="thumbSysPic" class="thumb">
@@ -216,6 +226,7 @@
         <strong style="display:block;margin-bottom:8px;">背景</strong>
         <div id="slotBgPic" class="fileSlot">
           <div class="title">背景</div>
+          <div class="smallNote">クリックorドロップ</div>
           <input id="fileBgPic" type="file" accept="image/*" style="display:none;">
           <div id="infoBgPic" class="slotInfo" style="display:none;">
             <img id="thumbBgPic" class="thumb">

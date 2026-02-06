@@ -98,6 +98,8 @@
 
     const exportBtn = document.getElementById('exportBtn');
     const formatSel = document.getElementById('format');
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+    const reloadBtn = document.getElementById('reloadBtn');
 
     const infoMainPic = document.getElementById('infoMainPic');
     const infoSubPic = document.getElementById('infoSubPic');
@@ -1163,6 +1165,19 @@
         wmPicOpacity
     };
     window.APP.ui.exportCanvasImage = exportCanvasImage;
+
+    if(scrollTopBtn && !scrollTopBtn._bound){
+        scrollTopBtn.addEventListener('click', ()=>{
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        scrollTopBtn._bound = true;
+    }
+    if(reloadBtn && !reloadBtn._bound){
+        reloadBtn.addEventListener('click', ()=>{
+            window.location.reload();
+        });
+        reloadBtn._bound = true;
+    }
 
     function setupTabs(){
         const btnImages = document.getElementById('tabBtnImages');
