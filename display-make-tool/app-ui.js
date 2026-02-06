@@ -1169,6 +1169,8 @@
     if(scrollTopBtn && !scrollTopBtn._bound){
         scrollTopBtn.addEventListener('click', ()=>{
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            const sidebar = document.querySelector('.sidebar');
+            if(sidebar) sidebar.scrollTo({ top: 0, behavior: 'smooth' });
         });
         scrollTopBtn._bound = true;
     }
