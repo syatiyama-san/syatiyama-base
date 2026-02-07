@@ -22,15 +22,17 @@
       <div class="header-actions">
         <div class="header-undo-redo">
           <button id="undoBtn" class="undo-redo-btn undo-btn" title="元に戻す" aria-label="元に戻す">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-              <path d="M7 7v10c0 1.1.9 2 2 2h10v-2H9V7z"></path>
-              <path d="M15 2v2h4.59L8.41 20 10 18.41 18.59 9.82V14h2V2z" opacity="0.3"></path>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <g transform="translate(24 0) scale(-1 1)">
+                <path d="M12 4 A8 8 0 0 0 4 12 A8 8 0 0 0 12 20 A8 8 0 0 0 20 12"></path>
+                <path d="M13.0 1.6 L20.8 5.8 L13.2 10.0 Z" fill="currentColor" stroke="none"></path>
+              </g>
             </svg>
           </button>
           <button id="redoBtn" class="undo-redo-btn redo-btn" title="やり直す" aria-label="やり直す">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-              <path d="M17 7v10c0 1.1-.9 2-2 2H5v-2h10V7z"></path>
-              <path d="M9 2v2H4.41L15.59 20 14 18.41 5.41 9.82V14h-2V2z" opacity="0.3"></path>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 4 A8 8 0 0 0 4 12 A8 8 0 0 0 12 20 A8 8 0 0 0 20 12"></path>
+              <path d="M13.0 1.6 L20.8 5.8 L13.2 10.0 Z" fill="currentColor" stroke="none"></path>
             </svg>
           </button>
           <button id="scrollTopBtn" class="header-action-btn" title="上へ" aria-label="上へ">上へ</button>
@@ -142,11 +144,11 @@
           <label for="subPicCropX" style="display:block; margin-top:8px;">横の位置</label>
           <input id="subPicCropX" type="range" min="0" max="100" value="50" step="1" style="width:100%;">
 
-          <label style="margin-top:8px;">縁の太さ</label>
+          <label style="margin-top:8px;">フチの太さ</label>
           <input id="subPicBorder" type="number" min="0" max="20" value="2">
 
           <div class="controlRow">
-          <label style="margin-top:8px;">縁の色</label>
+          <label style="margin-top:8px;">フチの色</label>
           <input id="subPicBorderColor" type="color" value="#000000">
           </div>
 
