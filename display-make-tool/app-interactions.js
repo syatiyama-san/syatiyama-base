@@ -59,14 +59,19 @@
         resetSysPicPos: document.getElementById('resetSysPicPos') || document.getElementById('resetSysPicPosBtn'),
         mainPicX: document.getElementById('mainPicX'),
         mainPicY: document.getElementById('mainPicY'),
+        mainPicZ: document.getElementById('mainPicZ'),
         subPicX: document.getElementById('subPicX'),
         subPicY: document.getElementById('subPicY'),
+        subPicZ: document.getElementById('subPicZ'),
         bgPicX: document.getElementById('bgPicX'),
         bgPicY: document.getElementById('bgPicY'),
+        bgPicZ: document.getElementById('bgPicZ'),
         wmPicX: document.getElementById('wmPicX'),
         wmPicY: document.getElementById('wmPicY'),
+        wmPicZ: document.getElementById('wmPicZ'),
         sysPicX: document.getElementById('sysPicX'),
         sysPicY: document.getElementById('sysPicY'),
+        sysPicZ: document.getElementById('sysPicZ'),
         slotSysPic: document.getElementById('slotSysPic'),
         infoSysPic: document.getElementById('infoSysPic'),
         thumbSysPic: document.getElementById('thumbSysPic'),
@@ -415,6 +420,7 @@
                             
                             obj.rectangleHeight = newHeight;
                             obj.rectangleWidth = newWidth;
+                            if(refs.subPicZ) refs.subPicZ.value = Math.round((newWidth / 1200) * 100);
                         } else {
                             let newSize = Math.round(hitWidth * delta);
                             if(window.APP && window.APP.subPicDefault){
@@ -423,6 +429,8 @@
                                 newSize = Math.max(10, Math.min(2000, newSize));
                             }
                             obj.sizePx = newSize;
+                            const baseSize = (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) ? window.APP.subPicDefault.sizePx : 1200;
+                            if(refs.subPicZ) refs.subPicZ.value = Math.round((newSize / baseSize) * 100);
                         }
                         if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
                         return;
@@ -440,7 +448,13 @@
                 }
                 if(p.x >= obj.x && p.x <= obj.x + w && p.y >= obj.y && p.y <= obj.y + h){
                     const delta = e.deltaY < 0 ? 1.05 : 0.95;
-                    obj.scale = Math.max(0.01, Math.min(40, (obj.scale || 1) * delta)); if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); return;
+                    obj.scale = Math.max(0.01, Math.min(40, (obj.scale || 1) * delta));
+                    if(k === 'mainPic' && refs.mainPicZ) refs.mainPicZ.value = Math.round(obj.scale * 100);
+                    if(k === 'bgPic' && refs.bgPicZ) refs.bgPicZ.value = Math.round(obj.scale * 100);
+                    if(k === 'wmPic' && refs.wmPicZ) refs.wmPicZ.value = Math.round(obj.scale * 100);
+                    if(k === 'sysPic' && refs.sysPicZ) refs.sysPicZ.value = Math.round(obj.scale * 100);
+                    if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                    return;
                 }
             }
         } catch(err){
@@ -717,20 +731,36 @@
 
     function setPosInputs(key){
         const map = {
-            mainPic: { x: refs.mainPicX, y: refs.mainPicY },
-            subPic: { x: refs.subPicX, y: refs.subPicY },
-            bgPic: { x: refs.bgPicX, y: refs.bgPicY },
-            wmPic: { x: refs.wmPicX, y: refs.wmPicY },
-            sysPic: { x: refs.sysPicX, y: refs.sysPicY }
+            mainPic: { x: refs.mainPicX, y: refs.mainPicY, z: refs.mainPicZ },
+            subPic: { x: refs.subPicX, y: refs.subPicY, z: refs.subPicZ },
+            bgPic: { x: refs.bgPicX, y: refs.bgPicY, z: refs.bgPicZ },
+            wmPic: { x: refs.wmPicX, y: refs.wmPicY, z: refs.wmPicZ },
+            sysPic: { x: refs.sysPicX, y: refs.sysPicY, z: refs.sysPicZ }
         };
         const target = map[key];
         const obj = state.images && state.images[key];
         if(!target || !obj) return;
         if(target.x) target.x.value = Math.round(typeof obj.x === 'number' ? obj.x : 0);
         if(target.y) target.y.value = Math.round(typeof obj.y === 'number' ? obj.y : 0);
+        if(target.z){
+            if(key === 'subPic'){
+                const baseSize = (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) ? window.APP.subPicDefault.sizePx : 1200;
+                const shape = (obj.crop && typeof obj.crop.shape === 'string') ? obj.crop.shape : 'circle';
+                if(shape === 'rectangle'){
+                    const curW = (typeof obj.rectangleWidth === 'number') ? obj.rectangleWidth : 1200;
+                    target.z.value = Math.round((curW / 1200) * 100);
+                } else {
+                    const curSize = (typeof obj.sizePx === 'number') ? obj.sizePx : baseSize;
+                    target.z.value = Math.round((curSize / baseSize) * 100);
+                }
+            } else {
+                const pct = Math.round((obj.scale || 1) * 100);
+                target.z.value = pct;
+            }
+        }
     }
 
-    function bindPosInputs(key, xEl, yEl){
+    function bindPosInputs(key, xEl, yEl, zEl){
         const obj = state.images && state.images[key];
         if(!obj) return;
         if(xEl && !xEl._bound){
@@ -751,6 +781,39 @@
             yEl.addEventListener('change', ()=>{ commitHistorySnapshot(yEl); });
             yEl._bound = true;
         }
+        if(zEl && !zEl._bound){
+            bindHistoryStart(zEl);
+            zEl.addEventListener('input', ()=>{
+                const pct = parseInt(zEl.value,10);
+                if(Number.isNaN(pct)) return;
+                if(key === 'subPic'){
+                    const baseSize = (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) ? window.APP.subPicDefault.sizePx : 1200;
+                    const shape = (obj.crop && typeof obj.crop.shape === 'string') ? obj.crop.shape : 'circle';
+                    if(shape === 'rectangle'){
+                        const nextW = Math.max(400, Math.min(2020, Math.round(1200 * (pct / 100))));
+                        const nextH = Math.max(400, Math.min(2500, Math.round(1200 * (pct / 100))));
+                        obj.rectangleWidth = nextW;
+                        obj.rectangleHeight = nextH;
+                        const subPicHeightPx = document.getElementById('subPicHeightPx');
+                        const subPicHeightPxVal = document.getElementById('subPicHeightPxVal');
+                        const subPicWidthPx = document.getElementById('subPicWidthPx');
+                        const subPicWidthPxVal = document.getElementById('subPicWidthPxVal');
+                        if(subPicHeightPx) subPicHeightPx.value = nextH;
+                        if(subPicHeightPxVal) subPicHeightPxVal.textContent = String(nextH);
+                        if(subPicWidthPx) subPicWidthPx.value = nextW;
+                        if(subPicWidthPxVal) subPicWidthPxVal.textContent = String(nextW);
+                    } else {
+                        const nextSize = Math.max(window.APP.subPicDefault.min, Math.min(window.APP.subPicDefault.max, Math.round(baseSize * (pct / 100))));
+                        obj.sizePx = nextSize;
+                    }
+                } else {
+                    obj.scale = Math.max(0.01, Math.min(4.0, pct / 100));
+                }
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            });
+            zEl.addEventListener('change', ()=>{ commitHistorySnapshot(zEl); });
+            zEl._bound = true;
+        }
         setPosInputs(key);
     }
 
@@ -766,7 +829,7 @@
     }
     if(refs.subPicZoom) {
         bindHistoryStart(refs.subPicZoom);
-        refs.subPicZoom.addEventListener('input', ()=>{ const pct = parseInt(refs.subPicZoom.value,10); if(refs.subPicZoomVal) refs.subPicZoomVal.textContent = pct + '%'; state.images.subPic.zoom = pct/100; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+        refs.subPicZoom.addEventListener('input', ()=>{ const pct = parseInt(refs.subPicZoom.value,10); if(refs.subPicZoomVal) refs.subPicZoomVal.textContent = pct + '%'; state.images.subPic.zoom = pct/100; if(refs.subPicZ) refs.subPicZ.value = pct; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
         refs.subPicZoom.addEventListener('change', ()=>{ commitHistorySnapshot(refs.subPicZoom); });
     }
     if(refs.subPicBorder) {
@@ -774,7 +837,7 @@
         refs.subPicBorder.addEventListener('input', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
         refs.subPicBorder.addEventListener('change', ()=>{ commitHistorySnapshot(refs.subPicBorder); });
     }
-    if(refs.resetSubPicPos) refs.resetSubPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); state.images.subPic.x = window.APP.subPicDefault.x; state.images.subPic.y = window.APP.subPicDefault.y; state.images.subPic.sizePx = window.APP.subPicDefault.sizePx; state.images.subPic.rectangleWidth = 1200; state.images.subPic.rectangleHeight = 1200; state.images.subPic.crop = {cx:0.5,cy:0.33}; state.images.subPic.zoom = 1.0; state.images.subPic.bgOpacity = 1.0; if(refs.subPicCropX) refs.subPicCropX.value = 50; if(refs.subPicCropY) refs.subPicCropY.value = 33; if(refs.subPicZoom) refs.subPicZoom.value = 100; if(refs.subPicZoomVal) refs.subPicZoomVal.textContent='100%'; if(refs.bgSubPic) refs.bgSubPic.value = '#FFFF00'; if(refs.bgSubPicAlpha) refs.bgSubPicAlpha.value = 100; if(refs.bgSubPicAlphaVal) refs.bgSubPicAlphaVal.textContent = '100%'; const subPicHeightPx = document.getElementById('subPicHeightPx'); const subPicHeightPxVal = document.getElementById('subPicHeightPxVal'); const subPicWidthPx = document.getElementById('subPicWidthPx'); const subPicWidthPxVal = document.getElementById('subPicWidthPxVal'); if(subPicHeightPx) subPicHeightPx.value = 1200; if(subPicHeightPxVal) subPicHeightPxVal.textContent = '1200'; if(subPicWidthPx) subPicWidthPx.value = 1200; if(subPicWidthPxVal) subPicWidthPxVal.textContent = '1200'; setPosInputs('subPic'); if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+    if(refs.resetSubPicPos) refs.resetSubPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); state.images.subPic.x = window.APP.subPicDefault.x; state.images.subPic.y = window.APP.subPicDefault.y; state.images.subPic.sizePx = window.APP.subPicDefault.sizePx; state.images.subPic.rectangleWidth = 1200; state.images.subPic.rectangleHeight = 1200; state.images.subPic.crop = {cx:0.5,cy:0.33}; state.images.subPic.zoom = 1.0; state.images.subPic.bgOpacity = 1.0; if(refs.subPicCropX) refs.subPicCropX.value = 50; if(refs.subPicCropY) refs.subPicCropY.value = 33; if(refs.subPicZoom) refs.subPicZoom.value = 100; if(refs.subPicZoomVal) refs.subPicZoomVal.textContent='100%'; if(refs.subPicZ) refs.subPicZ.value = 100; if(refs.bgSubPic) refs.bgSubPic.value = '#FFFF00'; if(refs.bgSubPicAlpha) refs.bgSubPicAlpha.value = 100; if(refs.bgSubPicAlphaVal) refs.bgSubPicAlphaVal.textContent = '100%'; const subPicHeightPx = document.getElementById('subPicHeightPx'); const subPicHeightPxVal = document.getElementById('subPicHeightPxVal'); const subPicWidthPx = document.getElementById('subPicWidthPx'); const subPicWidthPxVal = document.getElementById('subPicWidthPxVal'); if(subPicHeightPx) subPicHeightPx.value = 1200; if(subPicHeightPxVal) subPicHeightPxVal.textContent = '1200'; if(subPicWidthPx) subPicWidthPx.value = 1200; if(subPicWidthPxVal) subPicWidthPxVal.textContent = '1200'; setPosInputs('subPic'); if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
 
     if(refs.text1El) {
         refs.text1El.addEventListener('input', ()=>{ if(!refs.text1El._historySnapshot) startHistorySnapshot(refs.text1El); state.texts[0].text = refs.text1El.value; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
@@ -973,11 +1036,11 @@
         refs.wmPicOpacity.addEventListener('change', ()=>{ commitHistorySnapshot(refs.wmPicOpacity); });
     }
 
-    bindPosInputs('mainPic', refs.mainPicX, refs.mainPicY);
-    bindPosInputs('subPic', refs.subPicX, refs.subPicY);
-    bindPosInputs('bgPic', refs.bgPicX, refs.bgPicY);
-    bindPosInputs('wmPic', refs.wmPicX, refs.wmPicY);
-    bindPosInputs('sysPic', refs.sysPicX, refs.sysPicY);
+    bindPosInputs('mainPic', refs.mainPicX, refs.mainPicY, refs.mainPicZ);
+    bindPosInputs('subPic', refs.subPicX, refs.subPicY, refs.subPicZ);
+    bindPosInputs('bgPic', refs.bgPicX, refs.bgPicY, refs.bgPicZ);
+    bindPosInputs('wmPic', refs.wmPicX, refs.wmPicY, refs.wmPicZ);
+    bindPosInputs('sysPic', refs.sysPicX, refs.sysPicY, refs.sysPicZ);
 
     if(refs.resetMainPicPos) refs.resetMainPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); state.images.mainPic.x = window.APP.refPos.mainPic.x; state.images.mainPic.y = window.APP.refPos.mainPic.y; if(typeof state.images.mainPic.initialScale==='number') state.images.mainPic.scale = state.images.mainPic.initialScale; setPosInputs('mainPic'); if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
     if(refs.resetBgPicPos) refs.resetBgPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); if(state.images.bgPic.img && window.APP && window.APP.ui && typeof window.APP.ui.fitBgPicToCanvas === 'function') window.APP.ui.fitBgPicToCanvas(state.images.bgPic.img); setPosInputs('bgPic'); if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });

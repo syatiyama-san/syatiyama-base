@@ -434,6 +434,10 @@ input[type="range"]:disabled {
     font-size: 11px;
 }
 
+.positionRow.three-cols .posInput {
+    width: 52px;
+}
+
 .tabBar {
     display: flex;
     gap: 6px;

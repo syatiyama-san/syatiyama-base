@@ -87,14 +87,19 @@
     const text3OrientVertical = document.getElementById('text3OrientVertical');
     const mainPicX = document.getElementById('mainPicX');
     const mainPicY = document.getElementById('mainPicY');
+    const mainPicZ = document.getElementById('mainPicZ');
     const subPicX = document.getElementById('subPicX');
     const subPicY = document.getElementById('subPicY');
+    const subPicZ = document.getElementById('subPicZ');
     const bgPicX = document.getElementById('bgPicX');
     const bgPicY = document.getElementById('bgPicY');
+    const bgPicZ = document.getElementById('bgPicZ');
     const wmPicX = document.getElementById('wmPicX');
     const wmPicY = document.getElementById('wmPicY');
+    const wmPicZ = document.getElementById('wmPicZ');
     const sysPicX = document.getElementById('sysPicX');
     const sysPicY = document.getElementById('sysPicY');
+    const sysPicZ = document.getElementById('sysPicZ');
 
     const exportBtn = document.getElementById('exportBtn');
     const formatSel = document.getElementById('format');
@@ -266,6 +271,23 @@
                     subPicZoomVal.textContent = Math.round((subPic.zoom || 1.0) * 100) + '%';
                 }
             }
+            if(subPicZ){
+                if(!hasImg){
+                    subPicZ.value = '';
+                    subPicZ.disabled = true;
+                } else {
+                    subPicZ.disabled = false;
+                    const baseSize = (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) ? window.APP.subPicDefault.sizePx : 1200;
+                    const shape = (subPic.crop && typeof subPic.crop.shape === 'string') ? subPic.crop.shape : 'circle';
+                    if(shape === 'rectangle'){
+                        const curW = (typeof subPic.rectangleWidth === 'number') ? subPic.rectangleWidth : 1200;
+                        subPicZ.value = Math.round((curW / 1200) * 100);
+                    } else {
+                        const curSize = (typeof subPic.sizePx === 'number') ? subPic.sizePx : baseSize;
+                        subPicZ.value = Math.round((curSize / baseSize) * 100);
+                    }
+                }
+            }
         } catch(e){
             console.warn('updateSubPicCropSliders error', e);
         }
@@ -282,6 +304,17 @@
             if(subPicZoomVal){
                 subPicZoomVal.textContent = Math.round((subPic.zoom || 1.0) * 100) + '%';
             }
+            if(subPicZ){
+                const baseSize = (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) ? window.APP.subPicDefault.sizePx : 1200;
+                const shape = (subPic.crop && typeof subPic.crop.shape === 'string') ? subPic.crop.shape : 'circle';
+                if(shape === 'rectangle'){
+                    const curW = (typeof subPic.rectangleWidth === 'number') ? subPic.rectangleWidth : 1200;
+                    subPicZ.value = Math.round((curW / 1200) * 100);
+                } else {
+                    const curSize = (typeof subPic.sizePx === 'number') ? subPic.sizePx : baseSize;
+                    subPicZ.value = Math.round((curSize / baseSize) * 100);
+                }
+            }
             if(subPicBorder && typeof subPic.borderWidth === 'number'){
                 subPicBorder.value = subPic.borderWidth;
             }
@@ -296,6 +329,22 @@
             const wmPic = (state.images && state.images.wmPic) ? state.images.wmPic : {};
             if(wmPicOpacity && typeof wmPic.opacity === 'number'){
                 wmPicOpacity.value = Math.round(wmPic.opacity * 100);
+            }
+            if(mainPicZ && state.images && state.images.mainPic){
+                const s = state.images.mainPic.scale || 1;
+                mainPicZ.value = Math.round(s * 100);
+            }
+            if(bgPicZ && state.images && state.images.bgPic){
+                const s = state.images.bgPic.scale || 1;
+                bgPicZ.value = Math.round(s * 100);
+            }
+            if(wmPicZ && state.images && state.images.wmPic){
+                const s = state.images.wmPic.scale || 1;
+                wmPicZ.value = Math.round(s * 100);
+            }
+            if(sysPicZ && state.images && state.images.sysPic){
+                const s = state.images.sysPic.scale || 1;
+                sysPicZ.value = Math.round(s * 100);
             }
             if(bandHeight && state.ui && typeof state.ui.bandHeight === 'number'){
                 bandHeight.value = state.ui.bandHeight;
@@ -1152,6 +1201,7 @@
         slotMainPic,slotSubPic,slotBgPic,slotWmPic,slotSysPic,
         resetMainPicPos,resetSubPicPos,resetBgPicPos,resetWmPicPos,resetSysPicPos,
         mainPicX,mainPicY,subPicX,subPicY,bgPicX,bgPicY,wmPicX,wmPicY,sysPicX,sysPicY,
+        mainPicZ,subPicZ,bgPicZ,wmPicZ,sysPicZ,
         subPicCropY,subPicZoom,subPicZoomVal,subPicBorder,subPicBorderColor,centerTopBtn,
         subPicCropX,
         subPicShapeCircle, subPicShapeDiamond,
