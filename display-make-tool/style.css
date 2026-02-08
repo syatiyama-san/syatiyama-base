@@ -11,10 +11,14 @@
 html,body{height:100%;}
 body{
     margin:0;
-    padding-top: 80px;
+    padding-top: var(--header-offset, 80px);
     font-family:"Noto Sans JP",system-ui,Roboto,Arial;
     background:#f5f5f5;
     color:#222;
+}
+
+body.menu-open{
+    overflow:hidden;
 }
 
 .header-container {
@@ -173,6 +177,80 @@ canvas{
     top: 18px;
 }
 
+.menu-toggle-handle{
+    display:none;
+    position:fixed;
+    right:12px;
+    top:var(--handle-top, 160px);
+    transform:none;
+    z-index:1250;
+    width:36px;
+    height:120px;
+    padding:10px 6px;
+    border-radius:18px 0 0 18px;
+    border:1px solid #ddd;
+    background:#f0f0f0;
+    color:#222;
+    font-size:12px;
+    cursor:pointer;
+    transition:all 0.2s ease;
+    box-shadow:0 4px 10px rgba(0,0,0,0.12);
+    writing-mode:vertical-rl;
+    text-orientation:upright;
+    letter-spacing:0.2em;
+    text-align:center;
+}
+.menu-toggle-handle:hover{
+    background:#e8e8e8;
+}
+
+.sidebar-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.35);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.2s ease;
+    z-index:1100;
+}
+
+body.menu-mode .main-content{
+    width:100%;
+}
+
+body.menu-mode .menu-toggle-handle{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+body.menu-mode .sidebar{
+    position:fixed;
+    top:84px;
+    right:12px;
+    left:auto;
+    height:calc(100vh - 96px);
+    max-height:calc(100vh - 96px);
+    width:min(92vw, var(--ui-w));
+    transform:translateX(120%);
+    transition:transform 0.25s ease;
+    z-index:1200;
+    box-shadow:0 12px 32px rgba(0,0,0,0.18);
+}
+
+body.menu-open .sidebar{
+    transform:translateX(0);
+}
+
+body.menu-open .menu-toggle-handle{
+    transform:translateX(calc(-1 * var(--drawer-w, 360px)));
+}
+
+body.menu-open .sidebar-backdrop{
+    opacity:1;
+    pointer-events:auto;
+}
+
 .panel{
     background:#fff;
     border-radius:10px;
@@ -302,10 +380,6 @@ input[type="range"]{width:100%;}
     color:#333;
 }
 
-@media(max-width:1100px){
-    .container{flex-direction:column}
-    .sidebar{width:100%;height:auto}
-}
 
 .controlRow{
     display: flex;
@@ -367,6 +441,7 @@ input[type="range"]:disabled {
     font-size: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .header-action-btn:hover:not(:disabled) {
@@ -389,6 +464,54 @@ input[type="range"]:disabled {
     transition: all 0.2s ease;
     position: relative;
     padding: 0;
+    flex: 0 0 auto;
+}
+
+@media (max-width: 860px){
+    :root{ --header-offset: 110px; }
+    .header-container{
+        padding: 12px 12px 8px;
+    }
+    .header-top{
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    h3{
+        margin: 0;
+        font-size: 16px;
+    }
+    .header-actions{
+        width: 100%;
+        margin-left: 0;
+        padding-right: 0;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .header-undo-redo{
+        margin-right: 0;
+    }
+    .header-right-actions{
+        margin-left: auto;
+    }
+}
+
+@media (max-width: 520px){
+    :root{ --header-offset: 130px; }
+    .home-btn{
+        width: 34px;
+        height: 34px;
+    }
+    .home-icon{ font-size: 18px; }
+    .header-action-btn{
+        height: 32px;
+        padding: 0 10px;
+        font-size: 11px;
+    }
+    .undo-redo-btn{
+        width: 34px;
+        height: 34px;
+    }
 }
 
 .undo-redo-btn:hover:not(:disabled) {

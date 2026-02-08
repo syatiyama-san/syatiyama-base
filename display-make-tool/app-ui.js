@@ -1224,6 +1224,53 @@
         });
         scrollTopBtn._bound = true;
     }
+
+    const menuToggleBtn = document.getElementById('menuToggleBtn');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+    const closeMenu = ()=>{
+        document.body.classList.remove('menu-open');
+        if(menuToggleBtn) menuToggleBtn.setAttribute('aria-expanded', 'false');
+    };
+    const updateMenuMode = ()=>{
+        const container = document.querySelector('.container');
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+        if(!container || !sidebar) return;
+        const sidebarWidth = sidebar.offsetWidth || 380;
+        const minMain = 560;
+        const gap = 16;
+        const available = container.getBoundingClientRect().width || window.innerWidth;
+        const mainWidth = mainContent ? mainContent.getBoundingClientRect().width : available;
+        const shouldMenu = (mainWidth < minMain) || (available < (sidebarWidth + minMain + gap));
+        document.body.classList.toggle('menu-mode', shouldMenu);
+        document.body.style.setProperty('--drawer-w', `${sidebarWidth}px`);
+        const sidebarRect = sidebar.getBoundingClientRect();
+        const handleTop = Math.max(24, Math.round((sidebarRect.top || 0) + 110));
+        document.body.style.setProperty('--handle-top', `${handleTop}px`);
+        if(menuToggleBtn) menuToggleBtn.hidden = !shouldMenu;
+        if(!shouldMenu){
+            closeMenu();
+        }
+    };
+    if(menuToggleBtn && !menuToggleBtn._bound){
+        menuToggleBtn.addEventListener('click', ()=>{
+            if(!document.body.classList.contains('menu-mode')) return;
+            const isOpen = document.body.classList.toggle('menu-open');
+            menuToggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+        menuToggleBtn._bound = true;
+    }
+    if(sidebarBackdrop && !sidebarBackdrop._bound){
+        sidebarBackdrop.addEventListener('click', closeMenu);
+        sidebarBackdrop._bound = true;
+    }
+    if(!window.APP._menuResizeBound){
+        window.addEventListener('resize', ()=>{
+            requestAnimationFrame(updateMenuMode);
+        });
+        window.APP._menuResizeBound = true;
+    }
+    updateMenuMode();
     if(reloadBtn && !reloadBtn._bound){
         reloadBtn.addEventListener('click', ()=>{
             window.location.reload();
