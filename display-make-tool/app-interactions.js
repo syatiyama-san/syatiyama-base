@@ -202,91 +202,233 @@
         return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
     }
 
-    canvas.addEventListener('mousedown', e=>{
-        try {
-            const p = canvasPointFromEvent(e);
-            const maxWidth = Math.max(200, state.width - 220 - 220);
-            for(let i = state.texts.length - 1; i >= 0; i--){
-                const t = state.texts[i];
-                const style = getTextStyle(i);
-                const fontSpec = style.fontSpec;
-                const lineHeight = style.lineHeight;
-                const textOrient = style.textOrientation;
-                let w = 0; let h = 0;
-                if(textOrient === 'vertical'){
-                    const cols = String(t.text || '').split('\n');
-                    let maxRows = 0;
-                    for(const col of cols){
-                        const len = Array.from(col).length;
-                        if(len > maxRows) maxRows = len;
-                    }
-                    w = Math.max(1, cols.length) * lineHeight;
-                    h = Math.max(1, maxRows) * lineHeight;
-                } else {
-                    const block = utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight);
-                    w = block.width || maxWidth;
-                    h = block.height;
+    function canvasPointFromTouch(touch){
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return { x: (touch.clientX - rect.left) * scaleX, y: (touch.clientY - rect.top) * scaleY };
+    }
+
+    function startDragAtPoint(p){
+        const maxWidth = Math.max(200, state.width - 220 - 220);
+        for(let i = state.texts.length - 1; i >= 0; i--){
+            const t = state.texts[i];
+            const style = getTextStyle(i);
+            const fontSpec = style.fontSpec;
+            const lineHeight = style.lineHeight;
+            const textOrient = style.textOrientation;
+            let w = 0; let h = 0;
+            if(textOrient === 'vertical'){
+                const cols = String(t.text || '').split('\n');
+                let maxRows = 0;
+                for(const col of cols){
+                    const len = Array.from(col).length;
+                    if(len > maxRows) maxRows = len;
                 }
-                const hitX = (textOrient === 'vertical') ? (t.x - (w - lineHeight)) : t.x;
-                if(p.x >= hitX && p.x <= hitX + w && p.y >= t.y && p.y <= t.y + h){
-                    if(window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
-                        state._dragSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
-                    }
-                    state.dragging = { type:'text', index:i };
-                    state.dragOffset.x = p.x - t.x; state.dragOffset.y = p.y - t.y;
-                    return;
-                }
+                w = Math.max(1, cols.length) * lineHeight;
+                h = Math.max(1, maxRows) * lineHeight;
+            } else {
+                const block = utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight);
+                w = block.width || maxWidth;
+                h = block.height;
             }
-            const imgs = ['mainPic','subPic','bgPic','wmPic','sysPic'].sort((a,b)=> (state.images[b] && state.images[b].z||0)-(state.images[a] && state.images[a].z||0));
-            for(const k of imgs){
-                const obj = state.images[k];
-                if(!obj || !obj.img) continue;
-                if(k === 'subPic'){
-                    const crop = obj.crop || {};
-                    const shape = (crop && typeof crop.shape === 'string') ? crop.shape : 'circle';
-                    let hitWidth, hitHeight, hitX, hitY;
-                    
-                    const sizePx = obj.sizePx || (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) || 300;
-                    if(shape === 'rectangle'){
-                        hitWidth = obj.rectangleWidth || 1200;
-                        hitHeight = obj.rectangleHeight || 1200;
-                        hitX = obj.x + (sizePx - hitWidth) / 2;
-                        hitY = obj.y + (sizePx - hitHeight) / 2;
-                    } else {
-                        hitWidth = sizePx;
-                        hitHeight = sizePx;
-                        hitX = obj.x;
-                        hitY = obj.y;
-                    }
-                    
-                    if(p.x >= hitX && p.x <= hitX + hitWidth && p.y >= hitY && p.y <= hitY + hitHeight){
-                        if(window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
-                            state._dragSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
-                        }
-                        state.dragging = { type:'image', key:k };
-                        state.dragOffset.x = p.x - obj.x; state.dragOffset.y = p.y - obj.y;
-                        return;
-                    }
-                    continue;
+            const hitX = (textOrient === 'vertical') ? (t.x - (w - lineHeight)) : t.x;
+            if(p.x >= hitX && p.x <= hitX + w && p.y >= t.y && p.y <= t.y + h){
+                if(window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
+                    state._dragSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
                 }
-                let w, h;
-                if(k === 'sysPic'){
-                    const scale = (typeof obj.scale === 'number') ? obj.scale : 1;
-                    w = (obj.img.width || 0) * scale;
-                    h = (obj.img.height || 0) * scale;
+                state.dragging = { type:'text', index:i };
+                state.dragOffset.x = p.x - t.x; state.dragOffset.y = p.y - t.y;
+                return true;
+            }
+        }
+        const imgs = ['mainPic','subPic','bgPic','wmPic','sysPic'].sort((a,b)=> (state.images[b] && state.images[b].z||0)-(state.images[a] && state.images[a].z||0));
+        for(const k of imgs){
+            const obj = state.images[k];
+            if(!obj || !obj.img) continue;
+            if(k === 'subPic'){
+                const crop = obj.crop || {};
+                const shape = (crop && typeof crop.shape === 'string') ? crop.shape : 'circle';
+                let hitWidth, hitHeight, hitX, hitY;
+                const sizePx = obj.sizePx || (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) || 300;
+                if(shape === 'rectangle'){
+                    hitWidth = obj.rectangleWidth || 1200;
+                    hitHeight = obj.rectangleHeight || 1200;
+                    hitX = obj.x + (sizePx - hitWidth) / 2;
+                    hitY = obj.y + (sizePx - hitHeight) / 2;
                 } else {
-                    w = (obj.img.width || 0) * (obj.scale || 1);
-                    h = (obj.img.height || 0) * (obj.scale || 1);
+                    hitWidth = sizePx;
+                    hitHeight = sizePx;
+                    hitX = obj.x;
+                    hitY = obj.y;
                 }
-                if(p.x >= obj.x && p.x <= obj.x + w && p.y >= obj.y && p.y <= obj.y + h){
+                if(p.x >= hitX && p.x <= hitX + hitWidth && p.y >= hitY && p.y <= hitY + hitHeight){
                     if(window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
                         state._dragSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
                     }
                     state.dragging = { type:'image', key:k };
                     state.dragOffset.x = p.x - obj.x; state.dragOffset.y = p.y - obj.y;
-                    return;
+                    return true;
                 }
+                continue;
             }
+            let w, h;
+            if(k === 'sysPic'){
+                const scale = (typeof obj.scale === 'number') ? obj.scale : 1;
+                w = (obj.img.width || 0) * scale;
+                h = (obj.img.height || 0) * scale;
+            } else {
+                w = (obj.img.width || 0) * (obj.scale || 1);
+                h = (obj.img.height || 0) * (obj.scale || 1);
+            }
+            if(p.x >= obj.x && p.x <= obj.x + w && p.y >= obj.y && p.y <= obj.y + h){
+                if(window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
+                    state._dragSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
+                }
+                state.dragging = { type:'image', key:k };
+                state.dragOffset.x = p.x - obj.x; state.dragOffset.y = p.y - obj.y;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function moveDragToPoint(p){
+        if(!state.dragging) return;
+        if(state.dragging.type === 'text'){
+            const t = state.texts[state.dragging.index];
+            t.x = p.x - state.dragOffset.x; t.y = p.y - state.dragOffset.y;
+            if(state.dragging.index === 0){ if(refs.text1X) refs.text1X.value = Math.round(t.x); if(refs.text1Y) refs.text1Y.value = Math.round(t.y); }
+            if(state.dragging.index === 1){ if(refs.text2X) refs.text2X.value = Math.round(t.x); if(refs.text2Y) refs.text2Y.value = Math.round(t.y); }
+            if(state.dragging.index === 2){ if(refs.text3X) refs.text3X.value = Math.round(t.x); if(refs.text3Y) refs.text3Y.value = Math.round(t.y); }
+        } else {
+            const obj = state.images[state.dragging.key];
+            obj.x = p.x - state.dragOffset.x; obj.y = p.y - state.dragOffset.y;
+            setPosInputs(state.dragging.key);
+        }
+        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+    }
+
+    function endDrag(){
+        if(state.dragging && state._dragSnapshot && window.APP && window.APP.history && typeof window.APP.history.saveSnapshot === 'function'){
+            window.APP.history.saveSnapshot(state._dragSnapshot);
+        }
+        state._dragSnapshot = null;
+        state.dragging = null;
+    }
+
+    function applyZoomAtPoint(p, delta, deltaSub){
+        const maxWidth = Math.max(200, state.width - 220 - 220);
+        for(let i = state.texts.length - 1; i >= 0; i--){
+            const t = state.texts[i];
+            const style = getTextStyle(i);
+            const fontSpec = style.fontSpec;
+            const lineHeight = style.lineHeight;
+            const textOrient = style.textOrientation;
+            let w = 0; let h = 0;
+            if(textOrient === 'vertical'){
+                const cols = String(t.text || '').split('\n');
+                let maxRows = 0;
+                for(const col of cols){
+                    const len = Array.from(col).length;
+                    if(len > maxRows) maxRows = len;
+                }
+                w = Math.max(1, cols.length) * lineHeight;
+                h = Math.max(1, maxRows) * lineHeight;
+            } else {
+                const block = utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight);
+                w = block.width || maxWidth;
+                h = block.height;
+            }
+            const hitX = (textOrient === 'vertical') ? (t.x - (w - lineHeight)) : t.x;
+            if(p.x >= hitX && p.x <= hitX + w && p.y >= t.y && p.y <= t.y + h){
+                const curSize = (typeof t.fontSize === 'number') ? t.fontSize : 60;
+                const newSize = Math.max(20, Math.min(300, Math.round(curSize * delta)));
+                t.fontSize = newSize;
+                if(i === 0 && refs.text1FontSize) refs.text1FontSize.value = newSize;
+                if(i === 1 && refs.text2FontSize) refs.text2FontSize.value = newSize;
+                if(i === 2 && refs.text3FontSize) refs.text3FontSize.value = newSize;
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                return true;
+            }
+        }
+        const imgs = ['mainPic','subPic','bgPic','wmPic','sysPic'].sort((a,b)=> (state.images[b] && state.images[b].z||0)-(state.images[a] && state.images[a].z||0));
+        for(const k of imgs){
+            const obj = state.images[k];
+            if(!obj || !obj.img) continue;
+            if(k === 'subPic'){
+                const crop = obj.crop || {};
+                const shape = (crop && typeof crop.shape === 'string') ? crop.shape : 'circle';
+                let hitWidth, hitHeight, hitX, hitY;
+                const sizePx = obj.sizePx || (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) || 300;
+                if(shape === 'rectangle'){
+                    hitWidth = obj.rectangleWidth || 1200;
+                    hitHeight = obj.rectangleHeight || 1200;
+                    hitX = obj.x + (sizePx - hitWidth) / 2;
+                    hitY = obj.y + (sizePx - hitHeight) / 2;
+                } else {
+                    hitWidth = sizePx;
+                    hitHeight = sizePx;
+                    hitX = obj.x;
+                    hitY = obj.y;
+                }
+                if(p.x >= hitX && p.x <= hitX + hitWidth && p.y >= hitY && p.y <= hitY + hitHeight){
+                    const useDelta = (typeof deltaSub === 'number') ? deltaSub : delta;
+                    if(shape === 'rectangle'){
+                        const currentWidth = obj.rectangleWidth || 1200;
+                        const currentHeight = obj.rectangleHeight || 1200;
+                        let newHeight = Math.round(currentHeight * useDelta);
+                        let newWidth = Math.round(currentWidth * useDelta);
+                        const heightRatio = newHeight < 400 ? 400 / newHeight : (newHeight > 2500 ? 2500 / newHeight : 1);
+                        const widthRatio = newWidth < 400 ? 400 / newWidth : (newWidth > 2020 ? 2020 / newWidth : 1);
+                        const limitRatio = Math.min(heightRatio, widthRatio);
+                        newHeight = Math.round(newHeight * limitRatio);
+                        newWidth = Math.round(newWidth * limitRatio);
+                        obj.rectangleHeight = newHeight;
+                        obj.rectangleWidth = newWidth;
+                        if(refs.subPicZ) refs.subPicZ.value = Math.round((newWidth / 1200) * 100);
+                    } else {
+                        let newSize = Math.round(hitWidth * useDelta);
+                        if(window.APP && window.APP.subPicDefault){
+                            newSize = Math.max(window.APP.subPicDefault.min, Math.min(window.APP.subPicDefault.max, newSize));
+                        } else {
+                            newSize = Math.max(10, Math.min(2000, newSize));
+                        }
+                        obj.sizePx = newSize;
+                        const baseSize = (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) ? window.APP.subPicDefault.sizePx : 1200;
+                        if(refs.subPicZ) refs.subPicZ.value = Math.round((newSize / baseSize) * 100);
+                    }
+                    if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                    return true;
+                }
+                continue;
+            }
+            let w, h;
+            if(k === 'sysPic'){
+                const scale = (typeof obj.scale === 'number') ? obj.scale : 1;
+                w = (obj.img.width || 0) * scale;
+                h = (obj.img.height || 0) * scale;
+            } else {
+                w = (obj.img.width || 0) * (obj.scale || 1);
+                h = (obj.img.height || 0) * (obj.scale || 1);
+            }
+            if(p.x >= obj.x && p.x <= obj.x + w && p.y >= obj.y && p.y <= obj.y + h){
+                obj.scale = Math.max(0.01, Math.min(40, (obj.scale || 1) * delta));
+                if(k === 'mainPic' && refs.mainPicZ) refs.mainPicZ.value = Math.round(obj.scale * 100);
+                if(k === 'bgPic' && refs.bgPicZ) refs.bgPicZ.value = Math.round(obj.scale * 100);
+                if(k === 'wmPic' && refs.wmPicZ) refs.wmPicZ.value = Math.round(obj.scale * 100);
+                if(k === 'sysPic' && refs.sysPicZ) refs.sysPicZ.value = Math.round(obj.scale * 100);
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    canvas.addEventListener('mousedown', e=>{
+        try {
+            const p = canvasPointFromEvent(e);
+            startDragAtPoint(p);
         } catch(err){
             console.error('mousedown handler error', err);
         }
@@ -296,35 +438,16 @@
         try {
             if(!state.dragging) return;
             const p = canvasPointFromEvent(e);
-            if(state.dragging.type === 'text'){
-                const t = state.texts[state.dragging.index];
-                t.x = p.x - state.dragOffset.x; t.y = p.y - state.dragOffset.y;
-                if(state.dragging.index === 0){ if(refs.text1X) refs.text1X.value = Math.round(t.x); if(refs.text1Y) refs.text1Y.value = Math.round(t.y); }
-                if(state.dragging.index === 1){ if(refs.text2X) refs.text2X.value = Math.round(t.x); if(refs.text2Y) refs.text2Y.value = Math.round(t.y); }
-                if(state.dragging.index === 2){ if(refs.text3X) refs.text3X.value = Math.round(t.x); if(refs.text3Y) refs.text3Y.value = Math.round(t.y); }
-            } else {
-                const obj = state.images[state.dragging.key];
-                obj.x = p.x - state.dragOffset.x; obj.y = p.y - state.dragOffset.y;
-                    setPosInputs(state.dragging.key);
-            }
-            if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            moveDragToPoint(p);
         } catch(err){
             console.error('mousemove handler error', err);
         }
     });
     canvas.addEventListener('mouseup', ()=> {
-        if(state.dragging && state._dragSnapshot && window.APP && window.APP.history && typeof window.APP.history.saveSnapshot === 'function'){
-            window.APP.history.saveSnapshot(state._dragSnapshot);
-        }
-        state._dragSnapshot = null;
-        state.dragging = null;
+        endDrag();
     });
     canvas.addEventListener('mouseleave', ()=> {
-        if(state.dragging && state._dragSnapshot && window.APP && window.APP.history && typeof window.APP.history.saveSnapshot === 'function'){
-            window.APP.history.saveSnapshot(state._dragSnapshot);
-        }
-        state._dragSnapshot = null;
-        state.dragging = null;
+        endDrag();
     });
 
     canvas.addEventListener('wheel', e=>{
@@ -344,123 +467,111 @@
                 state._wheelCommitTimer = null;
             }, 200);
             const p = canvasPointFromEvent(e);
-            const maxWidth = Math.max(200, state.width - 220 - 220);
-            for(let i = state.texts.length - 1; i >= 0; i--){
-                const t = state.texts[i];
-                const style = getTextStyle(i);
-                const fontSpec = style.fontSpec;
-                const lineHeight = style.lineHeight;
-                const textOrient = style.textOrientation;
-                let w = 0; let h = 0;
-                if(textOrient === 'vertical'){
-                    const cols = String(t.text || '').split('\n');
-                    let maxRows = 0;
-                    for(const col of cols){
-                        const len = Array.from(col).length;
-                        if(len > maxRows) maxRows = len;
-                    }
-                    w = Math.max(1, cols.length) * lineHeight;
-                    h = Math.max(1, maxRows) * lineHeight;
-                } else {
-                    const block = utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight);
-                    w = block.width || maxWidth;
-                    h = block.height;
-                }
-                const hitX = (textOrient === 'vertical') ? (t.x - (w - lineHeight)) : t.x;
-                if(p.x >= hitX && p.x <= hitX + w && p.y >= t.y && p.y <= t.y + h){
-                    const delta = e.deltaY < 0 ? 1.05 : 0.95;
-                    const curSize = (typeof t.fontSize === 'number') ? t.fontSize : 60;
-                    const newSize = Math.max(20, Math.min(300, Math.round(curSize * delta)));
-                    t.fontSize = newSize;
-                    if(i === 0 && refs.text1FontSize) refs.text1FontSize.value = newSize;
-                    if(i === 1 && refs.text2FontSize) refs.text2FontSize.value = newSize;
-                    if(i === 2 && refs.text3FontSize) refs.text3FontSize.value = newSize;
-                    if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
-                    return;
-                }
-            }
-            const imgs = ['mainPic','subPic','bgPic','wmPic','sysPic'].sort((a,b)=> (state.images[b] && state.images[b].z||0)-(state.images[a] && state.images[a].z||0));
-            for(const k of imgs){
-                const obj = state.images[k];
-                if(!obj || !obj.img) continue;
-                if(k === 'subPic'){
-                    const crop = obj.crop || {};
-                    const shape = (crop && typeof crop.shape === 'string') ? crop.shape : 'circle';
-                    let hitWidth, hitHeight, hitX, hitY;
-                    
-                    const sizePx = obj.sizePx || (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) || 300;
-                    if(shape === 'rectangle'){
-                        hitWidth = obj.rectangleWidth || 1200;
-                        hitHeight = obj.rectangleHeight || 1200;
-                        hitX = obj.x + (sizePx - hitWidth) / 2;
-                        hitY = obj.y + (sizePx - hitHeight) / 2;
-                    } else {
-                        hitWidth = sizePx;
-                        hitHeight = sizePx;
-                        hitX = obj.x;
-                        hitY = obj.y;
-                    }
-                    
-                    if(p.x >= hitX && p.x <= hitX + hitWidth && p.y >= hitY && p.y <= hitY + hitHeight){
-                        const delta = e.deltaY < 0 ? 1.06 : 0.94;
-                        
-                        if(shape === 'rectangle'){
-                            const currentWidth = obj.rectangleWidth || 1200;
-                            const currentHeight = obj.rectangleHeight || 1200;
-                            
-                            let newHeight = Math.round(currentHeight * delta);
-                            let newWidth = Math.round(currentWidth * delta);
-                            
-                            const heightRatio = newHeight < 400 ? 400 / newHeight : (newHeight > 2500 ? 2500 / newHeight : 1);
-                            const widthRatio = newWidth < 400 ? 400 / newWidth : (newWidth > 2020 ? 2020 / newWidth : 1);
-                            const limitRatio = Math.min(heightRatio, widthRatio);
-                            
-                            newHeight = Math.round(newHeight * limitRatio);
-                            newWidth = Math.round(newWidth * limitRatio);
-                            
-                            obj.rectangleHeight = newHeight;
-                            obj.rectangleWidth = newWidth;
-                            if(refs.subPicZ) refs.subPicZ.value = Math.round((newWidth / 1200) * 100);
-                        } else {
-                            let newSize = Math.round(hitWidth * delta);
-                            if(window.APP && window.APP.subPicDefault){
-                                newSize = Math.max(window.APP.subPicDefault.min, Math.min(window.APP.subPicDefault.max, newSize));
-                            } else {
-                                newSize = Math.max(10, Math.min(2000, newSize));
-                            }
-                            obj.sizePx = newSize;
-                            const baseSize = (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) ? window.APP.subPicDefault.sizePx : 1200;
-                            if(refs.subPicZ) refs.subPicZ.value = Math.round((newSize / baseSize) * 100);
-                        }
-                        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
-                        return;
-                    }
-                    continue;
-                }
-                let w, h;
-                if(k === 'sysPic'){
-                    const scale = (typeof obj.scale === 'number') ? obj.scale : 1;
-                    w = (obj.img.width || 0) * scale;
-                    h = (obj.img.height || 0) * scale;
-                } else {
-                    w = (obj.img.width || 0) * (obj.scale || 1);
-                    h = (obj.img.height || 0) * (obj.scale || 1);
-                }
-                if(p.x >= obj.x && p.x <= obj.x + w && p.y >= obj.y && p.y <= obj.y + h){
-                    const delta = e.deltaY < 0 ? 1.05 : 0.95;
-                    obj.scale = Math.max(0.01, Math.min(40, (obj.scale || 1) * delta));
-                    if(k === 'mainPic' && refs.mainPicZ) refs.mainPicZ.value = Math.round(obj.scale * 100);
-                    if(k === 'bgPic' && refs.bgPicZ) refs.bgPicZ.value = Math.round(obj.scale * 100);
-                    if(k === 'wmPic' && refs.wmPicZ) refs.wmPicZ.value = Math.round(obj.scale * 100);
-                    if(k === 'sysPic' && refs.sysPicZ) refs.sysPicZ.value = Math.round(obj.scale * 100);
-                    if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
-                    return;
-                }
-            }
+            const delta = e.deltaY < 0 ? 1.05 : 0.95;
+            const deltaSub = e.deltaY < 0 ? 1.06 : 0.94;
+            applyZoomAtPoint(p, delta, deltaSub);
         } catch(err){
             console.error('wheel handler error', err);
         }
     }, { passive:false });
+
+    let touchMode = null;
+    let pinchLastDist = 0;
+    canvas.addEventListener('touchstart', e=>{
+        try {
+            if(e.touches.length === 1){
+                touchMode = 'drag';
+                const p = canvasPointFromTouch(e.touches[0]);
+                startDragAtPoint(p);
+                e.preventDefault();
+            } else if(e.touches.length >= 2){
+                touchMode = 'pinch';
+                const t0 = e.touches[0];
+                const t1 = e.touches[1];
+                const dx = t0.clientX - t1.clientX;
+                const dy = t0.clientY - t1.clientY;
+                pinchLastDist = Math.hypot(dx, dy);
+                if(!state._wheelSnapshot && window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
+                    state._wheelSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
+                }
+                e.preventDefault();
+            }
+        } catch(err){
+            console.error('touchstart handler error', err);
+        }
+    }, { passive:false });
+
+    canvas.addEventListener('touchmove', e=>{
+        try {
+            if(touchMode === 'drag' && e.touches.length === 1){
+                const p = canvasPointFromTouch(e.touches[0]);
+                moveDragToPoint(p);
+                e.preventDefault();
+                return;
+            }
+            if(touchMode === 'pinch' && e.touches.length >= 2){
+                const t0 = e.touches[0];
+                const t1 = e.touches[1];
+                const dx = t0.clientX - t1.clientX;
+                const dy = t0.clientY - t1.clientY;
+                const dist = Math.hypot(dx, dy);
+                if(pinchLastDist > 0){
+                    const scale = dist / pinchLastDist;
+                    const mid = { clientX: (t0.clientX + t1.clientX) / 2, clientY: (t0.clientY + t1.clientY) / 2 };
+                    const p = canvasPointFromEvent(mid);
+                    applyZoomAtPoint(p, scale, scale);
+                    if(state._wheelCommitTimer){
+                        clearTimeout(state._wheelCommitTimer);
+                    }
+                    state._wheelCommitTimer = setTimeout(()=>{
+                        if(state._wheelSnapshot && window.APP && window.APP.history && typeof window.APP.history.saveSnapshot === 'function'){
+                            window.APP.history.saveSnapshot(state._wheelSnapshot);
+                        }
+                        state._wheelSnapshot = null;
+                        state._wheelCommitTimer = null;
+                    }, 200);
+                }
+                pinchLastDist = dist;
+                e.preventDefault();
+            }
+        } catch(err){
+            console.error('touchmove handler error', err);
+        }
+    }, { passive:false });
+
+    function endPinch(){
+        if(state._wheelSnapshot && window.APP && window.APP.history && typeof window.APP.history.saveSnapshot === 'function'){
+            window.APP.history.saveSnapshot(state._wheelSnapshot);
+        }
+        state._wheelSnapshot = null;
+        if(state._wheelCommitTimer){
+            clearTimeout(state._wheelCommitTimer);
+            state._wheelCommitTimer = null;
+        }
+        pinchLastDist = 0;
+    }
+
+    canvas.addEventListener('touchend', e=>{
+        try {
+            if(touchMode === 'drag' && e.touches.length === 0){
+                endDrag();
+            }
+            if(touchMode === 'pinch' && e.touches.length < 2){
+                endPinch();
+            }
+            if(e.touches.length === 0){
+                touchMode = null;
+            }
+        } catch(err){
+            console.error('touchend handler error', err);
+        }
+    });
+
+    canvas.addEventListener('touchcancel', ()=>{
+        if(touchMode === 'drag') endDrag();
+        if(touchMode === 'pinch') endPinch();
+        touchMode = null;
+    });
 
     async function detectTaintedImageCandidates() {
         const results = [];
@@ -1042,6 +1153,10 @@
     bindPosInputs('wmPic', refs.wmPicX, refs.wmPicY, refs.wmPicZ);
     bindPosInputs('sysPic', refs.sysPicX, refs.sysPicY, refs.sysPicZ);
 
+    setPosInputs('subPic');
+    setPosInputs('wmPic');
+    setPosInputs('sysPic');
+
     if(refs.resetMainPicPos) refs.resetMainPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); state.images.mainPic.x = window.APP.refPos.mainPic.x; state.images.mainPic.y = window.APP.refPos.mainPic.y; if(typeof state.images.mainPic.initialScale==='number') state.images.mainPic.scale = state.images.mainPic.initialScale; setPosInputs('mainPic'); if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
     if(refs.resetBgPicPos) refs.resetBgPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); if(state.images.bgPic.img && window.APP && window.APP.ui && typeof window.APP.ui.fitBgPicToCanvas === 'function') window.APP.ui.fitBgPicToCanvas(state.images.bgPic.img); setPosInputs('bgPic'); if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
 
@@ -1071,6 +1186,9 @@
         try {
             state.images = state.images || {};
             state.images.sysPic = state.images.sysPic || { img:null, filename:null, thumb:null, info:{}, x:40, y: Math.round((state.height || 2000) - 200 - 40), scale:1, z:0 };
+            if(typeof state.images.sysPic.x !== 'number') state.images.sysPic.x = 40;
+            if(typeof state.images.sysPic.y !== 'number') state.images.sysPic.y = Math.round((state.height || 2000) - 200 - 40);
+            if(typeof state.images.sysPic.scale !== 'number') state.images.sysPic.scale = 1;
             const slot = refs.slotSysPic || document.getElementById('slotSysPic');
             const input = refs.sysPicInput || document.getElementById('sysPicInput');
             const removeBtn = refs.removeSysPicBtn || document.getElementById('removeSysPicBtn');
@@ -1125,6 +1243,7 @@
                 state.images.wmPic.x = Math.round((state.width - w5) / 2);
                 state.images.wmPic.y = Math.round((state.height / 2) - (h5 / 2) + verticalOffset);
                 state.images.wmPic.thumb = img.src;
+                setPosInputs('wmPic');
                 if(window.APP && window.APP.ui && typeof window.APP.ui.updateSlotUI === 'function'){
                     try { window.APP.ui.updateSlotUI('wmPic'); } catch(e){ console.warn('[app-interactions] updateSlotUI("wmPic") threw:', e); }
                 }
@@ -1232,5 +1351,6 @@
             });
         }
         ensureSysPicUIBindings();
+        setPosInputs('sysPic');
     })();
 })();

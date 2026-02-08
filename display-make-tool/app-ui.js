@@ -193,6 +193,9 @@
                     state.images.sysPic.x = margin;
                     state.images.sysPic.y = Math.round(state.height - h - margin);
                     state.images.sysPic.z = 0;
+                    if(sysPicX) sysPicX.value = Math.round(state.images.sysPic.x);
+                    if(sysPicY) sysPicY.value = Math.round(state.images.sysPic.y);
+                    if(sysPicZ) sysPicZ.value = Math.round((state.images.sysPic.scale || 1) * 100);
                     try { updateSlotUI('sysPic'); } catch(e){ }
                     if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
                     try {
@@ -345,6 +348,13 @@
             if(sysPicZ && state.images && state.images.sysPic){
                 const s = state.images.sysPic.scale || 1;
                 sysPicZ.value = Math.round(s * 100);
+            }
+            if(state.images && state.images.sysPic){
+                const sysPic = state.images.sysPic;
+                if(typeof sysPic.x !== 'number') sysPic.x = 40;
+                if(typeof sysPic.y !== 'number') sysPic.y = Math.round((state.height || 2000) - 200 - 40);
+                if(sysPicX) sysPicX.value = Math.round(sysPic.x);
+                if(sysPicY) sysPicY.value = Math.round(sysPic.y);
             }
             if(bandHeight && state.ui && typeof state.ui.bandHeight === 'number'){
                 bandHeight.value = state.ui.bandHeight;

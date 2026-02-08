@@ -45,8 +45,8 @@
             },
             subPic: {
                 img: null,
-                x: Math.round(canvas.width * 0.05),
-                y: Math.round(canvas.height * 0.08),
+                x: subPicDefault.x,
+                y: subPicDefault.y,
                 sizePx: subPicDefault.sizePx,
                 z: 2,
                 crop: { cx: 0.5, cy: 0.33, shape: 'circle' },
@@ -78,7 +78,7 @@
             sysPic: {
                 img: null,
                 x: 40,
-                y: null,
+                y: Math.round((canvas.height || 2000) - 200 - 40),
                 scale: 1,
                 z: 0,
                 filename: null,
