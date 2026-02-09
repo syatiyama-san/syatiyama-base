@@ -13,9 +13,21 @@
     }
 
     const refs = (ui && ui.refs) ? ui.refs : {
-        fontSizeEl: document.getElementById('fontSize'),
-        fontSelect: document.getElementById('fontSelect'),
-        fontColorEl: document.getElementById('fontColor'),
+        text1FontSelect: document.getElementById('text1FontSelect'),
+        text1FontSize: document.getElementById('text1FontSize'),
+        text1FontColor: document.getElementById('text1FontColor'),
+        text1OrientHorizontal: document.getElementById('text1OrientHorizontal'),
+        text1OrientVertical: document.getElementById('text1OrientVertical'),
+        text2FontSelect: document.getElementById('text2FontSelect'),
+        text2FontSize: document.getElementById('text2FontSize'),
+        text2FontColor: document.getElementById('text2FontColor'),
+        text2OrientHorizontal: document.getElementById('text2OrientHorizontal'),
+        text2OrientVertical: document.getElementById('text2OrientVertical'),
+        text3FontSelect: document.getElementById('text3FontSelect'),
+        text3FontSize: document.getElementById('text3FontSize'),
+        text3FontColor: document.getElementById('text3FontColor'),
+        text3OrientHorizontal: document.getElementById('text3OrientHorizontal'),
+        text3OrientVertical: document.getElementById('text3OrientVertical'),
         subPicCropX: document.getElementById('subPicCropX'),
         subPicCropY: document.getElementById('subPicCropY'),
         subPicZoom: document.getElementById('subPicZoom'),
@@ -35,8 +47,6 @@
         text2Y: document.getElementById('text2Y'),
         text3X: document.getElementById('text3X'),
         text3Y: document.getElementById('text3Y'),
-        textOrientHorizontal: document.getElementById('textOrientHorizontal'),
-        textOrientVertical: document.getElementById('textOrientVertical'),
         exportBtn: document.getElementById('exportBtn'),
         formatSel: document.getElementById('format'),
         wmPicOpacity: document.getElementById('wmPicOpacity'),
@@ -49,14 +59,19 @@
         resetSysPicPos: document.getElementById('resetSysPicPos') || document.getElementById('resetSysPicPosBtn'),
         mainPicX: document.getElementById('mainPicX'),
         mainPicY: document.getElementById('mainPicY'),
+        mainPicZ: document.getElementById('mainPicZ'),
         subPicX: document.getElementById('subPicX'),
         subPicY: document.getElementById('subPicY'),
+        subPicZ: document.getElementById('subPicZ'),
         bgPicX: document.getElementById('bgPicX'),
         bgPicY: document.getElementById('bgPicY'),
+        bgPicZ: document.getElementById('bgPicZ'),
         wmPicX: document.getElementById('wmPicX'),
         wmPicY: document.getElementById('wmPicY'),
+        wmPicZ: document.getElementById('wmPicZ'),
         sysPicX: document.getElementById('sysPicX'),
         sysPicY: document.getElementById('sysPicY'),
+        sysPicZ: document.getElementById('sysPicZ'),
         slotSysPic: document.getElementById('slotSysPic'),
         infoSysPic: document.getElementById('infoSysPic'),
         thumbSysPic: document.getElementById('thumbSysPic'),
@@ -81,6 +96,58 @@
         { x: 0.265, y: 0.945 }
     ];
 
+    function resetSingleTextToDefault(idx){
+        if(!state.texts || !state.texts[idx] || !textDefaultPos[idx]) return;
+        state.texts[idx].x = Math.round(state.width * textDefaultPos[idx].x);
+        state.texts[idx].y = Math.round(state.height * textDefaultPos[idx].y);
+        state.texts[idx].textOrientation = 'horizontal';
+        const defaultSize = (idx === 0 && refs.text1FontSize && refs.text1FontSize.defaultValue) ? parseInt(refs.text1FontSize.defaultValue,10)
+            : (idx === 1 && refs.text2FontSize && refs.text2FontSize.defaultValue) ? parseInt(refs.text2FontSize.defaultValue,10)
+            : (idx === 2 && refs.text3FontSize && refs.text3FontSize.defaultValue) ? parseInt(refs.text3FontSize.defaultValue,10)
+            : 60;
+        const safeDefaultSize = Number.isNaN(defaultSize) ? 60 : defaultSize;
+        const clampedDefaultSize = Math.max(20, safeDefaultSize);
+        state.texts[idx].fontSize = clampedDefaultSize;
+        if(idx === 0){
+            if(refs.text1OrientHorizontal) refs.text1OrientHorizontal.checked = true;
+            if(refs.text1OrientVertical) refs.text1OrientVertical.checked = false;
+            if(refs.text1FontSize) refs.text1FontSize.value = clampedDefaultSize;
+        }
+        if(idx === 1){
+            if(refs.text2OrientHorizontal) refs.text2OrientHorizontal.checked = true;
+            if(refs.text2OrientVertical) refs.text2OrientVertical.checked = false;
+            if(refs.text2FontSize) refs.text2FontSize.value = clampedDefaultSize;
+        }
+        if(idx === 2){
+            if(refs.text3OrientHorizontal) refs.text3OrientHorizontal.checked = true;
+            if(refs.text3OrientVertical) refs.text3OrientVertical.checked = false;
+            if(refs.text3FontSize) refs.text3FontSize.value = clampedDefaultSize;
+        }
+        if(idx === 0){ if(refs.text1X) refs.text1X.value = Math.round(state.texts[idx].x || 0); if(refs.text1Y) refs.text1Y.value = Math.round(state.texts[idx].y || 0); }
+        if(idx === 1){ if(refs.text2X) refs.text2X.value = Math.round(state.texts[idx].x || 0); if(refs.text2Y) refs.text2Y.value = Math.round(state.texts[idx].y || 0); }
+        if(idx === 2){ if(refs.text3X) refs.text3X.value = Math.round(state.texts[idx].x || 0); if(refs.text3Y) refs.text3Y.value = Math.round(state.texts[idx].y || 0); }
+        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+    }
+
+    function normalizeTextStyle(t){
+        if(!t) return;
+        if(typeof t.fontSize !== 'number') t.fontSize = (state.ui && typeof state.ui.fontSize === 'number') ? state.ui.fontSize : 60;
+        if(typeof t.fontFamily !== 'string') t.fontFamily = (state.ui && typeof state.ui.fontFamily === 'string') ? state.ui.fontFamily : 'Arial';
+        if(typeof t.fontColor !== 'string') t.fontColor = (state.ui && typeof state.ui.fontColor === 'string') ? state.ui.fontColor : '#000000';
+        if(typeof t.textOrientation !== 'string') t.textOrientation = (state.ui && typeof state.ui.textOrientation === 'string') ? state.ui.textOrientation : 'horizontal';
+    }
+
+    function getTextStyle(idx){
+        const t = (state.texts && state.texts[idx]) ? state.texts[idx] : null;
+        if(t) normalizeTextStyle(t);
+        const fontSize = (t && typeof t.fontSize === 'number') ? t.fontSize : 60;
+        const fontFamily = (t && typeof t.fontFamily === 'string') ? t.fontFamily : 'Arial';
+        const textOrientation = (t && t.textOrientation === 'vertical') ? 'vertical' : 'horizontal';
+        const fontSpec = `${fontSize}px "${fontFamily}"`;
+        const lineHeight = Math.round(fontSize * 1.15);
+        return { fontSize, fontFamily, textOrientation, fontSpec, lineHeight };
+    }
+
     function resetTextsToDefaults(){
         for(let i = 0; i < state.texts.length; i++){
             if(textDefaultPos[i]){
@@ -88,16 +155,43 @@
                 state.texts[i].y = Math.round(state.height * textDefaultPos[i].y);
             }
         }
-        state.ui = state.ui || {};
-        state.ui.textOrientation = 'horizontal';
-        if(refs.textOrientHorizontal) refs.textOrientHorizontal.checked = true;
-        if(refs.textOrientVertical) refs.textOrientVertical.checked = false;
+        for(let i = 0; i < state.texts.length; i++){
+            state.texts[i].textOrientation = 'horizontal';
+        }
+        const defaultSize1Raw = (refs.text1FontSize && refs.text1FontSize.defaultValue) ? parseInt(refs.text1FontSize.defaultValue,10) : 60;
+        const defaultSize2Raw = (refs.text2FontSize && refs.text2FontSize.defaultValue) ? parseInt(refs.text2FontSize.defaultValue,10) : 60;
+        const defaultSize3Raw = (refs.text3FontSize && refs.text3FontSize.defaultValue) ? parseInt(refs.text3FontSize.defaultValue,10) : 60;
+        const defaultSize1 = Math.max(20, Number.isNaN(defaultSize1Raw) ? 60 : defaultSize1Raw);
+        const defaultSize2 = Math.max(20, Number.isNaN(defaultSize2Raw) ? 60 : defaultSize2Raw);
+        const defaultSize3 = Math.max(20, Number.isNaN(defaultSize3Raw) ? 60 : defaultSize3Raw);
+        if(state.texts[0]) state.texts[0].fontSize = defaultSize1;
+        if(state.texts[1]) state.texts[1].fontSize = defaultSize2;
+        if(state.texts[2]) state.texts[2].fontSize = defaultSize3;
+        if(refs.text1OrientHorizontal) refs.text1OrientHorizontal.checked = true;
+        if(refs.text1OrientVertical) refs.text1OrientVertical.checked = false;
+        if(refs.text2OrientHorizontal) refs.text2OrientHorizontal.checked = true;
+        if(refs.text2OrientVertical) refs.text2OrientVertical.checked = false;
+        if(refs.text3OrientHorizontal) refs.text3OrientHorizontal.checked = true;
+        if(refs.text3OrientVertical) refs.text3OrientVertical.checked = false;
+        if(refs.text1FontSize) refs.text1FontSize.value = defaultSize1;
+        if(refs.text2FontSize) refs.text2FontSize.value = defaultSize2;
+        if(refs.text3FontSize) refs.text3FontSize.value = defaultSize3;
         if(refs.text1X) refs.text1X.value = Math.round(state.texts[0].x || 0);
         if(refs.text1Y) refs.text1Y.value = Math.round(state.texts[0].y || 0);
         if(refs.text2X) refs.text2X.value = Math.round(state.texts[1].x || 0);
         if(refs.text2Y) refs.text2Y.value = Math.round(state.texts[1].y || 0);
         if(refs.text3X) refs.text3X.value = Math.round(state.texts[2].x || 0);
         if(refs.text3Y) refs.text3Y.value = Math.round(state.texts[2].y || 0);
+        state.ui = state.ui || {};
+        const defaultBandColor = (refs.bandColor && refs.bandColor.defaultValue) ? refs.bandColor.defaultValue : '#ffffff';
+        const defaultBandHeight = (refs.bandHeight && refs.bandHeight.defaultValue) ? parseInt(refs.bandHeight.defaultValue, 10) : 1000;
+        state.ui.bandColor = defaultBandColor;
+        state.ui.bandHeight = Number.isNaN(defaultBandHeight) ? 1000 : defaultBandHeight;
+        state.ui.bandOrientation = 'horizontal';
+        if(refs.bandColor) refs.bandColor.value = defaultBandColor;
+        if(refs.bandHeight) refs.bandHeight.value = state.ui.bandHeight;
+        if(refs.bandOrientHorizontal) refs.bandOrientHorizontal.checked = true;
+        if(refs.bandOrientVertical) refs.bandOrientVertical.checked = false;
         if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
     }
 
@@ -108,91 +202,233 @@
         return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
     }
 
-    canvas.addEventListener('mousedown', e=>{
-        try {
-            const p = canvasPointFromEvent(e);
-            const size = parseInt((refs.fontSizeEl && refs.fontSizeEl.value) || 80,10) || 80;
-            const font = (refs.fontSelect && refs.fontSelect.value) || 'Arial';
-            const fontSpec = `${size}px "${font}"`;
-            const lineHeight = Math.round(size * 1.15);
-            const textOrient = (state.ui && state.ui.textOrientation) ? state.ui.textOrientation : 'horizontal';
-            const maxWidth = Math.max(200, state.width - 220 - 220);
-            for(let i = state.texts.length - 1; i >= 0; i--){
-                const t = state.texts[i];
-                let w = 0; let h = 0;
-                if(textOrient === 'vertical'){
-                    const cols = String(t.text || '').split('\n');
-                    let maxRows = 0;
-                    for(const col of cols){
-                        const len = Array.from(col).length;
-                        if(len > maxRows) maxRows = len;
-                    }
-                    w = Math.max(1, cols.length) * lineHeight;
-                    h = Math.max(1, maxRows) * lineHeight;
-                } else {
-                    const block = utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight);
-                    w = block.width || maxWidth;
-                    h = block.height;
+    function canvasPointFromTouch(touch){
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return { x: (touch.clientX - rect.left) * scaleX, y: (touch.clientY - rect.top) * scaleY };
+    }
+
+    function startDragAtPoint(p){
+        const maxWidth = Math.max(200, state.width - 220 - 220);
+        for(let i = state.texts.length - 1; i >= 0; i--){
+            const t = state.texts[i];
+            const style = getTextStyle(i);
+            const fontSpec = style.fontSpec;
+            const lineHeight = style.lineHeight;
+            const textOrient = style.textOrientation;
+            let w = 0; let h = 0;
+            if(textOrient === 'vertical'){
+                const cols = String(t.text || '').split('\n');
+                let maxRows = 0;
+                for(const col of cols){
+                    const len = Array.from(col).length;
+                    if(len > maxRows) maxRows = len;
                 }
-                if(p.x >= t.x && p.x <= t.x + w && p.y >= t.y && p.y <= t.y + h){
-                    if(window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
-                        state._dragSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
-                    }
-                    state.dragging = { type:'text', index:i };
-                    state.dragOffset.x = p.x - t.x; state.dragOffset.y = p.y - t.y;
-                    return;
-                }
+                w = Math.max(1, cols.length) * lineHeight;
+                h = Math.max(1, maxRows) * lineHeight;
+            } else {
+                const block = utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight);
+                w = block.width || maxWidth;
+                h = block.height;
             }
-            const imgs = ['mainPic','subPic','bgPic','wmPic','sysPic'].sort((a,b)=> (state.images[b] && state.images[b].z||0)-(state.images[a] && state.images[a].z||0));
-            for(const k of imgs){
-                const obj = state.images[k];
-                if(!obj || !obj.img) continue;
-                if(k === 'subPic'){
-                    const crop = obj.crop || {};
-                    const shape = (crop && typeof crop.shape === 'string') ? crop.shape : 'circle';
-                    let hitWidth, hitHeight, hitX, hitY;
-                    
-                    const sizePx = obj.sizePx || (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) || 300;
-                    if(shape === 'rectangle'){
-                        hitWidth = obj.rectangleWidth || 1200;
-                        hitHeight = obj.rectangleHeight || 1200;
-                        hitX = obj.x + (sizePx - hitWidth) / 2;
-                        hitY = obj.y + (sizePx - hitHeight) / 2;
-                    } else {
-                        hitWidth = sizePx;
-                        hitHeight = sizePx;
-                        hitX = obj.x;
-                        hitY = obj.y;
-                    }
-                    
-                    if(p.x >= hitX && p.x <= hitX + hitWidth && p.y >= hitY && p.y <= hitY + hitHeight){
-                        if(window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
-                            state._dragSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
-                        }
-                        state.dragging = { type:'image', key:k };
-                        state.dragOffset.x = p.x - obj.x; state.dragOffset.y = p.y - obj.y;
-                        return;
-                    }
-                    continue;
+            const hitX = (textOrient === 'vertical') ? (t.x - (w - lineHeight)) : t.x;
+            if(p.x >= hitX && p.x <= hitX + w && p.y >= t.y && p.y <= t.y + h){
+                if(window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
+                    state._dragSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
                 }
-                let w, h;
-                if(k === 'sysPic'){
-                    const scale = (typeof obj.scale === 'number') ? obj.scale : 1;
-                    w = (obj.img.width || 0) * scale;
-                    h = (obj.img.height || 0) * scale;
+                state.dragging = { type:'text', index:i };
+                state.dragOffset.x = p.x - t.x; state.dragOffset.y = p.y - t.y;
+                return true;
+            }
+        }
+        const imgs = ['mainPic','subPic','bgPic','wmPic','sysPic'].sort((a,b)=> (state.images[b] && state.images[b].z||0)-(state.images[a] && state.images[a].z||0));
+        for(const k of imgs){
+            const obj = state.images[k];
+            if(!obj || !obj.img) continue;
+            if(k === 'subPic'){
+                const crop = obj.crop || {};
+                const shape = (crop && typeof crop.shape === 'string') ? crop.shape : 'circle';
+                let hitWidth, hitHeight, hitX, hitY;
+                const sizePx = obj.sizePx || (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) || 300;
+                if(shape === 'rectangle'){
+                    hitWidth = obj.rectangleWidth || 1200;
+                    hitHeight = obj.rectangleHeight || 1200;
+                    hitX = obj.x + (sizePx - hitWidth) / 2;
+                    hitY = obj.y + (sizePx - hitHeight) / 2;
                 } else {
-                    w = (obj.img.width || 0) * (obj.scale || 1);
-                    h = (obj.img.height || 0) * (obj.scale || 1);
+                    hitWidth = sizePx;
+                    hitHeight = sizePx;
+                    hitX = obj.x;
+                    hitY = obj.y;
                 }
-                if(p.x >= obj.x && p.x <= obj.x + w && p.y >= obj.y && p.y <= obj.y + h){
+                if(p.x >= hitX && p.x <= hitX + hitWidth && p.y >= hitY && p.y <= hitY + hitHeight){
                     if(window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
                         state._dragSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
                     }
                     state.dragging = { type:'image', key:k };
                     state.dragOffset.x = p.x - obj.x; state.dragOffset.y = p.y - obj.y;
-                    return;
+                    return true;
                 }
+                continue;
             }
+            let w, h;
+            if(k === 'sysPic'){
+                const scale = (typeof obj.scale === 'number') ? obj.scale : 1;
+                w = (obj.img.width || 0) * scale;
+                h = (obj.img.height || 0) * scale;
+            } else {
+                w = (obj.img.width || 0) * (obj.scale || 1);
+                h = (obj.img.height || 0) * (obj.scale || 1);
+            }
+            if(p.x >= obj.x && p.x <= obj.x + w && p.y >= obj.y && p.y <= obj.y + h){
+                if(window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
+                    state._dragSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
+                }
+                state.dragging = { type:'image', key:k };
+                state.dragOffset.x = p.x - obj.x; state.dragOffset.y = p.y - obj.y;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function moveDragToPoint(p){
+        if(!state.dragging) return;
+        if(state.dragging.type === 'text'){
+            const t = state.texts[state.dragging.index];
+            t.x = p.x - state.dragOffset.x; t.y = p.y - state.dragOffset.y;
+            if(state.dragging.index === 0){ if(refs.text1X) refs.text1X.value = Math.round(t.x); if(refs.text1Y) refs.text1Y.value = Math.round(t.y); }
+            if(state.dragging.index === 1){ if(refs.text2X) refs.text2X.value = Math.round(t.x); if(refs.text2Y) refs.text2Y.value = Math.round(t.y); }
+            if(state.dragging.index === 2){ if(refs.text3X) refs.text3X.value = Math.round(t.x); if(refs.text3Y) refs.text3Y.value = Math.round(t.y); }
+        } else {
+            const obj = state.images[state.dragging.key];
+            obj.x = p.x - state.dragOffset.x; obj.y = p.y - state.dragOffset.y;
+            setPosInputs(state.dragging.key);
+        }
+        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+    }
+
+    function endDrag(){
+        if(state.dragging && state._dragSnapshot && window.APP && window.APP.history && typeof window.APP.history.saveSnapshot === 'function'){
+            window.APP.history.saveSnapshot(state._dragSnapshot);
+        }
+        state._dragSnapshot = null;
+        state.dragging = null;
+    }
+
+    function applyZoomAtPoint(p, delta, deltaSub){
+        const maxWidth = Math.max(200, state.width - 220 - 220);
+        for(let i = state.texts.length - 1; i >= 0; i--){
+            const t = state.texts[i];
+            const style = getTextStyle(i);
+            const fontSpec = style.fontSpec;
+            const lineHeight = style.lineHeight;
+            const textOrient = style.textOrientation;
+            let w = 0; let h = 0;
+            if(textOrient === 'vertical'){
+                const cols = String(t.text || '').split('\n');
+                let maxRows = 0;
+                for(const col of cols){
+                    const len = Array.from(col).length;
+                    if(len > maxRows) maxRows = len;
+                }
+                w = Math.max(1, cols.length) * lineHeight;
+                h = Math.max(1, maxRows) * lineHeight;
+            } else {
+                const block = utils.measureTextBlock(t.text, maxWidth, fontSpec, lineHeight);
+                w = block.width || maxWidth;
+                h = block.height;
+            }
+            const hitX = (textOrient === 'vertical') ? (t.x - (w - lineHeight)) : t.x;
+            if(p.x >= hitX && p.x <= hitX + w && p.y >= t.y && p.y <= t.y + h){
+                const curSize = (typeof t.fontSize === 'number') ? t.fontSize : 60;
+                const newSize = Math.max(20, Math.min(300, Math.round(curSize * delta)));
+                t.fontSize = newSize;
+                if(i === 0 && refs.text1FontSize) refs.text1FontSize.value = newSize;
+                if(i === 1 && refs.text2FontSize) refs.text2FontSize.value = newSize;
+                if(i === 2 && refs.text3FontSize) refs.text3FontSize.value = newSize;
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                return true;
+            }
+        }
+        const imgs = ['mainPic','subPic','bgPic','wmPic','sysPic'].sort((a,b)=> (state.images[b] && state.images[b].z||0)-(state.images[a] && state.images[a].z||0));
+        for(const k of imgs){
+            const obj = state.images[k];
+            if(!obj || !obj.img) continue;
+            if(k === 'subPic'){
+                const crop = obj.crop || {};
+                const shape = (crop && typeof crop.shape === 'string') ? crop.shape : 'circle';
+                let hitWidth, hitHeight, hitX, hitY;
+                const sizePx = obj.sizePx || (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) || 300;
+                if(shape === 'rectangle'){
+                    hitWidth = obj.rectangleWidth || 1200;
+                    hitHeight = obj.rectangleHeight || 1200;
+                    hitX = obj.x + (sizePx - hitWidth) / 2;
+                    hitY = obj.y + (sizePx - hitHeight) / 2;
+                } else {
+                    hitWidth = sizePx;
+                    hitHeight = sizePx;
+                    hitX = obj.x;
+                    hitY = obj.y;
+                }
+                if(p.x >= hitX && p.x <= hitX + hitWidth && p.y >= hitY && p.y <= hitY + hitHeight){
+                    const useDelta = (typeof deltaSub === 'number') ? deltaSub : delta;
+                    if(shape === 'rectangle'){
+                        const currentWidth = obj.rectangleWidth || 1200;
+                        const currentHeight = obj.rectangleHeight || 1200;
+                        let newHeight = Math.round(currentHeight * useDelta);
+                        let newWidth = Math.round(currentWidth * useDelta);
+                        const heightRatio = newHeight < 400 ? 400 / newHeight : (newHeight > 2500 ? 2500 / newHeight : 1);
+                        const widthRatio = newWidth < 400 ? 400 / newWidth : (newWidth > 2020 ? 2020 / newWidth : 1);
+                        const limitRatio = Math.min(heightRatio, widthRatio);
+                        newHeight = Math.round(newHeight * limitRatio);
+                        newWidth = Math.round(newWidth * limitRatio);
+                        obj.rectangleHeight = newHeight;
+                        obj.rectangleWidth = newWidth;
+                        if(refs.subPicZ) refs.subPicZ.value = Math.round((newWidth / 1200) * 100);
+                    } else {
+                        let newSize = Math.round(hitWidth * useDelta);
+                        if(window.APP && window.APP.subPicDefault){
+                            newSize = Math.max(window.APP.subPicDefault.min, Math.min(window.APP.subPicDefault.max, newSize));
+                        } else {
+                            newSize = Math.max(10, Math.min(2000, newSize));
+                        }
+                        obj.sizePx = newSize;
+                        const baseSize = (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) ? window.APP.subPicDefault.sizePx : 1200;
+                        if(refs.subPicZ) refs.subPicZ.value = Math.round((newSize / baseSize) * 100);
+                    }
+                    if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                    return true;
+                }
+                continue;
+            }
+            let w, h;
+            if(k === 'sysPic'){
+                const scale = (typeof obj.scale === 'number') ? obj.scale : 1;
+                w = (obj.img.width || 0) * scale;
+                h = (obj.img.height || 0) * scale;
+            } else {
+                w = (obj.img.width || 0) * (obj.scale || 1);
+                h = (obj.img.height || 0) * (obj.scale || 1);
+            }
+            if(p.x >= obj.x && p.x <= obj.x + w && p.y >= obj.y && p.y <= obj.y + h){
+                obj.scale = Math.max(0.01, Math.min(40, (obj.scale || 1) * delta));
+                if(k === 'mainPic' && refs.mainPicZ) refs.mainPicZ.value = Math.round(obj.scale * 100);
+                if(k === 'bgPic' && refs.bgPicZ) refs.bgPicZ.value = Math.round(obj.scale * 100);
+                if(k === 'wmPic' && refs.wmPicZ) refs.wmPicZ.value = Math.round(obj.scale * 100);
+                if(k === 'sysPic' && refs.sysPicZ) refs.sysPicZ.value = Math.round(obj.scale * 100);
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    canvas.addEventListener('mousedown', e=>{
+        try {
+            const p = canvasPointFromEvent(e);
+            startDragAtPoint(p);
         } catch(err){
             console.error('mousedown handler error', err);
         }
@@ -202,35 +438,16 @@
         try {
             if(!state.dragging) return;
             const p = canvasPointFromEvent(e);
-            if(state.dragging.type === 'text'){
-                const t = state.texts[state.dragging.index];
-                t.x = p.x - state.dragOffset.x; t.y = p.y - state.dragOffset.y;
-                if(state.dragging.index === 0){ if(refs.text1X) refs.text1X.value = Math.round(t.x); if(refs.text1Y) refs.text1Y.value = Math.round(t.y); }
-                if(state.dragging.index === 1){ if(refs.text2X) refs.text2X.value = Math.round(t.x); if(refs.text2Y) refs.text2Y.value = Math.round(t.y); }
-                if(state.dragging.index === 2){ if(refs.text3X) refs.text3X.value = Math.round(t.x); if(refs.text3Y) refs.text3Y.value = Math.round(t.y); }
-            } else {
-                const obj = state.images[state.dragging.key];
-                obj.x = p.x - state.dragOffset.x; obj.y = p.y - state.dragOffset.y;
-                    setPosInputs(state.dragging.key);
-            }
-            if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            moveDragToPoint(p);
         } catch(err){
             console.error('mousemove handler error', err);
         }
     });
     canvas.addEventListener('mouseup', ()=> {
-        if(state.dragging && state._dragSnapshot && window.APP && window.APP.history && typeof window.APP.history.saveSnapshot === 'function'){
-            window.APP.history.saveSnapshot(state._dragSnapshot);
-        }
-        state._dragSnapshot = null;
-        state.dragging = null;
+        endDrag();
     });
     canvas.addEventListener('mouseleave', ()=> {
-        if(state.dragging && state._dragSnapshot && window.APP && window.APP.history && typeof window.APP.history.saveSnapshot === 'function'){
-            window.APP.history.saveSnapshot(state._dragSnapshot);
-        }
-        state._dragSnapshot = null;
-        state.dragging = null;
+        endDrag();
     });
 
     canvas.addEventListener('wheel', e=>{
@@ -250,79 +467,111 @@
                 state._wheelCommitTimer = null;
             }, 200);
             const p = canvasPointFromEvent(e);
-            const imgs = ['mainPic','subPic','bgPic','wmPic','sysPic'].sort((a,b)=> (state.images[b] && state.images[b].z||0)-(state.images[a] && state.images[a].z||0));
-            for(const k of imgs){
-                const obj = state.images[k];
-                if(!obj || !obj.img) continue;
-                if(k === 'subPic'){
-                    const crop = obj.crop || {};
-                    const shape = (crop && typeof crop.shape === 'string') ? crop.shape : 'circle';
-                    let hitWidth, hitHeight, hitX, hitY;
-                    
-                    const sizePx = obj.sizePx || (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) || 300;
-                    if(shape === 'rectangle'){
-                        hitWidth = obj.rectangleWidth || 1200;
-                        hitHeight = obj.rectangleHeight || 1200;
-                        hitX = obj.x + (sizePx - hitWidth) / 2;
-                        hitY = obj.y + (sizePx - hitHeight) / 2;
-                    } else {
-                        hitWidth = sizePx;
-                        hitHeight = sizePx;
-                        hitX = obj.x;
-                        hitY = obj.y;
-                    }
-                    
-                    if(p.x >= hitX && p.x <= hitX + hitWidth && p.y >= hitY && p.y <= hitY + hitHeight){
-                        const delta = e.deltaY < 0 ? 1.06 : 0.94;
-                        
-                        if(shape === 'rectangle'){
-                            const currentWidth = obj.rectangleWidth || 1200;
-                            const currentHeight = obj.rectangleHeight || 1200;
-                            
-                            let newHeight = Math.round(currentHeight * delta);
-                            let newWidth = Math.round(currentWidth * delta);
-                            
-                            const heightRatio = newHeight < 400 ? 400 / newHeight : (newHeight > 2500 ? 2500 / newHeight : 1);
-                            const widthRatio = newWidth < 400 ? 400 / newWidth : (newWidth > 2020 ? 2020 / newWidth : 1);
-                            const limitRatio = Math.min(heightRatio, widthRatio);
-                            
-                            newHeight = Math.round(newHeight * limitRatio);
-                            newWidth = Math.round(newWidth * limitRatio);
-                            
-                            obj.rectangleHeight = newHeight;
-                            obj.rectangleWidth = newWidth;
-                        } else {
-                            let newSize = Math.round(hitWidth * delta);
-                            if(window.APP && window.APP.subPicDefault){
-                                newSize = Math.max(window.APP.subPicDefault.min, Math.min(window.APP.subPicDefault.max, newSize));
-                            } else {
-                                newSize = Math.max(10, Math.min(2000, newSize));
-                            }
-                            obj.sizePx = newSize;
-                        }
-                        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
-                        return;
-                    }
-                    continue;
-                }
-                let w, h;
-                if(k === 'sysPic'){
-                    const scale = (typeof obj.scale === 'number') ? obj.scale : 1;
-                    w = (obj.img.width || 0) * scale;
-                    h = (obj.img.height || 0) * scale;
-                } else {
-                    w = (obj.img.width || 0) * (obj.scale || 1);
-                    h = (obj.img.height || 0) * (obj.scale || 1);
-                }
-                if(p.x >= obj.x && p.x <= obj.x + w && p.y >= obj.y && p.y <= obj.y + h){
-                    const delta = e.deltaY < 0 ? 1.05 : 0.95;
-                    obj.scale = Math.max(0.01, Math.min(40, (obj.scale || 1) * delta)); if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); return;
-                }
-            }
+            const delta = e.deltaY < 0 ? 1.05 : 0.95;
+            const deltaSub = e.deltaY < 0 ? 1.06 : 0.94;
+            applyZoomAtPoint(p, delta, deltaSub);
         } catch(err){
             console.error('wheel handler error', err);
         }
     }, { passive:false });
+
+    let touchMode = null;
+    let pinchLastDist = 0;
+    canvas.addEventListener('touchstart', e=>{
+        try {
+            if(e.touches.length === 1){
+                touchMode = 'drag';
+                const p = canvasPointFromTouch(e.touches[0]);
+                startDragAtPoint(p);
+                e.preventDefault();
+            } else if(e.touches.length >= 2){
+                touchMode = 'pinch';
+                const t0 = e.touches[0];
+                const t1 = e.touches[1];
+                const dx = t0.clientX - t1.clientX;
+                const dy = t0.clientY - t1.clientY;
+                pinchLastDist = Math.hypot(dx, dy);
+                if(!state._wheelSnapshot && window.APP && window.APP.history && typeof window.APP.history.cloneStateForHistory === 'function'){
+                    state._wheelSnapshot = window.APP.history.cloneStateForHistory(window.APP.state);
+                }
+                e.preventDefault();
+            }
+        } catch(err){
+            console.error('touchstart handler error', err);
+        }
+    }, { passive:false });
+
+    canvas.addEventListener('touchmove', e=>{
+        try {
+            if(touchMode === 'drag' && e.touches.length === 1){
+                const p = canvasPointFromTouch(e.touches[0]);
+                moveDragToPoint(p);
+                e.preventDefault();
+                return;
+            }
+            if(touchMode === 'pinch' && e.touches.length >= 2){
+                const t0 = e.touches[0];
+                const t1 = e.touches[1];
+                const dx = t0.clientX - t1.clientX;
+                const dy = t0.clientY - t1.clientY;
+                const dist = Math.hypot(dx, dy);
+                if(pinchLastDist > 0){
+                    const scale = dist / pinchLastDist;
+                    const mid = { clientX: (t0.clientX + t1.clientX) / 2, clientY: (t0.clientY + t1.clientY) / 2 };
+                    const p = canvasPointFromEvent(mid);
+                    applyZoomAtPoint(p, scale, scale);
+                    if(state._wheelCommitTimer){
+                        clearTimeout(state._wheelCommitTimer);
+                    }
+                    state._wheelCommitTimer = setTimeout(()=>{
+                        if(state._wheelSnapshot && window.APP && window.APP.history && typeof window.APP.history.saveSnapshot === 'function'){
+                            window.APP.history.saveSnapshot(state._wheelSnapshot);
+                        }
+                        state._wheelSnapshot = null;
+                        state._wheelCommitTimer = null;
+                    }, 200);
+                }
+                pinchLastDist = dist;
+                e.preventDefault();
+            }
+        } catch(err){
+            console.error('touchmove handler error', err);
+        }
+    }, { passive:false });
+
+    function endPinch(){
+        if(state._wheelSnapshot && window.APP && window.APP.history && typeof window.APP.history.saveSnapshot === 'function'){
+            window.APP.history.saveSnapshot(state._wheelSnapshot);
+        }
+        state._wheelSnapshot = null;
+        if(state._wheelCommitTimer){
+            clearTimeout(state._wheelCommitTimer);
+            state._wheelCommitTimer = null;
+        }
+        pinchLastDist = 0;
+    }
+
+    canvas.addEventListener('touchend', e=>{
+        try {
+            if(touchMode === 'drag' && e.touches.length === 0){
+                endDrag();
+            }
+            if(touchMode === 'pinch' && e.touches.length < 2){
+                endPinch();
+            }
+            if(e.touches.length === 0){
+                touchMode = null;
+            }
+        } catch(err){
+            console.error('touchend handler error', err);
+        }
+    });
+
+    canvas.addEventListener('touchcancel', ()=>{
+        if(touchMode === 'drag') endDrag();
+        if(touchMode === 'pinch') endPinch();
+        touchMode = null;
+    });
 
     async function detectTaintedImageCandidates() {
         const results = [];
@@ -593,20 +842,36 @@
 
     function setPosInputs(key){
         const map = {
-            mainPic: { x: refs.mainPicX, y: refs.mainPicY },
-            subPic: { x: refs.subPicX, y: refs.subPicY },
-            bgPic: { x: refs.bgPicX, y: refs.bgPicY },
-            wmPic: { x: refs.wmPicX, y: refs.wmPicY },
-            sysPic: { x: refs.sysPicX, y: refs.sysPicY }
+            mainPic: { x: refs.mainPicX, y: refs.mainPicY, z: refs.mainPicZ },
+            subPic: { x: refs.subPicX, y: refs.subPicY, z: refs.subPicZ },
+            bgPic: { x: refs.bgPicX, y: refs.bgPicY, z: refs.bgPicZ },
+            wmPic: { x: refs.wmPicX, y: refs.wmPicY, z: refs.wmPicZ },
+            sysPic: { x: refs.sysPicX, y: refs.sysPicY, z: refs.sysPicZ }
         };
         const target = map[key];
         const obj = state.images && state.images[key];
         if(!target || !obj) return;
         if(target.x) target.x.value = Math.round(typeof obj.x === 'number' ? obj.x : 0);
         if(target.y) target.y.value = Math.round(typeof obj.y === 'number' ? obj.y : 0);
+        if(target.z){
+            if(key === 'subPic'){
+                const baseSize = (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) ? window.APP.subPicDefault.sizePx : 1200;
+                const shape = (obj.crop && typeof obj.crop.shape === 'string') ? obj.crop.shape : 'circle';
+                if(shape === 'rectangle'){
+                    const curW = (typeof obj.rectangleWidth === 'number') ? obj.rectangleWidth : 1200;
+                    target.z.value = Math.round((curW / 1200) * 100);
+                } else {
+                    const curSize = (typeof obj.sizePx === 'number') ? obj.sizePx : baseSize;
+                    target.z.value = Math.round((curSize / baseSize) * 100);
+                }
+            } else {
+                const pct = Math.round((obj.scale || 1) * 100);
+                target.z.value = pct;
+            }
+        }
     }
 
-    function bindPosInputs(key, xEl, yEl){
+    function bindPosInputs(key, xEl, yEl, zEl){
         const obj = state.images && state.images[key];
         if(!obj) return;
         if(xEl && !xEl._bound){
@@ -627,6 +892,39 @@
             yEl.addEventListener('change', ()=>{ commitHistorySnapshot(yEl); });
             yEl._bound = true;
         }
+        if(zEl && !zEl._bound){
+            bindHistoryStart(zEl);
+            zEl.addEventListener('input', ()=>{
+                const pct = parseInt(zEl.value,10);
+                if(Number.isNaN(pct)) return;
+                if(key === 'subPic'){
+                    const baseSize = (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) ? window.APP.subPicDefault.sizePx : 1200;
+                    const shape = (obj.crop && typeof obj.crop.shape === 'string') ? obj.crop.shape : 'circle';
+                    if(shape === 'rectangle'){
+                        const nextW = Math.max(400, Math.min(2020, Math.round(1200 * (pct / 100))));
+                        const nextH = Math.max(400, Math.min(2500, Math.round(1200 * (pct / 100))));
+                        obj.rectangleWidth = nextW;
+                        obj.rectangleHeight = nextH;
+                        const subPicHeightPx = document.getElementById('subPicHeightPx');
+                        const subPicHeightPxVal = document.getElementById('subPicHeightPxVal');
+                        const subPicWidthPx = document.getElementById('subPicWidthPx');
+                        const subPicWidthPxVal = document.getElementById('subPicWidthPxVal');
+                        if(subPicHeightPx) subPicHeightPx.value = nextH;
+                        if(subPicHeightPxVal) subPicHeightPxVal.textContent = String(nextH);
+                        if(subPicWidthPx) subPicWidthPx.value = nextW;
+                        if(subPicWidthPxVal) subPicWidthPxVal.textContent = String(nextW);
+                    } else {
+                        const nextSize = Math.max(window.APP.subPicDefault.min, Math.min(window.APP.subPicDefault.max, Math.round(baseSize * (pct / 100))));
+                        obj.sizePx = nextSize;
+                    }
+                } else {
+                    obj.scale = Math.max(0.01, Math.min(4.0, pct / 100));
+                }
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            });
+            zEl.addEventListener('change', ()=>{ commitHistorySnapshot(zEl); });
+            zEl._bound = true;
+        }
         setPosInputs(key);
     }
 
@@ -642,7 +940,7 @@
     }
     if(refs.subPicZoom) {
         bindHistoryStart(refs.subPicZoom);
-        refs.subPicZoom.addEventListener('input', ()=>{ const pct = parseInt(refs.subPicZoom.value,10); if(refs.subPicZoomVal) refs.subPicZoomVal.textContent = pct + '%'; state.images.subPic.zoom = pct/100; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+        refs.subPicZoom.addEventListener('input', ()=>{ const pct = parseInt(refs.subPicZoom.value,10); if(refs.subPicZoomVal) refs.subPicZoomVal.textContent = pct + '%'; state.images.subPic.zoom = pct/100; if(refs.subPicZ) refs.subPicZ.value = pct; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
         refs.subPicZoom.addEventListener('change', ()=>{ commitHistorySnapshot(refs.subPicZoom); });
     }
     if(refs.subPicBorder) {
@@ -650,7 +948,7 @@
         refs.subPicBorder.addEventListener('input', ()=>{ if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
         refs.subPicBorder.addEventListener('change', ()=>{ commitHistorySnapshot(refs.subPicBorder); });
     }
-    if(refs.resetSubPicPos) refs.resetSubPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); state.images.subPic.x = window.APP.subPicDefault.x; state.images.subPic.y = window.APP.subPicDefault.y; state.images.subPic.sizePx = window.APP.subPicDefault.sizePx; state.images.subPic.rectangleWidth = 1200; state.images.subPic.rectangleHeight = 1200; state.images.subPic.crop = {cx:0.5,cy:0.33}; state.images.subPic.zoom = 1.0; state.images.subPic.bgOpacity = 1.0; if(refs.subPicCropX) refs.subPicCropX.value = 50; if(refs.subPicCropY) refs.subPicCropY.value = 33; if(refs.subPicZoom) refs.subPicZoom.value = 100; if(refs.subPicZoomVal) refs.subPicZoomVal.textContent='100%'; if(refs.bgSubPic) refs.bgSubPic.value = '#FFFF00'; if(refs.bgSubPicAlpha) refs.bgSubPicAlpha.value = 100; if(refs.bgSubPicAlphaVal) refs.bgSubPicAlphaVal.textContent = '100%'; const subPicHeightPx = document.getElementById('subPicHeightPx'); const subPicHeightPxVal = document.getElementById('subPicHeightPxVal'); const subPicWidthPx = document.getElementById('subPicWidthPx'); const subPicWidthPxVal = document.getElementById('subPicWidthPxVal'); if(subPicHeightPx) subPicHeightPx.value = 1200; if(subPicHeightPxVal) subPicHeightPxVal.textContent = '1200'; if(subPicWidthPx) subPicWidthPx.value = 1200; if(subPicWidthPxVal) subPicWidthPxVal.textContent = '1200'; setPosInputs('subPic'); if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
+    if(refs.resetSubPicPos) refs.resetSubPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); state.images.subPic.x = window.APP.subPicDefault.x; state.images.subPic.y = window.APP.subPicDefault.y; state.images.subPic.sizePx = window.APP.subPicDefault.sizePx; state.images.subPic.rectangleWidth = 1200; state.images.subPic.rectangleHeight = 1200; state.images.subPic.crop = {cx:0.5,cy:0.33}; state.images.subPic.zoom = 1.0; state.images.subPic.bgOpacity = 1.0; if(refs.subPicCropX) refs.subPicCropX.value = 50; if(refs.subPicCropY) refs.subPicCropY.value = 33; if(refs.subPicZoom) refs.subPicZoom.value = 100; if(refs.subPicZoomVal) refs.subPicZoomVal.textContent='100%'; if(refs.subPicZ) refs.subPicZ.value = 100; if(refs.bgSubPic) refs.bgSubPic.value = '#FFFF00'; if(refs.bgSubPicAlpha) refs.bgSubPicAlpha.value = 100; if(refs.bgSubPicAlphaVal) refs.bgSubPicAlphaVal.textContent = '100%'; const subPicHeightPx = document.getElementById('subPicHeightPx'); const subPicHeightPxVal = document.getElementById('subPicHeightPxVal'); const subPicWidthPx = document.getElementById('subPicWidthPx'); const subPicWidthPxVal = document.getElementById('subPicWidthPxVal'); if(subPicHeightPx) subPicHeightPx.value = 1200; if(subPicHeightPxVal) subPicHeightPxVal.textContent = '1200'; if(subPicWidthPx) subPicWidthPx.value = 1200; if(subPicWidthPxVal) subPicWidthPxVal.textContent = '1200'; setPosInputs('subPic'); if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
 
     if(refs.text1El) {
         refs.text1El.addEventListener('input', ()=>{ if(!refs.text1El._historySnapshot) startHistorySnapshot(refs.text1El); state.texts[0].text = refs.text1El.value; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
@@ -693,37 +991,155 @@
     bindTextPosInputs(1, refs.text2X, refs.text2Y);
     bindTextPosInputs(2, refs.text3X, refs.text3Y);
 
+    function bindTextStyleControls(idx, controls){
+        if(!state.texts || !state.texts[idx] || !controls) return;
+        const getTextRef = ()=> (state.texts && state.texts[idx]) ? state.texts[idx] : null;
+        const initText = getTextRef();
+        if(initText) normalizeTextStyle(initText);
+
+        if(controls.fontSelect && !controls.fontSelect._bound){
+            bindHistoryStart(controls.fontSelect);
+            const applyFontChange = ()=>{
+                try {
+                    const t = getTextRef();
+                    if(!t) return;
+                    const f = (controls.fontSelect.value || 'Arial').toString();
+                    t.fontFamily = f;
+                    if (document && document.fonts && typeof document.fonts.load === 'function') {
+                        document.fonts.load(`16px "${f}"`).then(()=>{
+                            if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                        }).catch(()=>{
+                            if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                        });
+                    } else {
+                        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                    }
+                } catch(e){
+                    if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+                }
+            };
+            controls.fontSelect.addEventListener('change', applyFontChange);
+            controls.fontSelect.addEventListener('input', applyFontChange);
+            controls.fontSelect.addEventListener('change', ()=>{ commitHistorySnapshot(controls.fontSelect); });
+            controls.fontSelect._bound = true;
+        }
+
+        if(controls.fontSize && !controls.fontSize._bound){
+            bindHistoryStart(controls.fontSize);
+            controls.fontSize.addEventListener('input', ()=>{
+                const t = getTextRef();
+                if(!t) return;
+                const v = parseInt(controls.fontSize.value,10);
+                if(Number.isNaN(v)) return;
+                t.fontSize = v;
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            });
+            controls.fontSize.addEventListener('change', ()=>{
+                const t = getTextRef();
+                if(!t) return;
+                const v = parseInt(controls.fontSize.value,10);
+                const clamped = Number.isNaN(v) ? 20 : Math.max(20, v);
+                t.fontSize = clamped;
+                controls.fontSize.value = clamped;
+                commitHistorySnapshot(controls.fontSize);
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            });
+            controls.fontSize._bound = true;
+        }
+
+        if(controls.fontColor && !controls.fontColor._bound){
+            bindHistoryStart(controls.fontColor);
+            controls.fontColor.addEventListener('input', ()=>{
+                const t = getTextRef();
+                if(!t) return;
+                t.fontColor = controls.fontColor.value || '#000000';
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            });
+            controls.fontColor.addEventListener('change', ()=>{
+                const t = getTextRef();
+                if(!t) return;
+                t.fontColor = controls.fontColor.value || '#000000';
+                commitHistorySnapshot(controls.fontColor);
+                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+            });
+            controls.fontColor._bound = true;
+        }
+
+        function setOrientation(orient){
+            const t = getTextRef();
+            if(!t) return;
+            t.textOrientation = (orient === 'vertical') ? 'vertical' : 'horizontal';
+            if(controls.orientH) controls.orientH.checked = (t.textOrientation === 'horizontal');
+            if(controls.orientV) controls.orientV.checked = (t.textOrientation === 'vertical');
+            if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+        }
+
+        if(controls.orientH && !controls.orientH._bound){
+            bindHistoryStart(controls.orientH);
+            controls.orientH.addEventListener('change', function(){
+                if(this.checked) setOrientation('horizontal');
+                commitHistorySnapshot(controls.orientH);
+            });
+            controls.orientH._bound = true;
+        }
+        if(controls.orientV && !controls.orientV._bound){
+            bindHistoryStart(controls.orientV);
+            controls.orientV.addEventListener('change', function(){
+                if(this.checked) setOrientation('vertical');
+                commitHistorySnapshot(controls.orientV);
+            });
+            controls.orientV._bound = true;
+        }
+
+        if(controls.fontSelect && controls.fontSelect.value) {
+            const t = getTextRef();
+            if(t) t.fontFamily = (controls.fontSelect.value || 'Arial').toString();
+        }
+        if(controls.fontSize && controls.fontSize.value){
+            const v = parseInt(controls.fontSize.value,10);
+            const t = getTextRef();
+            if(!Number.isNaN(v) && t) t.fontSize = v;
+        }
+        if(controls.fontColor && controls.fontColor.value){
+            const t = getTextRef();
+            if(t) t.fontColor = controls.fontColor.value || t.fontColor || '#000000';
+        }
+        if(controls.orientV && controls.orientV.checked){
+            const t = getTextRef();
+            if(t) t.textOrientation = 'vertical';
+        } else if(controls.orientH){
+            const t = getTextRef();
+            if(t) t.textOrientation = 'horizontal';
+        }
+        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
+    }
+
+    bindTextStyleControls(0, {
+        fontSelect: refs.text1FontSelect,
+        fontSize: refs.text1FontSize,
+        fontColor: refs.text1FontColor,
+        orientH: refs.text1OrientHorizontal,
+        orientV: refs.text1OrientVertical
+    });
+    bindTextStyleControls(1, {
+        fontSelect: refs.text2FontSelect,
+        fontSize: refs.text2FontSize,
+        fontColor: refs.text2FontColor,
+        orientH: refs.text2OrientHorizontal,
+        orientV: refs.text2OrientVertical
+    });
+    bindTextStyleControls(2, {
+        fontSelect: refs.text3FontSelect,
+        fontSize: refs.text3FontSize,
+        fontColor: refs.text3FontColor,
+        orientH: refs.text3OrientHorizontal,
+        orientV: refs.text3OrientVertical
+    });
+
     if(refs.bgSubPicAlpha) {
         bindHistoryStart(refs.bgSubPicAlpha);
         refs.bgSubPicAlpha.addEventListener('input', ()=>{ state.images.subPic.bgOpacity = parseInt(refs.bgSubPicAlpha.value,10)/100; if(refs.bgSubPicAlphaVal) refs.bgSubPicAlphaVal.textContent = refs.bgSubPicAlpha.value + '%'; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
         refs.bgSubPicAlpha.addEventListener('change', ()=>{ commitHistorySnapshot(refs.bgSubPicAlpha); });
-    }
-    if(refs.fontSelect) {
-        const applyFontChange = ()=>{
-            try {
-                state.ui = state.ui || {};
-                const f = (refs.fontSelect.value || 'Arial').toString();
-                state.ui.fontFamily = f;
-                if (document && document.fonts && typeof document.fonts.load === 'function') {
-                    document.fonts.load(`16px "${f}"`).then(()=>{
-                        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
-                    }).catch(()=>{
-                        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
-                    });
-                } else {
-                    if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
-                }
-            } catch(e){
-                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
-            }
-        };
-        refs.fontSelect.addEventListener('change', applyFontChange);
-        refs.fontSelect.addEventListener('input', applyFontChange);
-    }
-    if(refs.fontSizeEl) {
-        bindHistoryStart(refs.fontSizeEl);
-        refs.fontSizeEl.addEventListener('input', ()=>{ state.ui = state.ui || {}; state.ui.fontSize = parseInt(refs.fontSizeEl.value,10) || 0; if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
-        refs.fontSizeEl.addEventListener('change', ()=>{ commitHistorySnapshot(refs.fontSizeEl); });
     }
     if(refs.wmPicOpacity) {
         bindHistoryStart(refs.wmPicOpacity);
@@ -731,11 +1147,15 @@
         refs.wmPicOpacity.addEventListener('change', ()=>{ commitHistorySnapshot(refs.wmPicOpacity); });
     }
 
-    bindPosInputs('mainPic', refs.mainPicX, refs.mainPicY);
-    bindPosInputs('subPic', refs.subPicX, refs.subPicY);
-    bindPosInputs('bgPic', refs.bgPicX, refs.bgPicY);
-    bindPosInputs('wmPic', refs.wmPicX, refs.wmPicY);
-    bindPosInputs('sysPic', refs.sysPicX, refs.sysPicY);
+    bindPosInputs('mainPic', refs.mainPicX, refs.mainPicY, refs.mainPicZ);
+    bindPosInputs('subPic', refs.subPicX, refs.subPicY, refs.subPicZ);
+    bindPosInputs('bgPic', refs.bgPicX, refs.bgPicY, refs.bgPicZ);
+    bindPosInputs('wmPic', refs.wmPicX, refs.wmPicY, refs.wmPicZ);
+    bindPosInputs('sysPic', refs.sysPicX, refs.sysPicY, refs.sysPicZ);
+
+    setPosInputs('subPic');
+    setPosInputs('wmPic');
+    setPosInputs('sysPic');
 
     if(refs.resetMainPicPos) refs.resetMainPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); state.images.mainPic.x = window.APP.refPos.mainPic.x; state.images.mainPic.y = window.APP.refPos.mainPic.y; if(typeof state.images.mainPic.initialScale==='number') state.images.mainPic.scale = state.images.mainPic.initialScale; setPosInputs('mainPic'); if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
     if(refs.resetBgPicPos) refs.resetBgPicPos.addEventListener('click', ()=>{ if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state); if(state.images.bgPic.img && window.APP && window.APP.ui && typeof window.APP.ui.fitBgPicToCanvas === 'function') window.APP.ui.fitBgPicToCanvas(state.images.bgPic.img); setPosInputs('bgPic'); if(window.APP && typeof window.APP.draw === 'function') window.APP.draw(); });
@@ -766,6 +1186,9 @@
         try {
             state.images = state.images || {};
             state.images.sysPic = state.images.sysPic || { img:null, filename:null, thumb:null, info:{}, x:40, y: Math.round((state.height || 2000) - 200 - 40), scale:1, z:0 };
+            if(typeof state.images.sysPic.x !== 'number') state.images.sysPic.x = 40;
+            if(typeof state.images.sysPic.y !== 'number') state.images.sysPic.y = Math.round((state.height || 2000) - 200 - 40);
+            if(typeof state.images.sysPic.scale !== 'number') state.images.sysPic.scale = 1;
             const slot = refs.slotSysPic || document.getElementById('slotSysPic');
             const input = refs.sysPicInput || document.getElementById('sysPicInput');
             const removeBtn = refs.removeSysPicBtn || document.getElementById('removeSysPicBtn');
@@ -820,6 +1243,7 @@
                 state.images.wmPic.x = Math.round((state.width - w5) / 2);
                 state.images.wmPic.y = Math.round((state.height / 2) - (h5 / 2) + verticalOffset);
                 state.images.wmPic.thumb = img.src;
+                setPosInputs('wmPic');
                 if(window.APP && window.APP.ui && typeof window.APP.ui.updateSlotUI === 'function'){
                     try { window.APP.ui.updateSlotUI('wmPic'); } catch(e){ console.warn('[app-interactions] updateSlotUI("wmPic") threw:', e); }
                 }
@@ -873,8 +1297,8 @@
             baseX = imgX + gapX;
             baseY = imgY + imgH + gapY;
         }
-        const size = (ui && ui.refs && ui.refs.fontSizeEl) ? (parseInt(ui.refs.fontSizeEl.value,10) || 80) : 80;
-        const lineHeight = Math.round(size * 1.15);
+        const style = getTextStyle(0);
+        const lineHeight = style.lineHeight;
         const blockGap = Math.round(lineHeight * 0.6);
         for(let i = 0; i < state.texts.length; i++){
             state.texts[i].x = baseX;
@@ -905,6 +1329,28 @@
         if(resetTextPosBtn){
             resetTextPosBtn.addEventListener('click', ()=>{ resetTextsToDefaults(); });
         }
+        const resetText1PosBtn = document.getElementById('resetText1PosBtn');
+        if(resetText1PosBtn){
+            resetText1PosBtn.addEventListener('click', ()=>{
+                if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
+                resetSingleTextToDefault(0);
+            });
+        }
+        const resetText2PosBtn = document.getElementById('resetText2PosBtn');
+        if(resetText2PosBtn){
+            resetText2PosBtn.addEventListener('click', ()=>{
+                if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
+                resetSingleTextToDefault(1);
+            });
+        }
+        const resetText3PosBtn = document.getElementById('resetText3PosBtn');
+        if(resetText3PosBtn){
+            resetText3PosBtn.addEventListener('click', ()=>{
+                if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
+                resetSingleTextToDefault(2);
+            });
+        }
         ensureSysPicUIBindings();
+        setPosInputs('sysPic');
     })();
 })();

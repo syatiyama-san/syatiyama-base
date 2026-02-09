@@ -16,20 +16,25 @@
         return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
     }
 
-    function checkHover(p){
-        const ui = window.APP.ui || {};
-        const uiRefs = ui.refs || {};
-        const utils = window.APP.utils || {};
+    function getTextStyle(t){
+        const fontSize = (t && typeof t.fontSize === 'number') ? t.fontSize : ((state.ui && typeof state.ui.fontSize === 'number') ? state.ui.fontSize : 60);
+        const fontFamily = (t && typeof t.fontFamily === 'string') ? t.fontFamily : ((state.ui && typeof state.ui.fontFamily === 'string') ? state.ui.fontFamily : 'Arial');
+        const textOrientation = (t && t.textOrientation === 'vertical') ? 'vertical' : ((state.ui && state.ui.textOrientation === 'vertical') ? 'vertical' : 'horizontal');
+        const fontSpec = `${fontSize}px "${fontFamily}"`;
+        const lineHeight = Math.round(fontSize * 1.15);
+        return { fontSpec, lineHeight, textOrientation };
+    }
 
-        const size = (uiRefs && uiRefs.fontSizeEl) ? (parseInt(uiRefs.fontSizeEl.value,10) || 60) : 60;
-        const font = (uiRefs && uiRefs.fontSelect) ? uiRefs.fontSelect.value || 'Arial' : 'Arial';
-        const fontSpec = `${size}px "${font}"`;
-        const lineHeight = Math.round(size * 1.15);
-        const textOrient = (state.ui && state.ui.textOrientation) ? state.ui.textOrientation : 'horizontal';
+    function checkHover(p){
+        const utils = window.APP.utils || {};
         const maxWidth = Math.max(200, state.width - 220 - 220);
         
         for(let i = state.texts.length - 1; i >= 0; i--){
             const t = state.texts[i];
+            const style = getTextStyle(t);
+            const fontSpec = style.fontSpec;
+            const lineHeight = style.lineHeight;
+            const textOrient = style.textOrientation;
             let w = 0; let h = 0;
             if(textOrient === 'vertical'){
                 const cols = String(t.text || '').split('\n');
@@ -45,7 +50,8 @@
                 w = block.width || maxWidth;
                 h = block.height || lineHeight;
             }
-            if(p.x >= t.x && p.x <= t.x + w && p.y >= t.y && p.y <= t.y + h){
+            const hitX = (textOrient === 'vertical') ? (t.x - (w - lineHeight)) : t.x;
+            if(p.x >= hitX && p.x <= hitX + w && p.y >= t.y && p.y <= t.y + h){
                 return { type: 'text', index: i };
             }
         }

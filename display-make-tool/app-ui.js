@@ -67,24 +67,44 @@
     const text2Y = document.getElementById('text2Y');
     const text3X = document.getElementById('text3X');
     const text3Y = document.getElementById('text3Y');
-    const fontSelect = document.getElementById('fontSelect');
-    const fontSizeEl = document.getElementById('fontSize');
-    const fontColorEl = document.getElementById('fontColor');
-    const textOrientHorizontal = document.getElementById('textOrientHorizontal');
-    const textOrientVertical = document.getElementById('textOrientVertical');
+
+    const text1FontSelect = document.getElementById('text1FontSelect');
+    const text1FontSize = document.getElementById('text1FontSize');
+    const text1FontColor = document.getElementById('text1FontColor');
+    const text1OrientHorizontal = document.getElementById('text1OrientHorizontal');
+    const text1OrientVertical = document.getElementById('text1OrientVertical');
+
+    const text2FontSelect = document.getElementById('text2FontSelect');
+    const text2FontSize = document.getElementById('text2FontSize');
+    const text2FontColor = document.getElementById('text2FontColor');
+    const text2OrientHorizontal = document.getElementById('text2OrientHorizontal');
+    const text2OrientVertical = document.getElementById('text2OrientVertical');
+
+    const text3FontSelect = document.getElementById('text3FontSelect');
+    const text3FontSize = document.getElementById('text3FontSize');
+    const text3FontColor = document.getElementById('text3FontColor');
+    const text3OrientHorizontal = document.getElementById('text3OrientHorizontal');
+    const text3OrientVertical = document.getElementById('text3OrientVertical');
     const mainPicX = document.getElementById('mainPicX');
     const mainPicY = document.getElementById('mainPicY');
+    const mainPicZ = document.getElementById('mainPicZ');
     const subPicX = document.getElementById('subPicX');
     const subPicY = document.getElementById('subPicY');
+    const subPicZ = document.getElementById('subPicZ');
     const bgPicX = document.getElementById('bgPicX');
     const bgPicY = document.getElementById('bgPicY');
+    const bgPicZ = document.getElementById('bgPicZ');
     const wmPicX = document.getElementById('wmPicX');
     const wmPicY = document.getElementById('wmPicY');
+    const wmPicZ = document.getElementById('wmPicZ');
     const sysPicX = document.getElementById('sysPicX');
     const sysPicY = document.getElementById('sysPicY');
+    const sysPicZ = document.getElementById('sysPicZ');
 
     const exportBtn = document.getElementById('exportBtn');
     const formatSel = document.getElementById('format');
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+    const reloadBtn = document.getElementById('reloadBtn');
 
     const infoMainPic = document.getElementById('infoMainPic');
     const infoSubPic = document.getElementById('infoSubPic');
@@ -173,6 +193,9 @@
                     state.images.sysPic.x = margin;
                     state.images.sysPic.y = Math.round(state.height - h - margin);
                     state.images.sysPic.z = 0;
+                    if(sysPicX) sysPicX.value = Math.round(state.images.sysPic.x);
+                    if(sysPicY) sysPicY.value = Math.round(state.images.sysPic.y);
+                    if(sysPicZ) sysPicZ.value = Math.round((state.images.sysPic.scale || 1) * 100);
                     try { updateSlotUI('sysPic'); } catch(e){ }
                     if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
                     try {
@@ -251,6 +274,23 @@
                     subPicZoomVal.textContent = Math.round((subPic.zoom || 1.0) * 100) + '%';
                 }
             }
+            if(subPicZ){
+                if(!hasImg){
+                    subPicZ.value = '';
+                    subPicZ.disabled = true;
+                } else {
+                    subPicZ.disabled = false;
+                    const baseSize = (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) ? window.APP.subPicDefault.sizePx : 1200;
+                    const shape = (subPic.crop && typeof subPic.crop.shape === 'string') ? subPic.crop.shape : 'circle';
+                    if(shape === 'rectangle'){
+                        const curW = (typeof subPic.rectangleWidth === 'number') ? subPic.rectangleWidth : 1200;
+                        subPicZ.value = Math.round((curW / 1200) * 100);
+                    } else {
+                        const curSize = (typeof subPic.sizePx === 'number') ? subPic.sizePx : baseSize;
+                        subPicZ.value = Math.round((curSize / baseSize) * 100);
+                    }
+                }
+            }
         } catch(e){
             console.warn('updateSubPicCropSliders error', e);
         }
@@ -267,6 +307,17 @@
             if(subPicZoomVal){
                 subPicZoomVal.textContent = Math.round((subPic.zoom || 1.0) * 100) + '%';
             }
+            if(subPicZ){
+                const baseSize = (window.APP && window.APP.subPicDefault && window.APP.subPicDefault.sizePx) ? window.APP.subPicDefault.sizePx : 1200;
+                const shape = (subPic.crop && typeof subPic.crop.shape === 'string') ? subPic.crop.shape : 'circle';
+                if(shape === 'rectangle'){
+                    const curW = (typeof subPic.rectangleWidth === 'number') ? subPic.rectangleWidth : 1200;
+                    subPicZ.value = Math.round((curW / 1200) * 100);
+                } else {
+                    const curSize = (typeof subPic.sizePx === 'number') ? subPic.sizePx : baseSize;
+                    subPicZ.value = Math.round((curSize / baseSize) * 100);
+                }
+            }
             if(subPicBorder && typeof subPic.borderWidth === 'number'){
                 subPicBorder.value = subPic.borderWidth;
             }
@@ -282,25 +333,78 @@
             if(wmPicOpacity && typeof wmPic.opacity === 'number'){
                 wmPicOpacity.value = Math.round(wmPic.opacity * 100);
             }
+            if(mainPicZ && state.images && state.images.mainPic){
+                const s = state.images.mainPic.scale || 1;
+                mainPicZ.value = Math.round(s * 100);
+            }
+            if(bgPicZ && state.images && state.images.bgPic){
+                const s = state.images.bgPic.scale || 1;
+                bgPicZ.value = Math.round(s * 100);
+            }
+            if(wmPicZ && state.images && state.images.wmPic){
+                const s = state.images.wmPic.scale || 1;
+                wmPicZ.value = Math.round(s * 100);
+            }
+            if(sysPicZ && state.images && state.images.sysPic){
+                const s = state.images.sysPic.scale || 1;
+                sysPicZ.value = Math.round(s * 100);
+            }
+            if(state.images && state.images.sysPic){
+                const sysPic = state.images.sysPic;
+                if(typeof sysPic.x !== 'number') sysPic.x = 40;
+                if(typeof sysPic.y !== 'number') sysPic.y = Math.round((state.height || 2000) - 200 - 40);
+                if(sysPicX) sysPicX.value = Math.round(sysPic.x);
+                if(sysPicY) sysPicY.value = Math.round(sysPic.y);
+            }
             if(bandHeight && state.ui && typeof state.ui.bandHeight === 'number'){
                 bandHeight.value = state.ui.bandHeight;
             }
             if(bandColor && state.ui && typeof state.ui.bandColor === 'string'){
                 bandColor.value = state.ui.bandColor;
             }
-            if(fontSizeEl && state.ui && typeof state.ui.fontSize === 'number'){
-                fontSizeEl.value = state.ui.fontSize;
+            const defaultFontSize = (state.ui && typeof state.ui.fontSize === 'number') ? state.ui.fontSize : 60;
+            const defaultFontColor = (state.ui && typeof state.ui.fontColor === 'string') ? state.ui.fontColor : '#000000';
+            const defaultFontFamily = (state.ui && typeof state.ui.fontFamily === 'string') ? state.ui.fontFamily : 'Arial';
+
+            function applyTextStyleToUI(textObj, controls){
+                if(!controls) return;
+                const fontSize = (textObj && typeof textObj.fontSize === 'number') ? textObj.fontSize : defaultFontSize;
+                const fontColor = (textObj && typeof textObj.fontColor === 'string') ? textObj.fontColor : defaultFontColor;
+                const fontFamily = (textObj && typeof textObj.fontFamily === 'string') ? textObj.fontFamily : defaultFontFamily;
+                const orient = (textObj && textObj.textOrientation === 'vertical') ? 'vertical' : 'horizontal';
+                if(controls.fontSize) controls.fontSize.value = fontSize;
+                if(controls.fontColor) controls.fontColor.value = fontColor;
+                if(controls.fontSelect) controls.fontSelect.value = fontFamily;
+                if(controls.orientH) controls.orientH.checked = (orient === 'horizontal');
+                if(controls.orientV) controls.orientV.checked = (orient === 'vertical');
             }
-            if(fontColorEl && state.ui && typeof state.ui.fontColor === 'string'){
-                fontColorEl.value = state.ui.fontColor;
+
+            if(state.texts && state.texts[0]){
+                applyTextStyleToUI(state.texts[0], {
+                    fontSize: text1FontSize,
+                    fontColor: text1FontColor,
+                    fontSelect: text1FontSelect,
+                    orientH: text1OrientHorizontal,
+                    orientV: text1OrientVertical
+                });
             }
-            if(textOrientHorizontal && textOrientVertical && state.ui && typeof state.ui.textOrientation === 'string'){
-                const orient = (state.ui.textOrientation === 'vertical') ? 'vertical' : 'horizontal';
-                textOrientHorizontal.checked = (orient === 'horizontal');
-                textOrientVertical.checked = (orient === 'vertical');
+            if(state.texts && state.texts[1]){
+                applyTextStyleToUI(state.texts[1], {
+                    fontSize: text2FontSize,
+                    fontColor: text2FontColor,
+                    fontSelect: text2FontSelect,
+                    orientH: text2OrientHorizontal,
+                    orientV: text2OrientVertical
+                });
             }
-            if(fontSelect && state.ui && typeof state.ui.fontFamily === 'string'){
-                fontSelect.value = state.ui.fontFamily;
+            if(state.texts && state.texts[2]){
+                applyTextStyleToUI(state.texts[2], {
+                    fontSize: text3FontSize,
+                    fontColor: text3FontColor,
+                    fontSelect: text3FontSelect,
+                    orientH: text3OrientHorizontal,
+                    orientV: text3OrientVertical
+                });
             }
             if(text1El && state.texts && state.texts[0]){
                 text1El.value = state.texts[0].text || '';
@@ -551,43 +655,6 @@
             if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
         });
         bandColor._bound = true;
-    }
-
-    if(fontColorEl && !fontColorEl._bound){
-        fontColorEl.addEventListener('input', function(){
-            try {
-                state.ui = state.ui || {};
-                state.ui.fontColor = fontColorEl.value;
-                if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
-            } catch(e){
-                console.warn('fontColorEl input error', e);
-            }
-        });
-        fontColorEl.addEventListener('change', function(){
-            if(window.APP && window.APP.history) window.APP.history.saveState(window.APP.state);
-        });
-        fontColorEl._bound = true;
-    }
-
-    function setTextOrientation(orient){
-        state.ui = state.ui || {};
-        state.ui.textOrientation = (orient === 'vertical') ? 'vertical' : 'horizontal';
-        if(textOrientHorizontal) textOrientHorizontal.checked = (state.ui.textOrientation === 'horizontal');
-        if(textOrientVertical) textOrientVertical.checked = (state.ui.textOrientation === 'vertical');
-        if(window.APP && typeof window.APP.draw === 'function') window.APP.draw();
-    }
-
-    if(textOrientHorizontal && !textOrientHorizontal._bound){
-        textOrientHorizontal.addEventListener('change', function(){
-            if(this.checked) setTextOrientation('horizontal');
-        });
-        textOrientHorizontal._bound = true;
-    }
-    if(textOrientVertical && !textOrientVertical._bound){
-        textOrientVertical.addEventListener('change', function(){
-            if(this.checked) setTextOrientation('vertical');
-        });
-        textOrientVertical._bound = true;
     }
 
     function setBandOrientation(orient){
@@ -1144,17 +1211,116 @@
         slotMainPic,slotSubPic,slotBgPic,slotWmPic,slotSysPic,
         resetMainPicPos,resetSubPicPos,resetBgPicPos,resetWmPicPos,resetSysPicPos,
         mainPicX,mainPicY,subPicX,subPicY,bgPicX,bgPicY,wmPicX,wmPicY,sysPicX,sysPicY,
+        mainPicZ,subPicZ,bgPicZ,wmPicZ,sysPicZ,
         subPicCropY,subPicZoom,subPicZoomVal,subPicBorder,subPicBorderColor,centerTopBtn,
         subPicCropX,
         subPicShapeCircle, subPicShapeDiamond,
         bandColor, bandHeight, bandOrientHorizontal, bandOrientVertical,
         bgSubPic, bgSubPicAlpha, bgSubPicAlphaVal,
-        text1El,text2El,text3El,text1X,text1Y,text2X,text2Y,text3X,text3Y,fontSelect,fontSizeEl,fontColorEl,
-        textOrientHorizontal,textOrientVertical,
+        text1El,text2El,text3El,text1X,text1Y,text2X,text2Y,text3X,text3Y,
+        text1FontSelect,text1FontSize,text1FontColor,text1OrientHorizontal,text1OrientVertical,
+        text2FontSelect,text2FontSize,text2FontColor,text2OrientHorizontal,text2OrientVertical,
+        text3FontSelect,text3FontSize,text3FontColor,text3OrientHorizontal,text3OrientVertical,
         exportBtn,formatSel,
         wmPicOpacity
     };
     window.APP.ui.exportCanvasImage = exportCanvasImage;
+
+    if(scrollTopBtn && !scrollTopBtn._bound){
+        scrollTopBtn.addEventListener('click', ()=>{
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const sidebar = document.querySelector('.sidebar');
+            if(sidebar) sidebar.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        scrollTopBtn._bound = true;
+    }
+
+    const menuToggleBtn = document.getElementById('menuToggleBtn');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+    const closeMenu = ()=>{
+        document.body.classList.remove('menu-open');
+        if(menuToggleBtn) menuToggleBtn.setAttribute('aria-expanded', 'false');
+    };
+    const updateMenuMode = ()=>{
+        const container = document.querySelector('.container');
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+        if(!container || !sidebar) return;
+        const sidebarWidth = sidebar.offsetWidth || 380;
+        const minMain = 560;
+        const gap = 16;
+        const available = container.getBoundingClientRect().width || window.innerWidth;
+        const mainWidth = mainContent ? mainContent.getBoundingClientRect().width : available;
+        const shouldMenu = (mainWidth < minMain) || (available < (sidebarWidth + minMain + gap));
+        document.body.classList.toggle('menu-mode', shouldMenu);
+        document.body.style.setProperty('--drawer-w', `${sidebarWidth}px`);
+        const sidebarRect = sidebar.getBoundingClientRect();
+        const handleTop = Math.max(24, Math.round((sidebarRect.top || 0) + 110));
+        document.body.style.setProperty('--handle-top', `${handleTop}px`);
+        if(menuToggleBtn) menuToggleBtn.hidden = !shouldMenu;
+        if(!shouldMenu){
+            closeMenu();
+        }
+    };
+    if(menuToggleBtn && !menuToggleBtn._bound){
+        menuToggleBtn.addEventListener('click', ()=>{
+            if(!document.body.classList.contains('menu-mode')) return;
+            const isOpen = document.body.classList.toggle('menu-open');
+            menuToggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+        menuToggleBtn._bound = true;
+    }
+    if(sidebarBackdrop && !sidebarBackdrop._bound){
+        sidebarBackdrop.addEventListener('click', closeMenu);
+        sidebarBackdrop._bound = true;
+    }
+    if(!window.APP._menuResizeBound){
+        window.addEventListener('resize', ()=>{
+            requestAnimationFrame(updateMenuMode);
+        });
+        window.APP._menuResizeBound = true;
+    }
+    updateMenuMode();
+    if(reloadBtn && !reloadBtn._bound){
+        reloadBtn.addEventListener('click', ()=>{
+            window.location.reload();
+        });
+        reloadBtn._bound = true;
+    }
+
+    function setupTabs(){
+        const btnImages = document.getElementById('tabBtnImages');
+        const btnText = document.getElementById('tabBtnText');
+        const btnExport = document.getElementById('tabBtnExport');
+        const tabImages = document.getElementById('tabImages');
+        const tabText = document.getElementById('tabText');
+        const tabExport = document.getElementById('tabExport');
+        if(!btnImages || !btnText || !btnExport || !tabImages || !tabText || !tabExport) return;
+        const setActive = (key)=>{
+            const isImages = key === 'images';
+            const isText = key === 'text';
+            const isExport = key === 'export';
+            btnImages.classList.toggle('active', isImages);
+            btnText.classList.toggle('active', isText);
+            btnExport.classList.toggle('active', isExport);
+            tabImages.classList.toggle('active', isImages);
+            tabText.classList.toggle('active', isText);
+            tabExport.classList.toggle('active', isExport);
+        };
+        if(!btnImages._bound){
+            btnImages.addEventListener('click', ()=> setActive('images'));
+            btnImages._bound = true;
+        }
+        if(!btnText._bound){
+            btnText.addEventListener('click', ()=> setActive('text'));
+            btnText._bound = true;
+        }
+        if(!btnExport._bound){
+            btnExport.addEventListener('click', ()=> setActive('export'));
+            btnExport._bound = true;
+        }
+        setActive('images');
+    }
 
     setupSlot(slotMainPic, fileMainPic, 'mainPic', infoMainPic, thumbMainPic, metaMainPic, removeMainPic);
     setupSlot(slotSubPic, fileSubPic, 'subPic', infoSubPic, thumbSubPic, metaSubPic, removeSubPic);
@@ -1163,7 +1329,9 @@
     setupSlot(slotSysPic, sysPicInput, 'sysPic', infoSysPic, thumbSysPic, metaSysPic, removeSysPic);
 
     if(utils && typeof utils.populateFontSelect === 'function'){
-        utils.populateFontSelect(fontSelect);
+        if(text1FontSelect) utils.populateFontSelect(text1FontSelect);
+        if(text2FontSelect) utils.populateFontSelect(text2FontSelect);
+        if(text3FontSelect) utils.populateFontSelect(text3FontSelect);
     }
 
     state.ui = state.ui || {};
@@ -1174,6 +1342,7 @@
     try { ensureDefaultSysPic(); } catch(e){ }
 
     try { updateSubPicCropSliders(); } catch(e){ }
+    try { setupTabs(); } catch(e){ }
 
     function setAspectRatio(ratio) {
         const ratios = {
