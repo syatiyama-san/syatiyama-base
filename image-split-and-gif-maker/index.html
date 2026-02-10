@@ -3,115 +3,143 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>画像ツール GIF合成プロトタイプ</title>
-  <link rel="stylesheet" href="styles.css" />
-  <!-- gif.js と gifuct-js を利用 -->
-  <script src="../libs/gif.js"></script>
-  <script src="https://unpkg.com/gifuct-js/dist/gifuct.min.js"></script>
+  <title>画像分割 & GIFメーカー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho&family=Noto+Sans+JP&family=Noto+Serif+JP&family=Kiwi+Maru&family=Hina+Mincho&family=Kaisei+Decol&family=Mochiy+Pop+One&family=Yomogi&family=Pacifico&family=Ballet&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="header">
-    <h1>画像ツール GIF合成プロトタイプ</h1>
-  </header>
+  <div class="header-container">
+    <div class="header-top">
+      <a href="../" class="home-btn" title="しゃちやまベース-Top">
+        <span class="home-icon">🏠</span>
+      </a>
+      <h3>画像分割 & GIFメーカー</h3>
+    </div>
+  </div>
 
-  <main class="container">
-    <section class="left">
-      <div id="dropArea" class="drop">ここをクリックまたは画像をドラッグ＆ドロップ</div>
-      <canvas id="previewCanvas" class="preview" width="800" height="450" style="display:none"></canvas>
-      <div id="noImage" class="no-image">画像が読み込まれていません</div>
-
-      <div class="preview-controls">
-        <label class="small">プレビューズーム</label>
-        <input id="zoomRange" type="range" min="50" max="150" value="100" />
+  <div class="container">
+    <div class="main-content">
+      <div class="previewWrap">
+        <div id="previewViewport" class="previewViewport">
+          <canvas id="previewCanvas" width="800" height="450"></canvas>
+          <div id="noImage" class="noImage">画像が読み込まれていません</div>
+          <div id="dropArea" class="dropArea">
+            <div id="dropTitle" class="dropTitle">ここをクリックまたはドラッグ＆ドロップ</div>
+            <div class="smallNote">JPG/PNG/GIF</div>
+          </div>
+        </div>
       </div>
-    </section>
 
-    <aside class="right">
+    </div>
+
+    <aside class="sidebar" aria-label="操作パネル">
       <div class="panel">
-        <label class="label">処理モード</label>
+        <strong>モード</strong>
         <div class="row">
-          <input type="radio" id="modeSplit" name="mode" value="split" checked />
-          <label for="modeSplit">4分割（16:9）</label>
+          <input type="radio" id="modeGif" name="mode" value="gif" checked />
+          <label for="modeGif">GIFメーカー</label>
         </div>
         <div class="row">
-          <input type="radio" id="modeGif" name="mode" value="gif" />
-          <label for="modeGif">GIF出力（合成）</label>
+          <input type="radio" id="modeSplit" name="mode" value="split" />
+          <label for="modeSplit">画像分割</label>
         </div>
       </div>
 
-      <div class="panel" id="splitOptions">
-        <label class="label">4分割オプション</label>
+      <div class="panel" id="gifPanel">
+        <strong>GIFメーカー</strong>
+        <div id="gifFileSlot" class="fileSlot">
+          <div class="title">画像を追加</div>
+          <div class="smallNote">クリックorドロップ</div>
+          <input id="gifFilesInput" type="file" accept="image/*" multiple style="display:none;">
+        </div>
+        <div class="small info" id="gifLimit">0 / 50</div>
+        <div class="layerHeader">
+          <strong>レイヤー</strong>
+          <div class="small info">ドラッグで並び替え</div>
+        </div>
+        <div id="layerList" class="layerList"></div>
+        <div class="row centerRow" style="margin-top:8px;">
+          <button id="clearBtn" class="btn">すべての画像を削除</button>
+        </div>
+        <div class="controlRow" style="margin-top:10px;">
+          <strong>エフェクト</strong>
+          <div class="row effectRow">
+            <select id="effectAssetSelect"></select>
+            <button id="addEffectAssetBtn" class="btn">追加</button>
+          </div>
+          <div id="effectFileSlot" class="fileSlot">
+            <div class="title">エフェクトを追加</div>
+            <div class="smallNote">クリックorドロップ</div>
+            <input id="effectGifInput" type="file" accept="image/gif" style="display:none;">
+          </div>
+          <div class="row centerRow" style="margin-top:8px;">
+            <button id="removeEffectBtn" class="btn">エフェクトを削除</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="gifOptions">
+        <strong>GIF設定</strong>
         <div class="row">
+          <label class="small" for="gifDelay">フレーム時間(ms)</label>
+          <input id="gifDelay" type="number" min="20" max="2000" value="80" />
+        </div>
+        <div class="row">
+          <label class="small" for="gifLoop">ループ</label>
+          <input id="gifLoop" type="number" min="0" max="0" value="0" />
+          <span class="small">0 = 無限ループ</span>
+        </div>
+      </div>
+
+      <div class="panel" id="splitOptions" style="display:none">
+        <strong>画像分割</strong>
+        <div id="splitFileSlot" class="fileSlot">
+          <div class="title">分割する画像</div>
+          <div class="smallNote">クリックorドロップ</div>
+          <input id="splitImageInput" type="file" accept="image/*" style="display:none;">
+          <div id="splitFileInfo" class="slotInfo" style="display:none;">
+            <img id="splitThumb" class="thumb">
+            <div id="splitMeta" class="fileMeta"></div>
+            <button id="removeSplitBtn" class="removeBtn">削除</button>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px;">
           <input type="radio" id="bgWhite" name="bg" value="#ffffff" checked />
           <label for="bgWhite">白</label>
           <input type="radio" id="bgBlack" name="bg" value="#000000" />
           <label for="bgBlack">黒</label>
         </div>
-        <div class="row">
-          <input type="radio" id="fmtPng" name="format" value="png" checked />
-          <label for="fmtPng">PNG</label>
-          <input type="radio" id="fmtJpg" name="format" value="jpg" />
-          <label for="fmtJpg">JPG</label>
-        </div>
       </div>
 
-      <div class="panel" id="gifOptions" style="display:none">
-        <label class="label">GIFオプション</label>
-
-        <div class="row">
-          <label class="small">モード</label>
-          <select id="gifMode">
-            <option value="fromImage">静止画から自動生成</option>
-            <option value="overlayGif">アップロードGIFを重ねる</option>
+      <div class="panel">
+        <strong id="exportLabel">出力</strong>
+        <div id="splitExportOptions">
+          <select id="format">
+            <option value="png">PNG</option>
+            <option value="jpg">JPG</option>
           </select>
         </div>
-
-        <div class="row">
-          <label class="small">フレーム数</label>
-          <input id="gifFrames" type="number" min="2" max="60" value="12" />
+        <div class="row centerRow" style="margin-top:8px;">
+          <button id="exportBtn" class="btnPrimary" disabled>エクスポート</button>
         </div>
-
-        <div class="row">
-          <label class="small">フレーム遅延(ms)</label>
-          <input id="gifDelay" type="number" min="20" max="2000" value="80" />
-        </div>
-
-        <div class="row">
-          <label class="small">ループ</label>
-          <input id="gifLoop" type="number" min="0" max="0" value="0" />
-          <span class="small">0 = 無限ループ</span>
-        </div>
-
-        <div class="row">
-          <label class="small">重ねるGIFをアップロード</label>
-          <input id="overlayGifInput" type="file" accept="image/gif" />
-        </div>
-
-        <div class="small info">注意: アップロードGIFのフレーム抽出には gifuct-js を使用します。大きなGIFは処理に時間がかかります。</div>
-      </div>
-
-      <div class="panel">
-        <label class="label">操作</label>
-        <div class="row">
-          <button id="exportBtn" disabled>エクスポート</button>
-          <button id="clearBtn" disabled class="btn-secondary">削除</button>
-        </div>
-        <div id="progress" class="small info">状態: 待機中</div>
-      </div>
-
-      <div class="panel">
-        <label class="label">ファイル情報</label>
-        <div id="fileInfo" class="small info">読み込み待ち</div>
-      </div>
-
-      <div class="panel footer-note">
-        <div class="small">画像はブラウザ内でのみ処理され、外部送信は行いません。</div>
       </div>
     </aside>
-  </main>
+  </div>
 
-  <script src="/syatiyama-base/libs/gif.js" defer></script>
-  <script src="/syatiyama-base/image-split-and-gif-maker/app.js"></script>
+  <footer id="site-footer" role="contentinfo" aria-label="サイト情報">
+    <p>
+      <small>@2026 syatiyama-san</small>
+      <a href="https://github.com/syatiyama-san/syatiyama-base/blob/main/LICENSE" id="footer-link" aria-label="ライセンス情報" target="_blank" rel="noopener noreferrer">
+        <small>MIT License</small>
+      </a>
+    </p>
+  </footer>
+
+  <script src="../libs/gif.js" defer></script>
+  <script src="https://unpkg.com/gifuct-js/dist/gifuct.min.js" defer></script>
+  <script src="app.js" defer></script>
 </body>
 </html>
 
