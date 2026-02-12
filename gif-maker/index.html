@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>画像分割 & GIFメーカー</title>
+  <title>GIFメーカー</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho&family=Noto+Sans+JP&family=Noto+Serif+JP&family=Kiwi+Maru&family=Hina+Mincho&family=Kaisei+Decol&family=Mochiy+Pop+One&family=Yomogi&family=Pacifico&family=Ballet&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
       <a href="../" class="home-btn" title="しゃちやまベース-Top">
         <span class="home-icon">🏠</span>
       </a>
-      <h3>画像分割 & GIFメーカー</h3>
+      <h3>GIFメーカー</h3>
     </div>
   </div>
 
@@ -35,18 +35,6 @@
     </div>
 
     <aside class="sidebar" aria-label="操作パネル">
-      <div class="panel">
-        <strong>モード</strong>
-        <div class="row">
-          <input type="radio" id="modeGif" name="mode" value="gif" checked />
-          <label for="modeGif">GIFメーカー</label>
-        </div>
-        <div class="row">
-          <input type="radio" id="modeSplit" name="mode" value="split" />
-          <label for="modeSplit">画像分割</label>
-        </div>
-      </div>
-
       <div class="panel" id="gifPanel">
         <strong>GIFメーカー</strong>
         <div id="gifFileSlot" class="fileSlot">
@@ -93,34 +81,7 @@
         </div>
       </div>
 
-      <div class="panel" id="splitOptions" style="display:none">
-        <strong>画像分割</strong>
-        <div id="splitFileSlot" class="fileSlot">
-          <div class="title">分割する画像</div>
-          <div class="smallNote">クリックorドロップ</div>
-          <input id="splitImageInput" type="file" accept="image/*" style="display:none;">
-          <div id="splitFileInfo" class="slotInfo" style="display:none;">
-            <img id="splitThumb" class="thumb">
-            <div id="splitMeta" class="fileMeta"></div>
-            <button id="removeSplitBtn" class="removeBtn">削除</button>
-          </div>
-        </div>
-        <div class="row" style="margin-top:10px;">
-          <input type="radio" id="bgWhite" name="bg" value="#ffffff" checked />
-          <label for="bgWhite">白</label>
-          <input type="radio" id="bgBlack" name="bg" value="#000000" />
-          <label for="bgBlack">黒</label>
-        </div>
-      </div>
-
       <div class="panel">
-        <strong id="exportLabel">出力</strong>
-        <div id="splitExportOptions">
-          <select id="format">
-            <option value="png">PNG</option>
-            <option value="jpg">JPG</option>
-          </select>
-        </div>
         <div class="row centerRow" style="margin-top:8px;">
           <button id="exportBtn" class="btnPrimary" disabled>エクスポート</button>
         </div>

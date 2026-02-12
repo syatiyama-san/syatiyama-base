@@ -14,31 +14,16 @@
   const effectGifInput = document.getElementById('effectGifInput');
   const removeEffectBtn = document.getElementById('removeEffectBtn');
   const gifPanel = document.getElementById('gifPanel');
-  const splitFileSlot = document.getElementById('splitFileSlot');
-  const splitImageInput = document.getElementById('splitImageInput');
-  const splitFileInfo = document.getElementById('splitFileInfo');
-  const splitThumb = document.getElementById('splitThumb');
-  const splitMeta = document.getElementById('splitMeta');
-  const removeSplitBtn = document.getElementById('removeSplitBtn');
   const exportBtn = document.getElementById('exportBtn');
   const clearBtn = document.getElementById('clearBtn');
 
-  const modeSplitRadio = document.getElementById('modeSplit');
-  const modeGifRadio = document.getElementById('modeGif');
-  const splitOptions = document.getElementById('splitOptions');
   const gifOptions = document.getElementById('gifOptions');
-  const splitExportOptions = document.getElementById('splitExportOptions');
-  const exportLabel = document.getElementById('exportLabel');
 
   const gifDelayInput = document.getElementById('gifDelay');
   const gifLoopInput = document.getElementById('gifLoop');
-  const formatSelect = document.getElementById('format');
 
   const state = {
-    mode: 'gif',
     layers: [],
-    splitFile: null,
-    splitImage: null,
     previewRunning: false,
     previewStart: 0,
     previewFrame: null,
@@ -64,34 +49,15 @@
     });
   };
 
-  bindDropTarget(dropArea, previewViewport, (files) => {
-    if (state.mode === 'gif') {
-      addGifFiles(files);
-    } else {
-      if (files[0]) loadSplitFile(files[0]);
-    }
-  });
-  bindDropTarget(previewViewport, previewViewport, (files) => {
-    if (state.mode === 'gif') {
-      addGifFiles(files);
-    } else {
-      if (files[0]) loadSplitFile(files[0]);
-    }
-  });
+  bindDropTarget(dropArea, previewViewport, addGifFiles);
+  bindDropTarget(previewViewport, previewViewport, addGifFiles);
   bindDropTarget(gifFileSlot, gifFileSlot, addGifFiles);
   bindDropTarget(effectFileSlot, effectFileSlot, (files) => {
     if (files[0]) addEffectFile(files[0]);
   });
-  bindDropTarget(splitFileSlot, splitFileSlot, (files) => {
-    if (files[0]) loadSplitFile(files[0]);
-  });
 
   dropArea.addEventListener('click', () => {
-    if (state.mode === 'gif') {
-      gifFilesInput.click();
-    } else {
-      splitImageInput.click();
-    }
+    gifFilesInput.click();
   });
   gifFileSlot.addEventListener('click', () => gifFilesInput.click());
   gifFilesInput.addEventListener('change', () => {
@@ -113,46 +79,15 @@
     addEffectFromAsset(name);
   });
 
-  splitFileSlot.addEventListener('click', () => splitImageInput.click());
-  splitImageInput.addEventListener('change', () => {
-    if (splitImageInput.files && splitImageInput.files[0]) loadSplitFile(splitImageInput.files[0]);
-  });
-
-  removeSplitBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    clearSplit();
-  });
-
   removeEffectBtn.addEventListener('click', () => {
     removeEffectLayers();
-  });
-
-  [modeSplitRadio, modeGifRadio].forEach(r => r.addEventListener('change', () => {
-    const nextMode = modeGifRadio.checked ? 'gif' : 'split';
-    if (nextMode !== state.mode) {
-      if (nextMode === 'gif') {
-        clearSplit();
-      } else {
-        clearGifLayers();
-      }
-    }
-    state.mode = nextMode;
-    updateModeUI();
-  }));
-
-  document.querySelectorAll('input[name="bg"]').forEach(r => {
-    r.addEventListener('change', () => renderPreviewFrame(performance.now()));
   });
 
   exportBtn.addEventListener('click', async () => {
     exportBtn.disabled = true;
     progress('処理開始...');
     try {
-      if (state.mode === 'split') {
-        await doSplitExport();
-      } else {
-        await doGifExport();
-      }
+      await doGifExport();
     } catch (err) {
       console.error(err);
       alert('処理中にエラーが発生しました');
@@ -163,10 +98,8 @@
   });
 
   clearBtn.addEventListener('click', () => {
-    if (state.mode === 'gif') {
-      clearGifLayers();
-      updateModeUI();
-    }
+    clearGifLayers();
+    updateModeUI();
   });
 
   async function addGifFiles(files) {
@@ -372,38 +305,6 @@
     state.layers.push(layer);
   }
 
-  async function loadSplitFile(file) {
-    if (!file.type.startsWith('image/')) {
-      alert('画像ファイルを選択してください');
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    try {
-      const img = await loadImage(url);
-      state.splitFile = file;
-      state.splitImage = img;
-      splitMeta.textContent = `${file.name} ・ ${img.width}×${img.height}px`;
-      splitFileInfo.style.display = 'flex';
-      splitThumb.onload = () => URL.revokeObjectURL(url);
-      splitThumb.src = url;
-      updateModeUI();
-      progress('画像読み込み完了');
-    } catch (err) {
-      URL.revokeObjectURL(url);
-      alert('画像の読み込みに失敗しました');
-      progress('待機中');
-    }
-  }
-
-  function clearSplit() {
-    splitImageInput.value = '';
-    state.splitFile = null;
-    state.splitImage = null;
-    splitFileInfo.style.display = 'none';
-    splitMeta.textContent = '';
-    splitThumb.removeAttribute('src');
-  }
-
   function clearGifLayers() {
     state.layers.forEach(layer => {
       if (layer.revoke) layer.revoke();
@@ -413,21 +314,9 @@
   }
 
   function updateModeUI() {
-    if (state.mode === 'gif') {
-      splitOptions.style.display = 'none';
-      gifOptions.style.display = 'block';
-      splitExportOptions.style.display = 'none';
-      exportLabel.style.display = 'none';
-      gifPanel.style.display = 'block';
-      dropTitle.textContent = 'GIF用の画像を追加';
-    } else {
-      splitOptions.style.display = 'block';
-      gifOptions.style.display = 'none';
-      splitExportOptions.style.display = 'block';
-      exportLabel.style.display = 'block';
-      gifPanel.style.display = 'none';
-      dropTitle.textContent = '分割する画像を追加';
-    }
+    gifOptions.style.display = 'block';
+    gifPanel.style.display = 'block';
+    dropTitle.textContent = 'GIF用の画像を追加';
     renderLayerList();
     updateExportState();
     renderPreviewFrame(performance.now());
@@ -435,14 +324,8 @@
   }
 
   function updateExportState() {
-    if (state.mode === 'gif') {
-      exportBtn.disabled = state.layers.length === 0;
-    } else {
-      exportBtn.disabled = !state.splitImage;
-    }
-    if (state.mode === 'gif') {
-      clearBtn.disabled = state.layers.length === 0;
-    }
+    exportBtn.disabled = state.layers.length === 0;
+    clearBtn.disabled = state.layers.length === 0;
   }
 
   function renderPreviewFrame(now) {
@@ -454,68 +337,17 @@
     const ctx = previewCanvas.getContext('2d');
     ctx.clearRect(0, 0, canvasW, canvasH);
 
-    if (state.mode === 'split') {
-      if (!state.splitImage) {
-        previewViewport.classList.remove('has-image');
-        previewCanvas.style.display = 'none';
-        noImage.style.display = 'flex';
-        return;
-      }
-      renderSplitPreview(ctx, canvasW, canvasH);
-    } else {
-      if (!state.layers.length) {
-        previewViewport.classList.remove('has-image');
-        previewCanvas.style.display = 'none';
-        noImage.style.display = 'flex';
-        return;
-      }
-      renderGifPreview(ctx, canvasW, canvasH, now);
+    if (!state.layers.length) {
+      previewViewport.classList.remove('has-image');
+      previewCanvas.style.display = 'none';
+      noImage.style.display = 'flex';
+      return;
     }
+    renderGifPreview(ctx, canvasW, canvasH, now);
 
     previewViewport.classList.add('has-image');
     previewCanvas.style.display = 'block';
     noImage.style.display = 'none';
-  }
-
-  function renderSplitPreview(ctx, canvasW, canvasH) {
-    const bgColor = document.querySelector('input[name="bg"]:checked')?.value || '#ffffff';
-    const master = document.createElement('canvas');
-    master.width = canvasW;
-    master.height = canvasH;
-    const mctx = master.getContext('2d');
-    mctx.fillStyle = bgColor;
-    mctx.fillRect(0,0,canvasW,canvasH);
-
-    const img = state.splitImage;
-    const imgRatio = img.width / img.height;
-    const targetRatio = 16/9;
-    let drawW, drawH;
-    if (imgRatio > targetRatio) {
-      drawW = canvasW * 0.95;
-      drawH = drawW / imgRatio;
-    } else {
-      drawH = canvasH * 0.95;
-      drawW = drawH * imgRatio;
-    }
-    const dx = (canvasW - drawW) / 2;
-    const dy = (canvasH - drawH) / 2;
-    mctx.drawImage(img, dx, dy, drawW, drawH);
-
-    const gap = Math.max(8, Math.round(canvasW * 0.015));
-    const tileW = Math.floor((canvasW - gap) / 2);
-    const tileH = Math.floor((canvasH - gap) / 2);
-    const tiles = [
-      {sx:0, sy:0, dx:0, dy:0},
-      {sx:tileW, sy:0, dx:tileW + gap, dy:0},
-      {sx:0, sy:tileH, dx:0, dy:tileH + gap},
-      {sx:tileW, sy:tileH, dx:tileW + gap, dy:tileH + gap}
-    ];
-
-    ctx.fillStyle = '#f0f0f0';
-    ctx.fillRect(0,0,canvasW,canvasH);
-    tiles.forEach(t => {
-      ctx.drawImage(master, t.sx, t.sy, tileW, tileH, t.dx, t.dy, tileW, tileH);
-    });
   }
 
   function renderGifPreview(ctx, canvasW, canvasH, now) {
@@ -570,71 +402,6 @@
       state.previewFrame = requestAnimationFrame(loop);
     };
     state.previewFrame = requestAnimationFrame(loop);
-  }
-
-  async function doSplitExport() {
-    if (!state.splitImage || !state.splitFile) return;
-    progress('4分割処理中...');
-    const targetRatio = 16/9;
-    const img = state.splitImage;
-
-    let canvasW = img.width;
-    let canvasH = Math.round(canvasW / targetRatio);
-    if (canvasH < img.height) {
-      canvasH = img.height;
-      canvasW = Math.round(canvasH * targetRatio);
-    }
-    const MAX_PIX = 8000;
-    if (canvasW > MAX_PIX || canvasH > MAX_PIX) {
-      const scale = Math.min(MAX_PIX / canvasW, MAX_PIX / canvasH);
-      canvasW = Math.round(canvasW * scale);
-      canvasH = Math.round(canvasH * scale);
-    }
-
-    const master = document.createElement('canvas');
-    master.width = canvasW;
-    master.height = canvasH;
-    const mctx = master.getContext('2d');
-    const bgColor = document.querySelector('input[name="bg"]:checked').value || '#ffffff';
-    mctx.fillStyle = bgColor;
-    mctx.fillRect(0,0,canvasW,canvasH);
-
-    const imgRatio = img.width / img.height;
-    let drawW, drawH;
-    if (imgRatio > targetRatio) {
-      drawW = canvasW * 0.95;
-      drawH = drawW / imgRatio;
-    } else {
-      drawH = canvasH * 0.95;
-      drawW = drawH * imgRatio;
-    }
-    const dx = Math.round((canvasW - drawW) / 2);
-    const dy = Math.round((canvasH - drawH) / 2);
-    mctx.drawImage(img, dx, dy, Math.round(drawW), Math.round(drawH));
-
-    const tileW = Math.floor(canvasW / 2);
-    const tileH = Math.floor(canvasH / 2);
-    const fmt = (formatSelect && formatSelect.value) ? formatSelect.value : 'png';
-    const baseName = sanitizeFilename(state.splitFile.name.replace(/\.[^/.]+$/, ''));
-
-    const tiles = [
-      {sx:0, sy:0, name:`${baseName}_1`},
-      {sx:tileW, sy:0, name:`${baseName}_2`},
-      {sx:0, sy:tileH, name:`${baseName}_3`},
-      {sx:tileW, sy:tileH, name:`${baseName}_4`}
-    ];
-
-    for (let i=0;i<tiles.length;i++) {
-      const t = tiles[i];
-      const tCanvas = document.createElement('canvas');
-      tCanvas.width = tileW;
-      tCanvas.height = tileH;
-      const tctx = tCanvas.getContext('2d');
-      tctx.drawImage(master, t.sx, t.sy, tileW, tileH, 0, 0, tileW, tileH);
-      await canvasToFileAndDownload(tCanvas, fmt, t.name);
-      await sleep(120);
-    }
-    progress('4分割ダウンロード完了');
   }
 
   async function doGifExport() {
@@ -699,20 +466,6 @@
     gif.render();
   }
 
-  function canvasToFileAndDownload(canvas, format, baseName) {
-    return new Promise((resolve, reject) => {
-      const mime = format === 'jpg' ? 'image/jpeg' : 'image/png';
-      const quality = format === 'jpg' ? 0.92 : undefined;
-      canvas.toBlob(blob => {
-        if (!blob) { reject(new Error('Blob 生成失敗')); return; }
-        const url = URL.createObjectURL(blob);
-        triggerDownload(url, `${baseName}.${format === 'jpg' ? 'jpg' : 'png'}`);
-        URL.revokeObjectURL(url);
-        resolve();
-      }, mime, quality);
-    });
-  }
-
   function triggerDownload(url, filename) {
     const a = document.createElement('a');
     a.href = url;
@@ -722,11 +475,6 @@
     a.remove();
   }
 
-  function sanitizeFilename(name) {
-    return name.replace(/[\/\\?%*:|"<>]/g, '-').slice(0,120);
-  }
-
-  function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
   function progress(){ }
 
   function loadImage(src) {
