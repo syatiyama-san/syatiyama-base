@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>GIFメーカー</title>
+  <title>アニメメーカー</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho&family=Noto+Sans+JP&family=Noto+Serif+JP&family=Kiwi+Maru&family=Hina+Mincho&family=Kaisei+Decol&family=Mochiy+Pop+One&family=Yomogi&family=Pacifico&family=Ballet&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
       <a href="../" class="home-btn" title="しゃちやまベース-Top">
         <span class="home-icon">🏠</span>
       </a>
-      <h3>GIFメーカー</h3>
+      <h3>アニメメーカー</h3>
     </div>
   </div>
 
@@ -36,17 +36,17 @@
 
     <aside class="sidebar" aria-label="操作パネル">
       <div class="panel" id="gifPanel">
-        <strong>GIFメーカー</strong>
+        <strong>アニメメーカー</strong>
         <div id="gifFileSlot" class="fileSlot">
           <div class="title">画像を追加</div>
           <div class="smallNote">クリックorドロップ</div>
           <input id="gifFilesInput" type="file" accept="image/*" multiple style="display:none;">
         </div>
-        <div class="small info" id="gifLimit">0 / 50</div>
         <div class="layerHeader">
           <strong>レイヤー</strong>
           <div class="small info">ドラッグで並び替え</div>
         </div>
+        <div class="small info" id="gifLimit">0 / 50</div>
         <div id="layerList" class="layerList"></div>
         <div class="row centerRow" style="margin-top:8px;">
           <button id="clearBtn" class="btn">すべての画像を削除</button>
@@ -69,7 +69,7 @@
       </div>
 
       <div class="panel" id="gifOptions">
-        <strong>GIF設定</strong>
+        <strong>アニメ設定</strong>
         <div class="row">
           <label class="small" for="gifDelay">フレーム時間(ms)</label>
           <input id="gifDelay" type="number" min="20" max="2000" value="80" />
@@ -82,6 +82,11 @@
       </div>
 
       <div class="panel">
+        <select id="exportFormat">
+          <option value="gif">GIF</option>
+          <option value="apng">APNG</option>
+          <option value="webp">WebP</option>
+        </select>
         <div class="row centerRow" style="margin-top:8px;">
           <button id="exportBtn" class="btnPrimary" disabled>エクスポート</button>
         </div>
@@ -99,8 +104,10 @@
   </footer>
 
   <script src="../libs/gif.js" defer></script>
+  <script src="https://unpkg.com/pako@2.1.0/dist/pako.min.js" defer></script>
+  <script src="../libs/UPNG.js" defer></script>
   <script src="https://unpkg.com/gifuct-js/dist/gifuct.min.js" defer></script>
+  <script src="../libs/webp_anim.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>
-

@@ -16,6 +16,7 @@
   const gifPanel = document.getElementById('gifPanel');
   const exportBtn = document.getElementById('exportBtn');
   const clearBtn = document.getElementById('clearBtn');
+  const exportFormat = document.getElementById('exportFormat');
 
   const gifOptions = document.getElementById('gifOptions');
 
@@ -29,6 +30,20 @@
     previewFrame: null,
     maxLayers: 50
   };
+
+  let webpAnimModulePromise = null;
+
+  function getWebpAnimModule() {
+    if (!webpAnimModulePromise) {
+      if (typeof WebPAnimModule !== 'function') {
+        return Promise.reject(new Error('WebPAnimModule not loaded'));
+      }
+      webpAnimModulePromise = WebPAnimModule({
+        locateFile: (path) => `../libs/${path}`
+      });
+    }
+    return webpAnimModulePromise;
+  }
 
   const bindDropTarget = (target, highlightTarget, onDrop) => {
     ['dragenter','dragover'].forEach(ev => {
@@ -87,7 +102,14 @@
     exportBtn.disabled = true;
     progress('処理開始...');
     try {
-      await doGifExport();
+      const fmt = exportFormat ? exportFormat.value : 'gif';
+      if (fmt === 'apng') {
+        await doApngExport();
+      } else if (fmt === 'webp') {
+        await doWebpExport();
+      } else {
+        await doGifExport();
+      }
     } catch (err) {
       console.error(err);
       alert('処理中にエラーが発生しました');
@@ -316,7 +338,7 @@
   function updateModeUI() {
     gifOptions.style.display = 'block';
     gifPanel.style.display = 'block';
-    dropTitle.textContent = 'GIF用の画像を追加';
+    dropTitle.textContent = 'アニメ用の画像を追加';
     renderLayerList();
     updateExportState();
     renderPreviewFrame(performance.now());
@@ -354,10 +376,20 @@
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0,0,canvasW,canvasH);
     const time = now - state.previewStart;
-    state.layers.forEach(layer => {
-      const frame = getLayerFrame(layer, time);
-      drawLayerToCanvas(ctx, canvasW, canvasH, frame, layer);
-    });
+    const delay = Math.max(20, parseInt(gifDelayInput.value,10) || 80);
+    const plan = getFramePlan(delay);
+    const baseLayers = getBaseLayers();
+    if (baseLayers.length) {
+      const index = plan.mode === 'sequence' ? Math.floor(time / delay) % baseLayers.length : 0;
+      const baseLayer = baseLayers.length > 1 ? baseLayers[index] : baseLayers[0];
+      const frame = getLayerFrame(baseLayer, time);
+      drawLayerToCanvas(ctx, canvasW, canvasH, frame, baseLayer);
+    }
+    const effectLayer = getEffectLayer();
+    if (effectLayer) {
+      const effectFrame = getLayerFrame(effectLayer, time);
+      drawLayerToCanvas(ctx, canvasW, canvasH, effectFrame, effectLayer);
+    }
   }
 
   function drawLayerToCanvas(ctx, canvasW, canvasH, frame, layer) {
@@ -415,19 +447,9 @@
     const loop = parseInt(gifLoopInput.value,10);
     const baseName = 'gif-output';
 
-    const targetRatio = 16/9;
-    const baseLayer = state.layers[0];
-    const baseW = baseLayer.width || 1920;
-    const baseH = baseLayer.height || 1080;
-    let canvasW = baseW;
-    let canvasH = Math.round(canvasW / targetRatio);
-    if (canvasH < baseH) {
-      canvasH = baseH;
-      canvasW = Math.round(canvasH * targetRatio);
-    }
-
-    const maxDuration = Math.max(...state.layers.map(layer => layer.totalDuration || delay), delay * 2);
-    const frameCount = Math.max(2, Math.ceil(maxDuration / delay));
+    const { canvasW, canvasH } = getExportCanvasSize();
+    const plan = getFramePlan(delay);
+    const frameCount = plan.count;
 
     const gif = new GIF({
       workers: 2,
@@ -441,16 +463,7 @@
 
     for (let i=0;i<frameCount;i++) {
       const t = i * delay;
-      const frameCanvas = document.createElement('canvas');
-      frameCanvas.width = canvasW;
-      frameCanvas.height = canvasH;
-      const fctx = frameCanvas.getContext('2d');
-      fctx.fillStyle = '#ffffff';
-      fctx.fillRect(0,0,canvasW,canvasH);
-      state.layers.forEach(layer => {
-        const frame = getLayerFrame(layer, t);
-        drawLayerToCanvas(fctx, canvasW, canvasH, frame, layer);
-      });
+      const frameCanvas = renderFrameCanvas(canvasW, canvasH, t, plan.mode === 'sequence' ? i : null);
       gif.addFrame(frameCanvas, {delay: delay});
     }
 
@@ -464,6 +477,168 @@
     gif.options.repeat = (isNaN(loop) ? 0 : loop);
     progress('エンコード開始...');
     gif.render();
+  }
+
+  async function doApngExport() {
+    if (!state.layers.length) return;
+    if (typeof UPNG === 'undefined') {
+      alert('UPNG.jsが見つかりません');
+      return;
+    }
+    progress('APNG生成準備...');
+    const delay = Math.max(20, parseInt(gifDelayInput.value,10) || 80);
+    const baseName = 'gif-output';
+    const { canvasW, canvasH } = getExportCanvasSize();
+    const plan = getFramePlan(delay);
+    const frameCount = plan.count;
+    const frames = [];
+    const delays = [];
+
+    for (let i=0;i<frameCount;i++) {
+      const t = i * delay;
+      const frameCanvas = renderFrameCanvas(canvasW, canvasH, t, plan.mode === 'sequence' ? i : null);
+      const ctx = frameCanvas.getContext('2d');
+      const imageData = ctx.getImageData(0, 0, canvasW, canvasH);
+      frames.push(imageData.data.buffer);
+      delays.push(delay);
+    }
+
+    const apng = UPNG.encode(frames, canvasW, canvasH, 0, delays);
+    const blob = new Blob([apng], {type:'image/png'});
+    const url = URL.createObjectURL(blob);
+    triggerDownload(url, `${baseName}.png`);
+    URL.revokeObjectURL(url);
+    progress('APNG生成完了');
+  }
+
+  async function doWebpExport() {
+    if (!state.layers.length) return;
+    progress('WebP生成準備...');
+    const { canvasW, canvasH } = getExportCanvasSize();
+    const delay = Math.max(20, parseInt(gifDelayInput.value,10) || 80);
+    const plan = getFramePlan(delay);
+    const frameCount = plan.count;
+    if (frameCount <= 1) {
+      const frameCanvas = renderFrameCanvas(canvasW, canvasH, 0, plan.mode === 'sequence' ? 0 : null);
+      await new Promise((resolve, reject) => {
+        frameCanvas.toBlob(blob => {
+          if (!blob) { reject(new Error('Blob 生成失敗')); return; }
+          const url = URL.createObjectURL(blob);
+          triggerDownload(url, 'gif-output.webp');
+          URL.revokeObjectURL(url);
+          resolve();
+        }, 'image/webp');
+      });
+      progress('WebP生成完了');
+      return;
+    }
+
+    const loop = parseInt(gifLoopInput.value,10);
+    const loopCount = Number.isFinite(loop) ? loop : 0;
+    let mod;
+    try {
+      mod = await getWebpAnimModule();
+    } catch (err) {
+      console.error(err);
+      alert('WebPアニメ用モジュールが見つかりません');
+      return;
+    }
+
+    const create = mod.cwrap('aw_create', 'number', ['number','number','number','number','number','number']);
+    const addFrame = mod.cwrap('aw_add_frame', 'number', ['number','number','number']);
+    const finalize = mod.cwrap('aw_finalize', 'number', ['number','number']);
+    const getPtr = mod.cwrap('aw_get_data_ptr', 'number', ['number']);
+    const getSize = mod.cwrap('aw_get_data_size', 'number', ['number']);
+    const destroy = mod.cwrap('aw_destroy', null, ['number']);
+
+    const handle = create(canvasW, canvasH, loopCount, 0xffffffff, 0, 80);
+    if (!handle) {
+      alert('WebPエンコーダの初期化に失敗しました');
+      return;
+    }
+
+    try {
+      for (let i=0;i<frameCount;i++) {
+        const t = i * delay;
+        const frameCanvas = renderFrameCanvas(canvasW, canvasH, t, plan.mode === 'sequence' ? i : null);
+        const ctx = frameCanvas.getContext('2d');
+        const imageData = ctx.getImageData(0, 0, canvasW, canvasH);
+        const size = canvasW * canvasH * 4;
+        const ptr = mod._malloc(size);
+        mod.HEAPU8.set(imageData.data, ptr);
+        const ok = addFrame(handle, ptr, t);
+        mod._free(ptr);
+        if (!ok) throw new Error('add frame failed');
+        progress(`エンコード進捗 ${Math.round(((i + 1) / frameCount) * 100)}%`);
+      }
+      const endTs = frameCount * delay;
+      const ok = finalize(handle, endTs);
+      if (!ok) throw new Error('assemble failed');
+      const outPtr = getPtr(handle);
+      const outSize = getSize(handle);
+      if (!outPtr || !outSize) throw new Error('data empty');
+      const outData = new Uint8Array(mod.HEAPU8.subarray(outPtr, outPtr + outSize));
+      const blob = new Blob([outData], { type: 'image/webp' });
+      const url = URL.createObjectURL(blob);
+      triggerDownload(url, 'gif-output.webp');
+      URL.revokeObjectURL(url);
+      progress('WebP生成完了');
+    } finally {
+      destroy(handle);
+    }
+  }
+
+  function getExportCanvasSize() {
+    const targetRatio = 16/9;
+    const baseLayer = getBaseLayers()[0] || state.layers[0];
+    const baseW = baseLayer.width || 1920;
+    const baseH = baseLayer.height || 1080;
+    let canvasW = baseW;
+    let canvasH = Math.round(canvasW / targetRatio);
+    if (canvasH < baseH) {
+      canvasH = baseH;
+      canvasW = Math.round(canvasH * targetRatio);
+    }
+    return { canvasW, canvasH };
+  }
+
+  function getFramePlan(delay) {
+    const baseLayers = getBaseLayers();
+    if (baseLayers.length > 1) {
+      return { mode: 'sequence', count: baseLayers.length };
+    }
+    const maxDuration = Math.max(...state.layers.map(layer => layer.totalDuration || delay), delay * 2);
+    return { mode: 'animate', count: Math.max(2, Math.ceil(maxDuration / delay)) };
+  }
+
+  function getBaseLayers() {
+    return state.layers.filter(layer => layer.kind !== 'effect');
+  }
+
+  function getEffectLayer() {
+    return state.layers.find(layer => layer.kind === 'effect') || null;
+  }
+
+  function renderFrameCanvas(canvasW, canvasH, time, sequenceIndex) {
+    const frameCanvas = document.createElement('canvas');
+    frameCanvas.width = canvasW;
+    frameCanvas.height = canvasH;
+    const fctx = frameCanvas.getContext('2d');
+    fctx.fillStyle = '#ffffff';
+    fctx.fillRect(0,0,canvasW,canvasH);
+    const baseLayers = getBaseLayers();
+    if (baseLayers.length) {
+      const index = (sequenceIndex === null || sequenceIndex === undefined) ? 0 : (sequenceIndex % baseLayers.length);
+      const baseLayer = baseLayers.length > 1 ? baseLayers[index] : baseLayers[0];
+      const frame = getLayerFrame(baseLayer, time);
+      drawLayerToCanvas(fctx, canvasW, canvasH, frame, baseLayer);
+    }
+    const effectLayer = getEffectLayer();
+    if (effectLayer) {
+      const effectFrame = getLayerFrame(effectLayer, time);
+      drawLayerToCanvas(fctx, canvasW, canvasH, effectFrame, effectLayer);
+    }
+    return frameCanvas;
   }
 
   function triggerDownload(url, filename) {
