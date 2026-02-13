@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>アニメメーカー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho&family=Noto+Sans+JP&family=Noto+Serif+JP&family=Kiwi+Maru&family=Hina+Mincho&family=Kaisei+Decol&family=Mochiy+Pop+One&family=Yomogi&family=Pacifico&family=Ballet&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="header-container">
+    <div class="header-top">
+      <a href="../" class="home-btn" title="しゃちやまベース-Top">
+        <span class="home-icon">🏠</span>
+      </a>
+      <h3>アニメメーカー</h3>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="main-content">
+      <div class="previewWrap">
+        <div id="previewViewport" class="previewViewport">
+          <canvas id="previewCanvas" width="800" height="450"></canvas>
+          <div id="noImage" class="noImage">画像が読み込まれていません</div>
+          <div id="dropArea" class="dropArea">
+            <div id="dropTitle" class="dropTitle">ここをクリックまたはドラッグ＆ドロップ</div>
+            <div class="smallNote">JPG/PNG/GIF</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <aside class="sidebar" aria-label="操作パネル">
+      <div class="panel" id="gifPanel">
+        <strong>アニメメーカー</strong>
+        <div id="gifFileSlot" class="fileSlot">
+          <div class="title">画像を追加</div>
+          <div class="smallNote">クリックorドロップ</div>
+          <input id="gifFilesInput" type="file" accept="image/*" multiple style="display:none;">
+        </div>
+        <div class="layerHeader">
+          <strong>レイヤー</strong>
+          <div class="small info">ドラッグで並び替え</div>
+        </div>
+        <div class="small info" id="gifLimit">0 / 50</div>
+        <div id="layerList" class="layerList"></div>
+        <div class="row centerRow" style="margin-top:8px;">
+          <button id="clearBtn" class="btn">すべての画像を削除</button>
+        </div>
+        <div class="controlRow" style="margin-top:10px;">
+          <strong>エフェクト</strong>
+          <div class="row effectRow">
+            <select id="effectAssetSelect"></select>
+            <button id="addEffectAssetBtn" class="btn">追加</button>
+          </div>
+          <div id="effectFileSlot" class="fileSlot">
+            <div class="title">エフェクトを追加</div>
+            <div class="smallNote">クリックorドロップ</div>
+            <input id="effectGifInput" type="file" accept="image/gif" style="display:none;">
+          </div>
+          <div class="row centerRow" style="margin-top:8px;">
+            <button id="removeEffectBtn" class="btn">エフェクトを削除</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="gifOptions">
+        <strong>アニメ設定</strong>
+        <div class="row">
+          <label class="small" for="gifDelay">フレーム時間(ms)</label>
+          <input id="gifDelay" type="number" min="20" max="2000" value="80" />
+        </div>
+        <div class="row">
+          <label class="small" for="gifLoop">ループ</label>
+          <input id="gifLoop" type="number" min="0" max="0" value="0" />
+          <span class="small">0 = 無限ループ</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <select id="exportFormat">
+          <option value="gif">GIF</option>
+          <option value="apng">APNG</option>
+          <option value="webp">WebP</option>
+        </select>
+        <div class="row centerRow" style="margin-top:8px;">
+          <button id="exportBtn" class="btnPrimary" disabled>エクスポート</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <footer id="site-footer" role="contentinfo" aria-label="サイト情報">
+    <p>
+      <small>@2026 syatiyama-san</small>
+      <a href="https://github.com/syatiyama-san/syatiyama-base/blob/main/LICENSE" id="footer-link" aria-label="ライセンス情報" target="_blank" rel="noopener noreferrer">
+        <small>MIT License</small>
+      </a>
+    </p>
+  </footer>
+
+  <script src="../libs/gif.js" defer></script>
+  <script src="https://unpkg.com/pako@2.1.0/dist/pako.min.js" defer></script>
+  <script src="../libs/UPNG.js" defer></script>
+  <script src="https://unpkg.com/gifuct-js/dist/gifuct.min.js" defer></script>
+  <script src="../libs/webp_anim.js" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>
