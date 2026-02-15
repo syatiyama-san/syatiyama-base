@@ -27,7 +27,7 @@
           <div id="noImage" class="noImage">画像が読み込まれていません</div>
           <div id="dropArea" class="dropArea">
             <div id="dropTitle" class="dropTitle">ここをクリックまたはドラッグ＆ドロップ</div>
-            <div class="smallNote">JPG/PNG/GIF</div>
+            <div class="smallNote">JPG/PNG/GIF/APNG/WebP</div>
           </div>
         </div>
       </div>
@@ -71,13 +71,12 @@
       <div class="panel" id="gifOptions">
         <strong>アニメ設定</strong>
         <div class="row">
-          <label class="small" for="gifDelay">フレーム時間(ms)</label>
+          <label class="small" for="gifDelay">1フレームあたりの時間(ms)</label>
           <input id="gifDelay" type="number" min="20" max="2000" value="80" />
         </div>
         <div class="row">
-          <label class="small" for="gifLoop">ループ</label>
+          <label class="small" for="gifLoop">ループ回数</label><span class="small">0だと無限ループになります。</span>
           <input id="gifLoop" type="number" min="0" max="0" value="0" />
-          <span class="small">0 = 無限ループ</span>
         </div>
       </div>
 
