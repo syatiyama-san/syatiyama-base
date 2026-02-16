@@ -17,18 +17,25 @@
   const exportBtn = document.getElementById('exportBtn');
   const clearBtn = document.getElementById('clearBtn');
   const exportFormat = document.getElementById('exportFormat');
+  const scrollTopBtn = document.getElementById('scrollTopBtn');
+  const sidebar = document.querySelector('.sidebar');
 
   const gifOptions = document.getElementById('gifOptions');
 
   const gifDelayInput = document.getElementById('gifDelay');
+  const gifDelayValue = document.getElementById('gifDelayValue');
   const gifLoopInput = document.getElementById('gifLoop');
+  const qualityInput = document.getElementById('qualityLevel');
+  const sizeWidthInput = document.getElementById('sizeWidth');
+  const sizeHeightInput = document.getElementById('sizeHeight');
 
   const state = {
     layers: [],
     previewRunning: false,
     previewStart: 0,
     previewFrame: null,
-    maxLayers: 50
+    previewRenderCanvas: null,
+    maxLayers: 100
   };
 
   let webpAnimModulePromise = null;
@@ -172,10 +179,27 @@
     updateModeUI();
   });
 
+  gifDelayInput.addEventListener('input', () => {
+    gifDelayValue.textContent = gifDelayInput.value;
+    renderPreviewFrame(performance.now());
+  });
+
+  const onSizeInput = () => {
+    renderPreviewFrame(performance.now());
+  };
+  if (sizeWidthInput) sizeWidthInput.addEventListener('input', onSizeInput);
+  if (sizeHeightInput) sizeHeightInput.addEventListener('input', onSizeInput);
+
+  scrollTopBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (layerList) layerList.scrollTo({ top: 0, behavior: 'smooth' });
+    if (sidebar) sidebar.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
   async function addGifFiles(files) {
     const available = state.maxLayers - state.layers.length;
     if (available <= 0) {
-      alert('50枚まで追加できます');
+      alert('100枚まで追加できます');
       return;
     }
     const targets = files.filter(f => f.type.startsWith('image/')).slice(0, available);
@@ -383,7 +407,7 @@
           });
         } else {
           const trackDuration = normalizeDurationMs(track?.repetitionDuration || 0);
-          const fallbackDelay = Math.max(20, parseInt(gifDelayInput.value,10) || 80);
+          const fallbackDelay = Math.max(20, parseInt(gifDelayInput.value,10) || 42);
           const perFrame = trackDuration ? Math.max(20, Math.round(trackDuration / count)) : fallbackDelay;
           frames.forEach(frame => {
             frame.delay = perFrame;
@@ -629,31 +653,49 @@
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0,0,canvasW,canvasH);
     const time = now - state.previewStart;
-    const delay = Math.max(20, parseInt(gifDelayInput.value,10) || 80);
+    const delay = Math.max(20, parseInt(gifDelayInput.value,10) || 42);
     const plan = getFramePlan(delay);
     const baseLayers = getBaseLayers();
-    if (baseLayers.length) {
-      const index = plan.mode === 'sequence' ? getSequenceIndexForTime(baseLayers, time, delay) : 0;
-      const baseLayer = baseLayers.length > 1 ? baseLayers[index] : baseLayers[0];
-      const frame = getLayerFrame(baseLayer, time);
-      drawLayerToCanvas(ctx, canvasW, canvasH, frame, baseLayer);
-    }
-    const effectLayer = getEffectLayer();
-    if (effectLayer) {
-      const effectFrame = getLayerFrame(effectLayer, time);
-      drawLayerToCanvas(ctx, canvasW, canvasH, effectFrame, effectLayer);
-    }
+    const index = plan.mode === 'sequence' ? getSequenceIndexForTime(baseLayers, time, delay) : 0;
+    const targetSize = getTargetCanvasSize();
+    const renderCanvas = getPreviewRenderCanvas(targetSize.canvasW, targetSize.canvasH);
+    const rctx = renderCanvas.getContext('2d');
+    renderCompositeToCanvas(rctx, targetSize.canvasW, targetSize.canvasH, time, index);
+
+    const scale = Math.min(canvasW / targetSize.canvasW, canvasH / targetSize.canvasH) * 0.95;
+    const drawW = targetSize.canvasW * scale;
+    const drawH = targetSize.canvasH * scale;
+    const dx = (canvasW - drawW) / 2;
+    const dy = (canvasH - drawH) / 2;
+    ctx.drawImage(renderCanvas, dx, dy, drawW, drawH);
   }
 
-  function drawLayerToCanvas(ctx, canvasW, canvasH, frame, layer) {
+  function drawLayerToCanvas(ctx, canvasW, canvasH, frame, layer, mode) {
     const imgW = frame.width || layer.width || 1;
     const imgH = frame.height || layer.height || 1;
-    const scale = Math.min(canvasW / imgW, canvasH / imgH) * 0.95;
+    const scale = mode === 'crop' ? 1 : Math.min(canvasW / imgW, canvasH / imgH) * 0.95;
     const drawW = imgW * scale;
     const drawH = imgH * scale;
     const dx = (canvasW - drawW) / 2;
     const dy = (canvasH - drawH) / 2;
     ctx.drawImage(frame.source, dx, dy, drawW, drawH);
+  }
+
+  function renderCompositeToCanvas(ctx, canvasW, canvasH, time, sequenceIndex) {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0,0,canvasW,canvasH);
+    const baseLayers = getBaseLayers();
+    if (baseLayers.length) {
+      const index = (sequenceIndex === null || sequenceIndex === undefined) ? 0 : (sequenceIndex % baseLayers.length);
+      const baseLayer = baseLayers.length > 1 ? baseLayers[index] : baseLayers[0];
+      const frame = getLayerFrame(baseLayer, time);
+      drawLayerToCanvas(ctx, canvasW, canvasH, frame, baseLayer, 'crop');
+    }
+    const effectLayer = getEffectLayer();
+    if (effectLayer) {
+      const effectFrame = getLayerFrame(effectLayer, time);
+      drawLayerToCanvas(ctx, canvasW, canvasH, effectFrame, effectLayer, 'crop');
+    }
   }
 
   function getSequenceIndexForTime(layers, time, fallbackDelay) {
@@ -704,22 +746,26 @@
 
   async function doGifExport() {
     if (!state.layers.length) return;
-    if (typeof GIF === 'undefined') {
+    const GifEncoder = (typeof window.GIFEncoder === 'function' && window.GIFEncoder.prototype?.on)
+      ? window.GIFEncoder
+      : (typeof window.GIF === 'function' && window.GIF.prototype?.on ? window.GIF : null);
+    if (!GifEncoder) {
       alert('GIFライブラリが見つかりません');
       return;
     }
     progress('GIF生成準備...');
-    const delay = Math.max(20, parseInt(gifDelayInput.value,10) || 80);
+    const delay = Math.max(20, parseInt(gifDelayInput.value,10) || 42);
     const loop = parseInt(gifLoopInput.value,10);
-    const baseName = 'gif-output';
+    const baseName = 'animation';
 
     const { canvasW, canvasH } = getExportCanvasSize();
     const plan = getFramePlan(delay);
     const frameCount = plan.count;
+    const qualitySettings = getQualitySettings();
 
-    const gif = new GIF({
+    const gif = new GifEncoder({
       workers: 2,
-      quality: 10,
+      quality: qualitySettings.gifQuality,
       workerScript: '../libs/gif.worker.js'
     });
 
@@ -752,11 +798,12 @@
       return;
     }
     progress('APNG生成準備...');
-    const delay = Math.max(20, parseInt(gifDelayInput.value,10) || 80);
-    const baseName = 'gif-output';
+    const delay = Math.max(20, parseInt(gifDelayInput.value,10) || 42);
+    const baseName = 'animation';
     const { canvasW, canvasH } = getExportCanvasSize();
     const plan = getFramePlan(delay);
     const frameCount = plan.count;
+    const qualitySettings = getQualitySettings();
     const frames = [];
     const delays = [];
 
@@ -769,7 +816,7 @@
       delays.push(delay);
     }
 
-    const apng = UPNG.encode(frames, canvasW, canvasH, 0, delays);
+    const apng = UPNG.encode(frames, canvasW, canvasH, qualitySettings.apngColors, delays);
     const blob = new Blob([apng], {type:'image/png'});
     const url = URL.createObjectURL(blob);
     triggerDownload(url, `${baseName}.png`);
@@ -781,16 +828,17 @@
     if (!state.layers.length) return;
     progress('WebP生成準備...');
     const { canvasW, canvasH } = getExportCanvasSize();
-    const delay = Math.max(20, parseInt(gifDelayInput.value,10) || 80);
+    const delay = Math.max(20, parseInt(gifDelayInput.value,10) || 42);
     const plan = getFramePlan(delay);
     const frameCount = plan.count;
+    const qualitySettings = getQualitySettings();
     if (frameCount <= 1) {
       const frameCanvas = renderFrameCanvas(canvasW, canvasH, 0, plan.mode === 'sequence' ? 0 : null);
       await new Promise((resolve, reject) => {
         frameCanvas.toBlob(blob => {
           if (!blob) { reject(new Error('Blob 生成失敗')); return; }
           const url = URL.createObjectURL(blob);
-          triggerDownload(url, 'gif-output.webp');
+          triggerDownload(url, 'animation.webp');
           URL.revokeObjectURL(url);
           resolve();
         }, 'image/webp');
@@ -817,8 +865,8 @@
     const getSize = mod.cwrap('aw_get_data_size', 'number', ['number']);
     const destroy = mod.cwrap('aw_destroy', null, ['number']);
 
-    const lossless = 1;
-    const quality = 100;
+    const lossless = qualitySettings.webpLossless;
+    const quality = qualitySettings.webpQuality;
     const handle = create(canvasW, canvasH, loopCount, 0xffffffff, lossless, quality);
     if (!handle) {
       alert('WebPエンコーダの初期化に失敗しました');
@@ -831,7 +879,7 @@
         const frameCanvas = renderFrameCanvas(canvasW, canvasH, t, plan.mode === 'sequence' ? i : null);
         const ctx = frameCanvas.getContext('2d');
         const imageData = ctx.getImageData(0, 0, canvasW, canvasH);
-        applyFrameUniqMarker(imageData, i);
+        applyFrameUniqMarker(imageData, i, !lossless);
         const size = canvasW * canvasH * 4;
         const ptr = mod._malloc(size);
         mod.HEAPU8.set(imageData.data, ptr);
@@ -849,7 +897,7 @@
       const outData = new Uint8Array(mod.HEAPU8.subarray(outPtr, outPtr + outSize));
       const blob = new Blob([outData], { type: 'image/webp' });
       const url = URL.createObjectURL(blob);
-      triggerDownload(url, 'gif-output.webp');
+      triggerDownload(url, 'animation.webp');
       URL.revokeObjectURL(url);
       progress('WebP生成完了');
     } finally {
@@ -858,17 +906,8 @@
   }
 
   function getExportCanvasSize() {
-    const targetRatio = 16/9;
-    const baseLayer = getBaseLayers()[0] || state.layers[0];
-    const baseW = baseLayer.width || 1920;
-    const baseH = baseLayer.height || 1080;
-    let canvasW = baseW;
-    let canvasH = Math.round(canvasW / targetRatio);
-    if (canvasH < baseH) {
-      canvasH = baseH;
-      canvasW = Math.round(canvasH * targetRatio);
-    }
-    return { canvasW, canvasH };
+    const target = getTargetCanvasSize();
+    return { canvasW: target.canvasW, canvasH: target.canvasH };
   }
 
   function getFramePlan(delay) {
@@ -893,20 +932,7 @@
     frameCanvas.width = canvasW;
     frameCanvas.height = canvasH;
     const fctx = frameCanvas.getContext('2d');
-    fctx.fillStyle = '#ffffff';
-    fctx.fillRect(0,0,canvasW,canvasH);
-    const baseLayers = getBaseLayers();
-    if (baseLayers.length) {
-      const index = (sequenceIndex === null || sequenceIndex === undefined) ? 0 : (sequenceIndex % baseLayers.length);
-      const baseLayer = baseLayers.length > 1 ? baseLayers[index] : baseLayers[0];
-      const frame = getLayerFrame(baseLayer, time);
-      drawLayerToCanvas(fctx, canvasW, canvasH, frame, baseLayer);
-    }
-    const effectLayer = getEffectLayer();
-    if (effectLayer) {
-      const effectFrame = getLayerFrame(effectLayer, time);
-      drawLayerToCanvas(fctx, canvasW, canvasH, effectFrame, effectLayer);
-    }
+    renderCompositeToCanvas(fctx, canvasW, canvasH, time, sequenceIndex);
     return frameCanvas;
   }
 
@@ -919,14 +945,75 @@
     a.remove();
   }
 
-  function applyFrameUniqMarker(imageData, index) {
+  function applyFrameUniqMarker(imageData, index, strong) {
     const data = imageData.data;
     const last = data.length - 4;
+    if (strong) {
+      data[last] = (index * 53) % 256;
+      data[last + 1] = (index * 97) % 256;
+      data[last + 2] = (index * 151) % 256;
+      data[last + 3] = 255;
+      return;
+    }
     // Flip only LSBs to keep the change visually imperceptible.
     data[last] = (data[last] & 0xFE) | (index & 1);
     data[last + 1] = (data[last + 1] & 0xFE) | ((index >> 1) & 1);
     data[last + 2] = (data[last + 2] & 0xFE) | ((index >> 2) & 1);
     data[last + 3] = 255;
+  }
+
+  function getQualitySettings() {
+    const level = Math.max(1, Math.min(3, parseInt(qualityInput?.value, 10) || 2));
+    const gifQualityMap = [20, 10, 5];
+    const webpQualityMap = [55, 80, 95];
+    const apngColorsMap = [32, 128, 0];
+    return {
+      level,
+      gifQuality: gifQualityMap[level - 1],
+      webpQuality: webpQualityMap[level - 1],
+      webpLossless: level === 3,
+      apngColors: apngColorsMap[level - 1]
+    };
+  }
+
+  function getTargetCanvasSize() {
+    const customW = Number.isFinite(sizeWidthInput?.valueAsNumber) ? sizeWidthInput.valueAsNumber : 0;
+    const customH = Number.isFinite(sizeHeightInput?.valueAsNumber) ? sizeHeightInput.valueAsNumber : 0;
+    const auto = getMaxLayerSize();
+    if (customW > 0 || customH > 0) {
+      return {
+        canvasW: customW > 0 ? customW : auto.canvasW,
+        canvasH: customH > 0 ? customH : auto.canvasH,
+        mode: 'custom'
+      };
+    }
+    return { canvasW: auto.canvasW, canvasH: auto.canvasH, mode: 'auto' };
+  }
+
+  function getMaxLayerSize() {
+    let maxW = 0;
+    let maxH = 0;
+    state.layers.forEach(layer => {
+      const w = layer.width || 0;
+      const h = layer.height || 0;
+      if (w > maxW) maxW = w;
+      if (h > maxH) maxH = h;
+    });
+    if (!maxW || !maxH) {
+      return { canvasW: 1920, canvasH: 1080 };
+    }
+    return { canvasW: maxW, canvasH: maxH };
+  }
+
+  function getPreviewRenderCanvas(canvasW, canvasH) {
+    if (!state.previewRenderCanvas) {
+      state.previewRenderCanvas = document.createElement('canvas');
+    }
+    if (state.previewRenderCanvas.width !== canvasW || state.previewRenderCanvas.height !== canvasH) {
+      state.previewRenderCanvas.width = canvasW;
+      state.previewRenderCanvas.height = canvasH;
+    }
+    return state.previewRenderCanvas;
   }
 
   function progress(){ }
