@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CoC NPC駒メーカー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho&family=Noto+Sans+JP&family=Noto+Serif+JP&family=Kiwi+Maru&family=Hina+Mincho&family=Kaisei+Decol&family=Mochiy+Pop+One&family=Yomogi&family=Pacifico&family=Ballet&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="header-container">
+    <div class="header-top">
+      <a href="../" class="home-btn" title="しゃちやまベース-Top">
+        <span class="home-icon">🏠</span>
+      </a>
+      <h3>CoC NPC駒メーカー</h3>
+      <div class="header-actions">
+        <button id="resetBtn" class="header-action-btn" title="リセット" aria-label="リセット">リセット</button>
+        <button id="scrollTopBtn" class="header-action-btn" title="上へ" aria-label="上へ">上へ</button>
+        <button id="copyBtn" class="header-action-btn btnPrimary" title="コピー" aria-label="コピー">クリップボードにコピー</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <section class="panel form-panel">
+      <strong>基本情報</strong>
+      <div class="row">
+        <label class="small" for="formatSelect">出力形式</label>
+        <select id="formatSelect">
+          <option value="6ccb">6版CCB</option>
+          <option value="6cc">6版CC</option>
+          <option value="7cc">7版</option>
+        </select>
+      </div>
+      <div class="row">
+        <label class="small" for="nameInput">名前</label>
+        <input id="nameInput" type="text" placeholder="NPC名" />
+      </div>
+      <div class="row">
+        <label class="small" for="initiativeInput">イニシアチブ</label>
+        <input id="initiativeInput" type="number" placeholder="値" />
+      </div>
+      <div class="row memo-row">
+        <label class="small" for="memoInput">キャラクターメモ</label>
+        <textarea id="memoInput" rows="3" placeholder="キャラクターメモ"></textarea>
+      </div>
+
+      <strong>ステータス</strong>
+      <div id="statusList" class="list"></div>
+      <button id="addStatusBtn" class="btn">ステータスを追加</button>
+
+      <strong>能力値</strong>
+      <div id="paramList" class="list"></div>
+      <button id="addParamBtn" class="btn">能力値を追加</button>
+
+      <strong>技能</strong>
+      <div class="toggle-row-left">
+        <label class="small toggle-label" for="includeParamRolls">
+          <input id="includeParamRolls" type="checkbox" checked />
+          <span>能力値ロールを出力に含める</span>
+        </label>
+      </div>
+      <div id="skillList" class="list"></div>
+      <button id="addSkillBtn" class="btn">技能を追加</button>
+    </section>
+
+    <div class="right-column">
+      <section class="panel output-panel">
+        <strong>出力JSON</strong>
+        <pre id="output" class="output"></pre>
+      </section>
+
+      <section class="panel auto-calc-panel">
+        <strong>ステータス自動計算</strong>
+        <div class="auto-status-buttons">
+          <button id="autoHpBtn" class="btn auto-status-btn">[HP]</button>
+          <button id="autoMpBtn" class="btn auto-status-btn">[MP]</button>
+          <button id="autoSanBtn" class="btn auto-status-btn">[SAN]</button>
+          <button id="autoLuckBtn" class="btn auto-status-btn">[幸運] 3d6*5 🎲</button>
+        </div>
+        <div class="damage-bonus-row">
+          <button id="autoDamageBtn" class="btn damage-bonus-btn">[ダメージボーナス]</button>
+          <div id="damageResult" class="damage-result"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <footer id="site-footer" role="contentinfo" aria-label="サイト情報">
+    <p>
+      <small>@2026 syatiyama-san</small>
+      <a href="https://github.com/syatiyama-san/syatiyama-base/blob/main/LICENSE" id="footer-link" aria-label="ライセンス情報" target="_blank" rel="noopener noreferrer">
+        <small>MIT License</small>
+      </a>
+    </p>
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
