@@ -433,6 +433,30 @@ button{
 	border-color:var(--accent);
 }
 
+#clearBtn,
+#removeEffectBtn,
+.layerRemove{
+	background:#ef6b6b;
+	color:#fff;
+	border-color:#ef6b6b;
+}
+
+#clearBtn:hover:not(:disabled),
+#removeEffectBtn:hover:not(:disabled),
+.layerRemove:hover:not(:disabled){
+	filter:brightness(1.1);
+}
+
+#addEffectAssetBtn{
+	background:#10b981;
+	color:#fff;
+	border-color:#10b981;
+}
+
+#addEffectAssetBtn:hover:not(:disabled){
+	filter:brightness(1.1);
+}
+
 #site-footer{
 	margin-top:24px;
 	padding:16px;
