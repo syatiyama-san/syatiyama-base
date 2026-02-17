@@ -16,6 +16,7 @@
         <span class="home-icon">🏠</span>
       </a>
       <h3>アニメメーカー</h3>
+      <button id="scrollTopBtn" class="header-action-btn" title="上へ" aria-label="上へ">上へ</button>
     </div>
   </div>
 
@@ -27,7 +28,7 @@
           <div id="noImage" class="noImage">画像が読み込まれていません</div>
           <div id="dropArea" class="dropArea">
             <div id="dropTitle" class="dropTitle">ここをクリックまたはドラッグ＆ドロップ</div>
-            <div class="smallNote">JPG/PNG/GIF</div>
+            <div class="smallNote">JPG/PNG/GIF/APNG/WebP</div>
           </div>
         </div>
       </div>
@@ -44,9 +45,9 @@
         </div>
         <div class="layerHeader">
           <strong>レイヤー</strong>
-          <div class="small info">ドラッグで並び替え</div>
+          <div class="small info">ドラッグで入れ替え</div>
         </div>
-        <div class="small info" id="gifLimit">0 / 50</div>
+        <div class="small info" id="gifLimit">0 / 100</div>
         <div id="layerList" class="layerList"></div>
         <div class="row centerRow" style="margin-top:8px;">
           <button id="clearBtn" class="btn">すべての画像を削除</button>
@@ -71,17 +72,36 @@
       <div class="panel" id="gifOptions">
         <strong>アニメ設定</strong>
         <div class="row">
-          <label class="small" for="gifDelay">フレーム時間(ms)</label>
-          <input id="gifDelay" type="number" min="20" max="2000" value="80" />
+          <label class="small" for="gifDelay">1フレームあたりの時間(ms) / 初期値：42</label>
         </div>
         <div class="row">
-          <label class="small" for="gifLoop">ループ</label>
+          <input id="gifDelay" type="range" min="20" max="1000" value="42" step="2" />
+          <span id="gifDelayValue" class="small" style="min-width:32px;text-align:right;">42</span>
+        </div>
+        <div class="row">
+          <label class="small" for="gifLoop">ループ回数</label><span class="small">0だと無限ループになります。</span>
           <input id="gifLoop" type="number" min="0" max="0" value="0" />
-          <span class="small">0 = 無限ループ</span>
+        </div>
+        <div class="row">
+          <label class="small" for="qualityLevel">画質</label>
+        </div>
+        <div class="row">
+          <span class="small">低</span>
+          <input id="qualityLevel" type="range" min="1" max="3" value="2" step="1" />
+          <span class="small">高</span>
+        </div>
+        <div class="row">
+          <label class="small">サイズ(px) / トリミングできます。</label>
+        </div>
+        <div class="row sizeRow">
+          <input id="sizeWidth" type="number" min="1" placeholder="幅" />
+          <span class="small">x</span>
+          <input id="sizeHeight" type="number" min="1" placeholder="高さ" />
         </div>
       </div>
 
       <div class="panel">
+        <strong>出力</strong>
         <select id="exportFormat">
           <option value="gif">GIF</option>
           <option value="apng">APNG</option>
@@ -103,7 +123,10 @@
     </p>
   </footer>
 
-  <script src="../libs/gif.js" defer></script>
+  <script src="../libs/gif.js"></script>
+  <script>
+    window.GIFEncoder = window.GIF;
+  </script>
   <script src="https://unpkg.com/pako@2.1.0/dist/pako.min.js" defer></script>
   <script src="../libs/UPNG.js" defer></script>
   <script src="https://unpkg.com/gifuct-js/dist/gifuct.min.js" defer></script>
