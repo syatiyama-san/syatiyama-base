@@ -12,6 +12,8 @@
   const includeParamRolls = document.getElementById('includeParamRolls');
   const output = document.getElementById('output');
   const copyBtn = document.getElementById('copyBtn');
+  const scrollTopBtn = document.getElementById('scrollTopBtn');
+  const resetBtn = document.getElementById('resetBtn');
 
   let dragState = null;
 
@@ -56,6 +58,36 @@
 
   function hasInputValue(value) {
     return String(value ?? '').trim() !== '';
+  }
+
+  function rollDice(expr) {
+    // Parse and evaluate dice expressions like "3d6", "18-1d2", "3d6*5", "2d6+5", "(2d6+6)*5"
+    const expr_trimmed = expr.trim();
+    
+    // Replace dice rolls with actual values
+    let result_expr = expr_trimmed.replace(/\b(\d+)d(\d+)\b/g, (match, numDice, numSides) => {
+      const n = parseInt(numDice, 10);
+      const s = parseInt(numSides, 10);
+      if (n <= 0 || s <= 0) return match;
+      let total = 0;
+      for (let i = 0; i < n; i++) {
+        total += Math.floor(Math.random() * s) + 1;
+      }
+      return total;
+    });
+    
+    // Check if result_expr is a valid math expression
+    // Only allow digits, +, -, *, /, () and spaces
+    if (!/^[0-9+\-*/()\s]*$/.test(result_expr)) return null;
+    
+    try {
+      // Use Function instead of eval for slightly safer evaluation
+      const result = Function('"use strict"; return (' + result_expr + ')')();
+      if (!Number.isFinite(result) || result < 0) return null;
+      return Math.round(result);
+    } catch (e) {
+      return null;
+    }
   }
 
   function buildCommands() {
@@ -223,6 +255,63 @@
         buildOutput();
       });
 
+      const dice = document.createElement('select');
+      dice.className = 'dice-select';
+      const options = [
+        { text: 'ダイスを選択', value: '' },
+        { text: '3d6', value: '3d6' },
+        { text: '2d6+6', value: '2d6+6' },
+        { text: '3d6+3', value: '3d6+3' },
+        { text: '3d6*5', value: '3d6*5' },
+        { text: '(2d6+6)*5', value: '(2d6+6)*5' },
+        { text: '自由入力', value: 'custom' }
+      ];
+      options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.value;
+        option.textContent = opt.text;
+        dice.appendChild(option);
+      });
+
+      const diceCustom = document.createElement('input');
+      diceCustom.type = 'text';
+      diceCustom.className = 'dice-input';
+      diceCustom.placeholder = 'ダイス式を入力';
+      diceCustom.style.display = 'none';
+      diceCustom.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') rollBtn.click();
+      });
+
+      dice.addEventListener('change', () => {
+        if (dice.value === 'custom') {
+          diceCustom.style.display = '';
+          diceCustom.focus();
+        } else {
+          diceCustom.style.display = 'none';
+        }
+      });
+
+      const rollBtn = document.createElement('button');
+      rollBtn.type = 'button';
+      rollBtn.className = 'roll-btn';
+      rollBtn.textContent = '🎲';
+      rollBtn.title = 'ダイスをロール';
+      rollBtn.addEventListener('click', () => {
+        let diceStr;
+        if (dice.value === 'custom') {
+          diceStr = diceCustom.value.trim();
+        } else {
+          diceStr = dice.value;
+        }
+        if (!diceStr) return;
+        const result = rollDice(diceStr);
+        if (result !== null) {
+          value.value = result;
+          state.params[index].value = result;
+          buildOutput();
+        }
+      });
+
       const remove = document.createElement('button');
       remove.type = 'button';
       remove.className = 'remove';
@@ -236,6 +325,9 @@
       row.appendChild(handle);
       row.appendChild(label);
       row.appendChild(value);
+      row.appendChild(dice);
+      row.appendChild(diceCustom);
+      row.appendChild(rollBtn);
       row.appendChild(remove);
       paramList.appendChild(row);
     });
@@ -353,6 +445,16 @@
     initiativeInput.addEventListener('input', buildOutput);
     memoInput.addEventListener('input', buildOutput);
     includeParamRolls.addEventListener('change', buildOutput);
+
+    scrollTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const outputPanel = document.querySelector('.output-panel');
+      if (outputPanel) outputPanel.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    resetBtn.addEventListener('click', () => {
+      window.location.reload();
+    });
   }
 
   async function copyOutput() {

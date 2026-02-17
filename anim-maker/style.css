@@ -448,9 +448,9 @@ button{
 }
 
 #addEffectAssetBtn{
-	background:#10b981;
+	background:#F0AD4E;
 	color:#fff;
-	border-color:#10b981;
+	border-color:#F0AD4E;
 }
 
 #addEffectAssetBtn:hover:not(:disabled){

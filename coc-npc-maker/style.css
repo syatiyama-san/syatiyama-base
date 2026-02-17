@@ -38,6 +38,13 @@ body{
   width:100%;
 }
 
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-left:auto;
+}
+
 h3{
   margin:0 0 12px 0;
   font-size:18px;
@@ -84,6 +91,10 @@ h3{
   background:#e8e8e8;
   transform:translateY(-1px);
   box-shadow:0 4px 8px rgba(0,0,0,0.1);
+}
+
+#resetBtn{
+  margin-right:60px;
 }
 
 .header-action-btn.btnPrimary{
@@ -191,9 +202,9 @@ button{
 
 .btn{
   margin-bottom:16px;
-  background:#10b981;
+  background:#F0AD4E;
   color:#fff;
-  border-color:#10b981;
+  border-color:#F0AD4E;
   transition:all 0.2s ease;
 }
 
@@ -238,6 +249,40 @@ button{
 
 .list-row .short{
   flex:0 0 70px;
+}
+
+.dice-select{
+  flex:0 0 90px;
+  padding:4px;
+  border:1px solid #e6e6e6;
+  border-radius:6px;
+  font-size:12px;
+  background:#fff;
+  cursor:pointer;
+}
+
+.dice-input{
+  flex:0 0 80px;
+  padding:4px;
+  border:1px solid #e6e6e6;
+  border-radius:6px;
+  font-size:12px;
+}
+
+.roll-btn{
+  flex:0 0 auto;
+  padding:4px 8px;
+  background:#F0AD4E;
+  color:#fff;
+  border:1px solid #F0AD4E;
+  border-radius:6px;
+  font-size:11px;
+  cursor:pointer;
+  transition:all 0.2s ease;
+}
+
+.roll-btn:hover{
+  filter:brightness(1.1);
 }
 
 .list-row .remove{
