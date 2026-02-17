@@ -8,7 +8,6 @@
   --text:#222;
 }
 
-/* リセット */
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{
@@ -23,10 +22,9 @@ body{
   flex-direction:column;
 }
 
-/* ヘッダー */
 header{
   position:fixed;
-  inset:0 0 auto 0; /* top:0; left:0; right:0 */
+  inset:0 0 auto 0;
   height:var(--header-height);
   display:flex;
   align-items:center;
@@ -42,7 +40,6 @@ header{
   letter-spacing:0.2px;
 }
 
-/* ヘッダー右側（お問い合わせボタン）を右端に寄せる */
 #header-actions{
   margin-left:auto;
   display:flex;
@@ -50,7 +47,6 @@ header{
   gap:12px;
 }
 
-/* お問い合わせボタン（丸） */
 .contact-btn{
   display:inline-flex;
   align-items:center;
@@ -70,7 +66,6 @@ header{
 .contact-btn:hover{ transform:translateY(-2px); box-shadow:0 6px 18px rgba(11,118,255,0.18); }
 .contact-btn svg{ width:20px; height:20px; display:block; fill:currentColor }
 
-/* ツールチップ（基本はボタンの下に表示） */
 .contact-btn[data-tooltip]::after{
   content:attr(data-tooltip);
   position:absolute;
@@ -98,13 +93,12 @@ header{
   transform:translateX(-50%) translateY(0);
 }
 
-/* メイン（中央寄せ・幅制限） */
 main#main{
   width:100%;
   max-width:var(--max-width);
   margin: calc(var(--header-height) + 20px) auto 40px;
   display:grid;
-  grid-template-columns: 1fr 1fr; /* 左右ちょうど半分 */
+  grid-template-columns: 1fr 1fr;
   gap:var(--gap);
   align-items:start;
   padding:0 16px;
@@ -112,7 +106,6 @@ main#main{
   flex:1 0 auto;
 }
 
-/* モーダル */
 .modal{
   position:fixed;
   inset:0;
@@ -120,7 +113,6 @@ main#main{
   z-index:2000;
 }
 
-/* カラム見出し */
 .column-title{
   font-size:1.6rem;
   font-weight:700;
@@ -129,7 +121,6 @@ main#main{
   line-height:1.05;
 }
 
-/* 左カラム：SNSグリッド */
 #left-column .grid-sns{
   display:grid;
   grid-template-columns:repeat(3,72px);
@@ -191,7 +182,6 @@ main#main{
 }
 .sns-spacer{ width:72px; height:72px; }
 
-/* 右カラム：Tools ヘッダー */
 .tools-header{
   display:flex;
   align-items:center;
@@ -227,7 +217,6 @@ main#main{
 .tool-card h3{ margin-bottom:6px; font-size:1.05rem; }
 .tool-card p{ margin:0; color:#555; line-height:1.4; }
 
-/* モバイル：縦積み、SNSが上に来る */
 @media (max-width:768px){
   main#main{
     grid-template-columns:1fr;
@@ -236,7 +225,6 @@ main#main{
     padding:0 12px;
   }
   .column-title{ font-size:1.25rem }
-  /* ツールチップはモバイルで上に出す（下だと見切れる場合がある） */
   .contact-btn[data-tooltip]::after{
     top:auto;
     bottom:calc(100% + 8px);
@@ -246,17 +234,14 @@ main#main{
   }
 }
 
-/* 小画面でSNSを2列に */
 @media (max-width:420px){
   #left-column .grid-sns{ grid-template-columns:repeat(2,64px); gap:8px }
   .sns-btn{ width:64px; height:64px; font-size:11px; }
   .sns-spacer{ width:64px; height:64px; }
 }
 
-/* アクセシビリティ補助（フォーカス時の視認性） */
 a:focus{ outline:3px solid rgba(11,118,255,0.12); outline-offset:2px; border-radius:6px; }
 
-/* style.css に追加（既存スタイルを壊さない最小スタイル） */
 #site-logo a {
   color: inherit;
   text-decoration: none;
@@ -267,5 +252,3 @@ a:focus{ outline:3px solid rgba(11,118,255,0.12); outline-offset:2px; border-rad
   outline-offset: 2px;
   border-radius: 4px;
 }
-
-

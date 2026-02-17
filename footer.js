@@ -27,7 +27,6 @@ function initFooter() {
       font-size: 13px;
     }
     
-    /* Readmeモーダル */
     .modal {
       position: fixed;
       inset: 0;
@@ -88,7 +87,6 @@ function initFooter() {
   `;
   document.head.appendChild(styleEl);
 
-  // フッター内容を設定
   const footerEl = document.getElementById('site-footer');
   if (!footerEl) return;
 
@@ -101,7 +99,6 @@ function initFooter() {
     <p class="footer-copyright">@2026 syatiyama-san</p>
   `;
 
-  // Readmeモーダルが存在しなければ作成
   let modal = document.getElementById('readme-modal');
   if (!modal) {
     modal = document.createElement('div');
@@ -130,7 +127,6 @@ function initFooter() {
     document.body.appendChild(modal);
   }
 
-  // Readmeリンクのイベント設定
   const readmeLink_el = document.getElementById('footer-readme-link');
   if (readmeLink_el && modal) {
     readmeLink_el.addEventListener('click', (event) => {
@@ -141,7 +137,6 @@ function initFooter() {
     });
   }
 
-  // モーダルのクローズ処理
   if (modal) {
     const closeTargets = modal.querySelectorAll('[data-close="true"]');
     const closeModal = () => {
