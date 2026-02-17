@@ -93,11 +93,6 @@
       <div class="tools-header">
         <h2 class="column-title tools-title">Tools</h2>
       </div>
-      <div class="readme-row">
-        <a href="#readme-modal" id="readme-link" class="readme-link" aria-haspopup="dialog" aria-controls="readme-modal">
-          ReadMe
-        </a>
-      </div>
 
       <nav id="tools-list" aria-label="ツール一覧">
         <a class="tool-card" href="display-make-tool/" aria-labelledby="tool1-title">
@@ -117,76 +112,14 @@
         <h3>お便り</h3>
         <p>お問い合わせへの回答をまとめるページを作る予定です。</p>
         <br>
-        <p>
-          最終更新日：2026/2/9
-          <a href="https://github.com/syatiyama-san/syatiyama-base/releases" target="_blank" rel="noopener noreferrer">リリースノート</a>
-        </p>
       </article>
 
     </section>
   </main>
 
-  <footer id="site-footer" role="contentinfo" aria-label="サイト情報">
-    <p>
-      <small>@2026 syatiyama-san</small>
-      <a href="https://github.com/syatiyama-san/syatiyama-base/blob/main/LICENSE" id="footer-link" aria-label="ライセンス情報" target="_blank" rel="noopener noreferrer">
-        <small>MIT License</small>
-      </a>
-    </p>
-  </footer>
-
-  <div id="readme-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="readme-modal-title" aria-hidden="true">
-    <div class="modal__backdrop" data-close="true"></div>
-    <div class="modal__content" role="document">
-      <div class="modal__header">
-        <h3 id="readme-modal-title">ReadMe</h3>
-      </div>
-      <div class="modal__body">
-        <p>ブラウザ上で動作するフリーツールです。</p>
-        <p>アップロードした画像はエクスポートのみに使用され、外部サーバーへの送信は行われません。</p>
-        <p>これらのツールはAIコーディングで作成されています。動作確認はWindows版Chromeでのみ行っており、環境によっては動作しないかもしれません。</p>
-      </div>
-      <div class="modal__footer">
-        <button type="button" class="modal__close" aria-label="閉じる" data-close="true">OK！</button>
-      </div>
-    </div>
-  </div>
+  <footer id="site-footer" role="contentinfo" aria-label="サイト情報"></footer>
 
   <script>
-    (function () {
-      const openLink = document.getElementById('readme-link');
-      const modal = document.getElementById('readme-modal');
-      const closeTargets = modal.querySelectorAll('[data-close="true"]');
-
-      const openModal = () => {
-        modal.classList.add('is-open');
-        modal.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
-      };
-
-      const closeModal = () => {
-        modal.classList.remove('is-open');
-        modal.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
-        openLink.focus();
-      };
-
-      openLink.addEventListener('click', (event) => {
-        event.preventDefault();
-        openModal();
-      });
-
-      closeTargets.forEach((el) => {
-        el.addEventListener('click', closeModal);
-      });
-
-      document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && modal.classList.contains('is-open')) {
-          closeModal();
-        }
-      });
-    })();
-
     (function () {
       const icons = document.querySelectorAll('.sns-icon');
 
@@ -211,5 +144,7 @@
       });
     })();
   </script>
+
+  <script src="footer.js" defer></script>
 </body>
 </html>

@@ -112,21 +112,6 @@ main#main{
   flex:1 0 auto;
 }
 
-/* フッター */
-#site-footer{
-  margin-top:auto;
-  padding:16px;
-  text-align:center;
-  color:#666;
-  border-top:1px solid rgba(0,0,0,0.06);
-  background:#fff;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-#site-footer a{ color:inherit; text-decoration:none; }
-#site-footer a:hover{ text-decoration:underline; }
-
 /* モーダル */
 .modal{
   position:fixed;
@@ -134,44 +119,6 @@ main#main{
   display:none;
   z-index:2000;
 }
-.modal.is-open{ display:block; }
-.modal__backdrop{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,0.4);
-}
-.modal__content{
-  position:relative;
-  max-width:640px;
-  margin:10vh auto 0;
-  background:#fff;
-  border-radius:12px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.2);
-  padding:16px 18px;
-}
-.modal__header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  margin-bottom:12px;
-}
-.modal__footer{
-  display:flex;
-  justify-content:flex-end;
-  margin-top:12px;
-}
-.modal__close{
-  background:#ef6b6b;
-  color:#fff;
-  border:none;
-  padding:6px 8px;
-  border-radius:8px;
-  cursor:pointer;
-  font-size:0.95rem;
-}
-.modal__body p{ margin:0 0 10px; color:#333; line-height:1.6; }
-.modal__body p:last-child{ margin-bottom:0; }
 
 /* カラム見出し */
 .column-title{
@@ -289,7 +236,6 @@ main#main{
     padding:0 12px;
   }
   .column-title{ font-size:1.25rem }
-  .modal__content{ margin:12vh 16px 0; }
   /* ツールチップはモバイルで上に出す（下だと見切れる場合がある） */
   .contact-btn[data-tooltip]::after{
     top:auto;
