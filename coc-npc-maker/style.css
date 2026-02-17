@@ -1,5 +1,5 @@
 :root{
-  --ui-w:360px;
+  --ui-w:320px;
   --gap:16px;
   --bg:#f7f7f7;
   --muted:#6b6b6b;
@@ -112,7 +112,9 @@ h3{
   gap:var(--gap);
   align-items:flex-start;
   min-height:calc(100vh - 36px);
-  padding:0 18px 18px;
+  padding:0 16px 18px;
+  max-width:1000px;
+  margin:0 auto;
 }
 
 .panel{
@@ -124,15 +126,24 @@ h3{
 
 .form-panel{
   flex:1;
-  min-width:320px;
+  min-width:280px;
+}
+
+.right-column{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  width:var(--ui-w);
 }
 
 .output-panel{
-  width:var(--ui-w);
-  position:sticky;
-  top:18px;
-  height:calc(100vh - 36px);
+  width:100%;
+  height:250px;
   overflow:auto;
+}
+
+.auto-calc-panel{
+  width:100%;
 }
 
 .panel > strong{
@@ -163,6 +174,22 @@ h3{
   gap:6px;
   font-size:12px;
   color:#444;
+}
+
+.toggle-row-left{
+  margin-bottom:10px;
+}
+
+.toggle-label{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+}
+
+.toggle-label input[type="checkbox"]{
+  margin:0;
+  cursor:pointer;
 }
 
 .row label{min-width:110px;}
@@ -251,8 +278,16 @@ button{
   flex:0 0 70px;
 }
 
+.param-label{
+  flex:0 0 115px !important;
+}
+
+.param-value{
+  flex:0 0 115px !important;
+}
+
 .dice-select{
-  flex:0 0 90px;
+  flex:0 0 105px;
   padding:4px;
   border:1px solid #e6e6e6;
   border-radius:6px;
@@ -262,7 +297,7 @@ button{
 }
 
 .dice-input{
-  flex:0 0 80px;
+  flex:0 0 105px;
   padding:4px;
   border:1px solid #e6e6e6;
   border-radius:6px;
@@ -300,6 +335,50 @@ button{
   word-break:break-word;
 }
 
+.auto-status-buttons{
+  display:flex;
+  gap:8px;
+  margin-top:8px;
+  flex-wrap:wrap;
+}
+
+.auto-status-btn{
+  flex:1;
+  min-width:70px;
+  padding:8px 12px;
+  font-size:13px;
+}
+
+.damage-bonus-row{
+  display:flex;
+  gap:8px;
+  margin-top:8px;
+  align-items:center;
+}
+
+.damage-bonus-btn{
+  flex:0 0 50%;
+  padding:8px 12px;
+  font-size:13px;
+  min-height:38px;
+}
+
+.damage-result{
+  flex:1;
+  padding:8px 12px;
+  background:#f5f5f5;
+  border:1px solid #e0e0e0;
+  border-radius:4px;
+  text-align:center;
+  font-size:13px;
+  font-weight:bold;
+  min-height:38px;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+
+}
+
 #site-footer{
   margin-top:24px;
   padding:16px;
@@ -324,6 +403,9 @@ button{
 @media (max-width: 980px){
   .container{
     flex-direction:column;
+  }
+  .right-column{
+    width:100%;
   }
   .output-panel{
     width:100%;

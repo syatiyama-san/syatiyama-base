@@ -14,6 +14,12 @@
   const copyBtn = document.getElementById('copyBtn');
   const scrollTopBtn = document.getElementById('scrollTopBtn');
   const resetBtn = document.getElementById('resetBtn');
+  const autoHpBtn = document.getElementById('autoHpBtn');
+  const autoMpBtn = document.getElementById('autoMpBtn');
+  const autoSanBtn = document.getElementById('autoSanBtn');
+  const autoLuckBtn = document.getElementById('autoLuckBtn');
+  const autoDamageBtn = document.getElementById('autoDamageBtn');
+  const damageResult = document.getElementById('damageResult');
 
   let dragState = null;
 
@@ -37,7 +43,8 @@
     ],
     skills: [
       { label: '', value: '' }
-    ]
+    ],
+    lastAutoInputs: [] // Track which auto-inputs were used: 'hp', 'mp', 'san', 'luck'
   };
 
   function clampNumber(value, fallback) {
@@ -54,6 +61,143 @@
   function getStatusValue(label) {
     const found = state.statuses.find(item => item.label === label);
     return found ? found.value : '';
+  }
+
+  function getParamValue(label) {
+    const found = state.params.find(item => item.label === label);
+    return found ? found.value : '';
+  }
+
+  function setStatusValue(label, value) {
+    const found = state.statuses.find(item => item.label === label);
+    if (found) {
+      found.value = value;
+      found.max = value;
+    } else {
+      state.statuses.push({ label, value, max: value });
+    }
+  }
+
+  function autoSetHP() {
+    const con = Number(getParamValue('CON'));
+    const siz = Number(getParamValue('SIZ'));
+    if (!Number.isFinite(con) || !Number.isFinite(siz)) return;
+    
+    let hp;
+    if (state.format === '7cc') {
+      hp = Math.round((con + siz) / 10);
+    } else {
+      hp = Math.round((con + siz) / 2);
+    }
+    
+    setStatusValue('HP', hp);
+    state.lastAutoInputs = [...new Set([...state.lastAutoInputs, 'hp'])];
+    renderStatusList();
+    buildOutput();
+  }
+
+  function autoSetMP() {
+    const pow = Number(getParamValue('POW'));
+    if (!Number.isFinite(pow)) return;
+    
+    let mp;
+    if (state.format === '7cc') {
+      mp = Math.round(pow / 10);
+    } else {
+      mp = pow;
+    }
+    
+    setStatusValue('MP', mp);
+    state.lastAutoInputs = [...new Set([...state.lastAutoInputs, 'mp'])];
+    renderStatusList();
+    buildOutput();
+  }
+
+  function autoSetSAN() {
+    const pow = Number(getParamValue('POW'));
+    if (!Number.isFinite(pow)) return;
+    
+    let san;
+    if (state.format === '7cc') {
+      san = pow;
+    } else {
+      san = pow * 5;
+    }
+    
+    setStatusValue('SAN', san);
+    state.lastAutoInputs = [...new Set([...state.lastAutoInputs, 'san'])];
+    renderStatusList();
+    buildOutput();
+  }
+
+  function autoSetLuck() {
+    const result = rollDice('3d6*5');
+    if (result === null) return;
+    
+    setStatusValue('幸運', result);
+    state.lastAutoInputs = [...new Set([...state.lastAutoInputs, 'luck'])];
+    renderStatusList();
+    buildOutput();
+  }
+
+  function calculateDamageBonus() {
+    const str = Number(getParamValue('STR'));
+    const siz = Number(getParamValue('SIZ'));
+    if (!Number.isFinite(str) || !Number.isFinite(siz)) {
+      damageResult.textContent = '';
+      return;
+    }
+    
+    const total = str + siz;
+    let bonus = '';
+    
+    // ダメージボーナス計算（版によって異なる）
+    if (state.format === '7cc') {
+      // 7版
+      if (total >= 2 && total <= 64) {
+        bonus = '-1d6';
+      } else if (total >= 65 && total <= 84) {
+        bonus = '-1d4';
+      } else if (total >= 85 && total <= 124) {
+        bonus = '0';
+      } else if (total >= 125 && total <= 164) {
+        bonus = '+1d4';
+      } else if (total >= 165 && total <= 204) {
+        bonus = '+1d6';
+      } else if (total >= 205 && total <= 284) {
+        bonus = '+2d6';
+      } else if (total >= 285 && total <= 364) {
+        bonus = '+3d6';
+      }
+    } else {
+      // 6版
+      if (total >= 2 && total <= 12) {
+        bonus = '-1d6';
+      } else if (total >= 13 && total <= 16) {
+        bonus = '-1d4';
+      } else if (total >= 17 && total <= 24) {
+        bonus = '0';
+      } else if (total >= 25 && total <= 32) {
+        bonus = '+1d4';
+      } else if (total >= 33 && total <= 40) {
+        bonus = '+1d6';
+      } else if (total >= 41 && total <= 56) {
+        bonus = '+2d6';
+      } else if (total >= 57 && total <= 73) {
+        bonus = '+3d6';
+      }
+    }
+    
+    damageResult.textContent = bonus;
+    state.lastAutoInputs = [...new Set([...state.lastAutoInputs, 'damage'])];
+  }
+
+  function reapplyAutoInputs() {
+    if (state.lastAutoInputs.includes('hp')) autoSetHP();
+    if (state.lastAutoInputs.includes('mp')) autoSetMP();
+    if (state.lastAutoInputs.includes('san')) autoSetSAN();
+    if (state.lastAutoInputs.includes('damage')) calculateDamageBonus();
+    // 幸運は形式変更時に再ロールしない
   }
 
   function hasInputValue(value) {
@@ -239,6 +383,7 @@
 
       const label = document.createElement('input');
       label.type = 'text';
+      label.className = 'param-label';
       label.placeholder = '能力値';
       label.value = item.label;
       label.addEventListener('input', () => {
@@ -248,6 +393,7 @@
 
       const value = document.createElement('input');
       value.type = 'number';
+      value.className = 'param-value';
       value.placeholder = '値';
       value.value = item.value;
       value.addEventListener('input', () => {
@@ -438,6 +584,7 @@
   function bindBaseInputs() {
     formatSelect.addEventListener('change', () => {
       state.format = formatSelect.value;
+      reapplyAutoInputs();
       buildOutput();
     });
 
@@ -445,6 +592,12 @@
     initiativeInput.addEventListener('input', buildOutput);
     memoInput.addEventListener('input', buildOutput);
     includeParamRolls.addEventListener('change', buildOutput);
+
+    autoHpBtn.addEventListener('click', autoSetHP);
+    autoMpBtn.addEventListener('click', autoSetMP);
+    autoSanBtn.addEventListener('click', autoSetSAN);
+    autoLuckBtn.addEventListener('click', autoSetLuck);
+    autoDamageBtn.addEventListener('click', calculateDamageBonus);
 
     scrollTopBtn.addEventListener('click', () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });

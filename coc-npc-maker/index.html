@@ -57,21 +57,36 @@
       <button id="addParamBtn" class="btn">能力値を追加</button>
 
       <strong>技能</strong>
-      <div class="row toggle-row">
-        <label class="small" for="includeParamRolls">能力値ロール</label>
-        <div class="toggle">
+      <div class="toggle-row-left">
+        <label class="small toggle-label" for="includeParamRolls">
           <input id="includeParamRolls" type="checkbox" checked />
-          <span>出力に含める</span>
-        </div>
+          <span>能力値ロールを出力に含める</span>
+        </label>
       </div>
       <div id="skillList" class="list"></div>
       <button id="addSkillBtn" class="btn">技能を追加</button>
     </section>
 
-    <section class="panel output-panel">
-      <strong>出力JSON</strong>
-      <pre id="output" class="output"></pre>
-    </section>
+    <div class="right-column">
+      <section class="panel output-panel">
+        <strong>出力JSON</strong>
+        <pre id="output" class="output"></pre>
+      </section>
+
+      <section class="panel auto-calc-panel">
+        <strong>ステータス自動計算</strong>
+        <div class="auto-status-buttons">
+          <button id="autoHpBtn" class="btn auto-status-btn">[HP]</button>
+          <button id="autoMpBtn" class="btn auto-status-btn">[MP]</button>
+          <button id="autoSanBtn" class="btn auto-status-btn">[SAN]</button>
+          <button id="autoLuckBtn" class="btn auto-status-btn">[幸運] 3d6*5 🎲</button>
+        </div>
+        <div class="damage-bonus-row">
+          <button id="autoDamageBtn" class="btn damage-bonus-btn">[ダメージボーナス]</button>
+          <div id="damageResult" class="damage-result"></div>
+        </div>
+      </section>
+    </div>
   </div>
 
   <footer id="site-footer" role="contentinfo" aria-label="サイト情報">
