@@ -1,3 +1,42 @@
+.param-bulk-label-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0px;
+}
+.param-bulk-roll-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 0px;
+}
+.param-bulk-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 0px;
+}
+.param-bulk-label {
+  font-weight: bold;
+  font-size: 15px;
+  margin-right: 12px;
+}
+#paramBulkDiceSelect.left-align {
+  margin-right: 0;
+}
+.param-bulk-roll-inner.left-align {
+  justify-content: flex-end;
+  justify-content: flex-start;
+}
+.bulk-center-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  min-width: 48px;
+  text-align: center;
+  padding: 0 8px;
+}
 :root{
   --ui-w:320px;
   --gap:16px;
@@ -284,6 +323,13 @@ button{
 
 .param-value{
   flex:0 0 115px !important;
+.param-bulk-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
 }
 
 .dice-select{
@@ -296,6 +342,10 @@ button{
   cursor:pointer;
 }
 
+.param-bulk-divider {
+  border-bottom: 1px solid #e3e3e3;
+  margin: 2px 0 6px 0;
+}
 .dice-input{
   flex:0 0 105px;
   padding:4px;
@@ -376,7 +426,6 @@ button{
   display:flex;
   align-items:flex-start;
   justify-content:center;
-
 }
 
 @media (max-width: 980px){

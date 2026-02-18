@@ -52,7 +52,24 @@
       <div id="statusList" class="list"></div>
       <button id="addStatusBtn" class="btn">ステータスを追加</button>
 
-      <strong>能力値</strong>
+
+      <div class="param-bulk-row">
+        <strong class="param-bulk-label">能力値</strong>
+        <div class="param-bulk-roll-inner" style="display: flex; align-items: center; gap: 4px;">
+          <select id="paramBulkDiceSelect" class="dice-select">
+            <option value="" selected>ダイスを選択</option>
+            <option value="3d6">3d6</option>
+            <option value="2d6+6">2d6+6</option>
+            <option value="3d6+3">3d6+3</option>
+            <option value="3d6*5">3d6*5</option>
+            <option value="(2d6+6)*5">(2d6+6)*5</option>
+            <option value="custom">自由入力</option>
+          </select>
+          <input id="paramBulkDiceInput" type="text" placeholder="ダイス式を入力" class="dice-input" style="display:none;" />
+          <button id="paramBulkRollBtn" class="btn roll-btn bulk-center-btn" style="margin-top:14px;">一括<small style='font-size:18px;'>🎲</small></button>
+        </div>
+      </div>
+      <div class="param-bulk-divider" style="border-bottom: 1px solid #e3e3e3; margin: 8px 0 10px 0;"></div>
       <div id="paramList" class="list"></div>
       <button id="addParamBtn" class="btn">能力値を追加</button>
 
