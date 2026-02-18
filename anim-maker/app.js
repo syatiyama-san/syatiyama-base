@@ -1056,4 +1056,3 @@
   updateModeUI();
   startPreviewLoop();
 })();
-
