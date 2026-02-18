@@ -20,6 +20,55 @@
   const autoLuckBtn = document.getElementById('autoLuckBtn');
   const autoDamageBtn = document.getElementById('autoDamageBtn');
   const damageResult = document.getElementById('damageResult');
+  const paramBulkDiceSelect = document.getElementById('paramBulkDiceSelect');
+  const paramBulkDiceInput = document.getElementById('paramBulkDiceInput');
+  const paramBulkRollBtn = document.getElementById('paramBulkRollBtn');
+
+  if (paramBulkRollBtn) {
+    const bulkRollInner = document.querySelector('.param-bulk-roll-inner');
+    // プルダウン選択で「自由入力」なら入力欄表示＆左寄せ、それ以外は非表示＆右寄せ
+    paramBulkDiceSelect.addEventListener('change', () => {
+      if (paramBulkDiceSelect.value === 'custom') {
+        paramBulkDiceInput.style.display = '';
+        paramBulkDiceInput.value = '';
+        paramBulkDiceInput.focus();
+        paramBulkDiceSelect.classList.add('left-align');
+        bulkRollInner.classList.add('left-align');
+      } else {
+        paramBulkDiceInput.style.display = 'none';
+        paramBulkDiceInput.value = paramBulkDiceSelect.value;
+        paramBulkDiceSelect.classList.remove('left-align');
+        bulkRollInner.classList.remove('left-align');
+      }
+    });
+    // 初期化
+    if (paramBulkDiceSelect.value === 'custom') {
+      paramBulkDiceInput.style.display = '';
+      paramBulkDiceSelect.classList.add('left-align');
+      bulkRollInner.classList.add('left-align');
+    } else {
+      paramBulkDiceInput.style.display = 'none';
+      paramBulkDiceInput.value = '';
+      paramBulkDiceSelect.classList.remove('left-align');
+      bulkRollInner.classList.remove('left-align');
+    }
+    // Enterキーでロール
+    paramBulkDiceInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') paramBulkRollBtn.click();
+    });
+    // 一括ロールボタン
+    paramBulkRollBtn.addEventListener('click', () => {
+      let expr = paramBulkDiceSelect.value === 'custom' ? paramBulkDiceInput.value.trim() : paramBulkDiceSelect.value;
+      if (!expr) return;
+      state.params.forEach(param => {
+        if (!param.label) return;
+        const result = rollDice(expr);
+        if (result !== null) param.value = result;
+      });
+      renderParamList();
+      buildOutput();
+    });
+  }
 
   let dragState = null;
 
@@ -44,7 +93,7 @@
     skills: [
       { label: '', value: '' }
     ],
-    lastAutoInputs: [] // Track which auto-inputs were used: 'hp', 'mp', 'san', 'luck'
+    lastAutoInputs: []
   };
 
   function clampNumber(value, fallback) {
@@ -151,9 +200,7 @@
     const total = str + siz;
     let bonus = '';
     
-    // ダメージボーナス計算（版によって異なる）
     if (state.format === '7cc') {
-      // 7版
       if (total >= 2 && total <= 64) {
         bonus = '-1d6';
       } else if (total >= 65 && total <= 84) {
@@ -170,7 +217,6 @@
         bonus = '+3d6';
       }
     } else {
-      // 6版
       if (total >= 2 && total <= 12) {
         bonus = '-1d6';
       } else if (total >= 13 && total <= 16) {
@@ -197,7 +243,6 @@
     if (state.lastAutoInputs.includes('mp')) autoSetMP();
     if (state.lastAutoInputs.includes('san')) autoSetSAN();
     if (state.lastAutoInputs.includes('damage')) calculateDamageBonus();
-    // 幸運は形式変更時に再ロールしない
   }
 
   function hasInputValue(value) {
@@ -205,10 +250,8 @@
   }
 
   function rollDice(expr) {
-    // Parse and evaluate dice expressions like "3d6", "18-1d2", "3d6*5", "2d6+5", "(2d6+6)*5"
     const expr_trimmed = expr.trim();
     
-    // Replace dice rolls with actual values
     let result_expr = expr_trimmed.replace(/\b(\d+)d(\d+)\b/g, (match, numDice, numSides) => {
       const n = parseInt(numDice, 10);
       const s = parseInt(numSides, 10);
@@ -220,12 +263,9 @@
       return total;
     });
     
-    // Check if result_expr is a valid math expression
-    // Only allow digits, +, -, *, /, () and spaces
     if (!/^[0-9+\-*/()\s]*$/.test(result_expr)) return null;
     
     try {
-      // Use Function instead of eval for slightly safer evaluation
       const result = Function('"use strict"; return (' + result_expr + ')')();
       if (!Number.isFinite(result) || result < 0) return null;
       return Math.round(result);
