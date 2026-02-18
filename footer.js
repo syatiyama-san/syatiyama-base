@@ -3,7 +3,7 @@ function initFooter() {
   styleEl.textContent = `
     #site-footer {
       margin-top: auto;
-      padding: 16px;
+      padding: 24px;
       text-align: center;
       color: #666;
       border-top: 1px solid rgba(0,0,0,0.06);
@@ -56,6 +56,8 @@ function initFooter() {
       justify-content: space-between;
       gap: 12px;
       margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
     }
     .modal__footer {
       display: flex;
@@ -94,7 +96,7 @@ function initFooter() {
 
   footerEl.innerHTML = `
     <nav class="footer-nav">
-      ${readmeLink}<a href="https://github.com/syatiyama-san/syatiyama-base/blob/main/LICENSE" id="footer-link" aria-label="ライセンス情報" target="_blank" rel="noopener noreferrer">MIT License</a> / <a href="https://github.com/syatiyama-san/syatiyama-base/releases" target="_blank" rel="noopener noreferrer">release note</a>
+      ${readmeLink}<a href="https://github.com/syatiyama-san/syatiyama-base/blob/main/LICENSE" id="footer-link" aria-label="ライセンス情報" target="_blank" rel="noopener noreferrer">MIT License</a> / <a href="https://github.com/syatiyama-san/syatiyama-base/releases" target="_blank" rel="noopener noreferrer">Release note</a>
     </nav>
     <p class="footer-copyright">@2026 syatiyama-san</p>
   `;
@@ -115,9 +117,15 @@ function initFooter() {
           <h3 id="readme-modal-title">ツール利用規約</h3>
         </div>
         <div class="modal__body">
-          <p>ブラウザ上で動作するフリーツールです。</p>
-          <p>アップロードした画像はエクスポートのみに使用され、外部サーバーへの送信は行われません。</p>
-          <p>これらのツールはAIコーディングで作成されています。動作確認はWindows版Chromeでのみ行っており、環境によっては動作しないかもしれません。</p>
+          <p>・本サイト/ツールはAIコーディングで生成されています。</p>
+          <p>・自分用に製作したものですが、誰でも無料で自由に使ってよいフリーツールとして公開しています。</p>
+          <p>・利用は自己責任でお願いします。製作者が何か責任を負ったりすることは一切ありません。</p>
+          <br>
+          <p>・アップロードしたデータはエクスポートのみに使用されます。外部へ送信されることはありません。</p>
+          <p>・開発/動作確認の環境はWindows版Chromeです。環境によっては動作しないかも。動作は保証しません。</p>
+          <p>・バグなど何かありましたら<a href="https://forms.gle/j2HgKUx7Bi8Br3zXA" target="_blank" rel="noopener noreferrer">ここ</a>からご連絡ください。お返事、バグ修正、アプデなどは気が向いたらやります。</p>
+          <br>
+          <p>・MIT Licenseの元で提供されていますが、一部ライブラリには別のライセンスが適用されているものがあります。改変、再頒布の際はそれぞれのライセンスをご確認ください。</p>
         </div>
         <div class="modal__footer">
           <button type="button" class="modal__close" aria-label="閉じる" data-close="true">OK！</button>
